@@ -10,23 +10,40 @@
 
 %% Useful packages
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{times}
+\usepackage{url}
+\usepackage{latexsym}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{paralist}
+\graphicspath{ {figs/} }
+
+
+%% \usepackage[numbers]{natbib}
 
 \title{Your Paper}
-\author{You}
+\author{Author: Xudong Hong \\ 
+Supervisor: Asad Sayeed, Vera Demberg}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Your abstract.
+We introduce a neural network model capturing both lexical and semantic features of event participants. Possible methods to composite word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk-EtAl:2016:EMNLP2016}, we represent the order-3 tensor feature space using 3 matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multitask style to counter both semantic role-filler prediction and semantic role-label prediction tasks. Comparing to previous works, the model has improvement on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. 
 \end{abstract}
 
 \section{Introduction}
 
 Your introduction goes here! Some examples of commonly used commands and features are listed below, to help you get started. If you have a question, please use the help menu (``?'') on the top bar to search for help or ask us a question. 
+
+
+
+
+
 
 \section{Some examples to get started}
 
@@ -100,7 +117,9 @@ You can find a \href{https://www.overleaf.com/help/97-how-to-include-a-bibliogra
 
 We hope you find Overleaf useful, and please let us know if you have any feedback using the help menu above --- or use the contact form at \url{https://www.overleaf.com/contact}!
 
-\bibliographystyle{alpha}
-\bibliography{sample}
+
+\bibliographystyle{acl_natbib}
+\bibliography{mtrf}
+
 
 \end{document}
