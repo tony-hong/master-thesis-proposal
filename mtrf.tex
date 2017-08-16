@@ -25,7 +25,7 @@
 
 %% \usepackage[numbers]{natbib}
 
-\title{Your Paper}
+\title{Learning Representations of Semantic Role Fillers in Events with Neural Networks}
 \author{Author: Xudong Hong \\ 
 Supervisor: Asad Sayeed, Vera Demberg}
 
@@ -36,11 +36,31 @@ Supervisor: Asad Sayeed, Vera Demberg}
 We introduce a neural network model capturing both lexical and semantic features of event participants. Possible methods to composite word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk-EtAl:2016:EMNLP2016}, we represent the order-3 tensor feature space using 3 matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multitask style to counter both semantic role-filler prediction and semantic role-label prediction tasks. Comparing to previous works, the model has improvement on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. 
 \end{abstract}
 
+
+
 \section{Introduction}
+Event participants can be mapped to arguments of a predicate.
+A level of representation to show the common characteristics is \textit{semantic roles} which express the abstract role of the argument of a predicate can taken in an event. 
+For example, 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{BOP.png}
+\caption{\label{fig:SemanticRoles} An event with predicate and event participants. Each event participant is annotated with its corresponding semantic role}
+\end{figure}
 
-Your introduction goes here! Some examples of commonly used commands and features are listed below, to help you get started. If you have a question, please use the help menu (``?'') on the top bar to search for help or ask us a question. 
+\noindent
 
 
+\noindent
+Distributed representation of words is useful in natural language understanding, natural language generation and machine translation. There are many efforts on learning word embedding from large scale text corpora. Nevertheless for generality, most of these works only use raw word as input without using any semantic features. 
+
+
+\noindent
+The semantic role labeling task is to assign semantic role labels to the event participants in an event. After many years of research, pre-trained semantic role labeling systems are quite reliable. However, most of these works only assign labels to the whole constituents or phrases. \citet{Sayeed2014} proposed an unsupervised method of assigning semantic roles to headwords in event participants to construct a corpus. The raw text are firstly processed by a state-of-the-art semantic role labeller SENNA \citep{Collobert}. Then a dependency parser Malt Parser is used to extract the headwords of the event participants together with some heuristics.
+
+
+\noindent
+In this paper, we present a model ...
 
 \section{Related Works}
 
