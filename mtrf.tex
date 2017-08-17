@@ -62,6 +62,8 @@ The semantic role labeling task is to assign semantic role labels to the event p
 \noindent
 In this paper, we present a model ...
 
+
+
 \section{Related Works}
 
 \subsection{Representation Learning}
@@ -77,7 +79,7 @@ There are many state-of-the-art SRL systems \citep{collobert2011natural, titov20
 \subsubsection{Event Level Model}
 Event-level knowledge does affect human expectations for verbal arguments \citep{baroni2010distributional}. \\
 \noindent 
-Regarding to models of events, \citet{tilk-EtAl:2016:EMNLP2016} proposed two models: \textit{non-incremental model} and \textit{incremental model}. For the \textit{non-incremental model}, they simply summed all the vectors $p$ of event participants together to represent the event $e$ as a vector:
+Regarding to models of events, \citet{tilk2016event} proposed two models: \textit{non-incremental model} and \textit{incremental model}. For the \textit{non-incremental model}, they simply summed all the vectors $p$ of event participants together to represent the event $e$ as a vector:
 \begin{equation} \label{eq:20}
 \begin{aligned}
     \mathbf{e}
@@ -99,6 +101,16 @@ where $\mathbf{v}$ is the parameter vector of event boundary. $\mathbf{h_{t-1}}$
 \citet{sayeed2014combining} 
 Extract thematic features using semantic role labeler SENNA \citep{collobert2011natural}.
 Construct distributional memory model. 
+
+
+
+\section{Representation of Event Participants}
+\subsection{Event Participant Embedding}
+We intend to learn meaningful representation in semantic space of words and roles. Firstly we define the symbolic representation for words. Word $a_i$ is encoded as one-hot row vector $\mathbf{w}_i = [00...1...0]$ containing exactly one $1$ value in the position of word index $i$ and other values are all $0$, where $|\mathbf{w}_i| = |V|$ and $V$ is the word vocabulary. In this vector space, words are mutual exclusive to each other.  \\
+\noindent
+Futher than that, we need to obtain a distributed representation that is smoother. So we compute the inner product between $\mathbf{w}_i$ and a embedding matrix $\mathbf{A} \in \mathbb{R}^{|V| \times k}$ as $\mathbf{A}_{(i)} = \mathbf{w}_i \mathbf{A}$. The vector $\mathbf{w}_i$ is now mapped to low-dimensional vector $\mathbf{A}_{(i)} \in \mathbb{R}^k$ which is the $i$-th row of matrix $\mathbf{A}$. The symbolic representations of words are transformed into distributed representations. \\
+\noindent
+In addition to word embedding, we want to learn the representation of words given a specific semantic role. Performing matricization on a order-3 tensor which contains word-role-word tuple onto a matrix can obtain vectors from different semantic spaces \citep{baroni2010distributional}. Inspiring by this idea, we add one more dimension of semantic role to the word embedding matrix and obtain a third-order tensor $\mathbf{T} \in \mathbb{R}^{|V| \times |R| \times d}$. For each word $\mathbf{w}_i$ and each semantic role $\mathbf{r}_j$, there is a corresponding vector $\mathbf{T}_{(ij)}$ with length of $d$ where $i \in [1, |V|]$ and $j \in [1, |R|]$. This vector is named as \textit{role-specific word embedding} vector \citep{tilk2016event} which can be further simplified to \textbf{event participant embedding} vector.
 
 
 
