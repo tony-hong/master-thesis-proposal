@@ -113,6 +113,66 @@ Futher than that, we need to obtain a distributed representation that is smoothe
 In addition to word embedding, we want to learn the representation of words given a specific semantic role. Performing matricization on a order-3 tensor which contains word-role-word tuple onto a matrix can obtain vectors from different semantic spaces \citep{baroni2010distributional}. Inspiring by this idea, we add one more dimension of semantic role to the word embedding matrix and obtain a third-order tensor $\mathbf{T} \in \mathbb{R}^{|V| \times |R| \times d}$. For each word $\mathbf{w}_i$ and each semantic role $\mathbf{r}_j$, there is a corresponding vector $\mathbf{T}_{(ij)}$ with length of $d$ where $i \in [1, |V|]$ and $j \in [1, |R|]$. This vector is named as \textit{role-specific word embedding} vector \citep{tilk2016event} which can be further simplified to \textbf{event participant embedding} vector.
 
 
+\subsection{Tensor Decomposition}
+
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.65\textwidth]{NNRF.png}
+\caption{\label{fig:NNRF} Model architecture of non-incremental role filler.}
+\end{figure}
+
+
+
+\section{Model Design}
+
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.7\textwidth]{MTNNRF.png}
+\caption{\label{fig:MTNNRF} Model architecture of multitask version of non-incremental role filler.}
+\end{figure}
+
+
+
+\subsection{Multitask Learning}
+
+
+
+\subsection{Target Role Specific Classifier}
+
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{BOP.png}
+\caption{\label{fig:BOP} Model architecture of multitask role filler.}
+\end{figure}
+
+
+
+
+\section{Evaluation}
+
+\subsection{Human thematic fit judgement correlation task}
+
+
+
+
+
+
+
+\section{Conclusion}
+
+
+
+
+
+\newpage
+
+
 
 \section{Some examples to get started}
 
