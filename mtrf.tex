@@ -113,7 +113,38 @@ Futher than that, we need to obtain a distributed representation that is smoothe
 In addition to word embedding, we want to learn the representation of words given a specific semantic role. Performing matricization on a order-3 tensor which contains word-role-word tuple onto a matrix can obtain vectors from different semantic spaces \citep{baroni2010distributional}. Inspiring by this idea, we add one more dimension of semantic role to the word embedding matrix and obtain a third-order tensor $\mathbf{T} \in \mathbb{R}^{|V| \times |R| \times d}$. For each word $\mathbf{w}_i$ and each semantic role $\mathbf{r}_j$, there is a corresponding vector $\mathbf{T}_{(ij)}$ with length of $d$ where $i \in [1, |V|]$ and $j \in [1, |R|]$. This vector is named as \textit{role-specific word embedding} vector \citep{tilk2016event} which can be further simplified to \textbf{event participant embedding} vector.
 
 
+
 \subsection{Tensor Decomposition}
+Although the role-specific word embedding is a versatile representation, it suffer the curse of dimensionality. There are $|V| \times |R| \times d$ parameters in the order-3 tensor $\mathbf{T}$. Since word vocabulary size $|V|$ is often very big (more than $50,000$), the number of parameters in the tensor is too huge, which makes the model hard to converge. \todo[]{more drawbacks} \\
+\noindent
+\citet{tilk2016event} proposed an effective tensor factorisation method on the parameter tensor to reduce the number of parameters. Similarly, we perform tensor rank decomposition \citep{hitchcock1927expression} on the embedding tensor in real space:
+\begin{equation} \label{eq:trd}
+\begin{aligned}
+    \mathbf{T}   
+        &= \sum_{m=1}^{k} \mathbf{T}'_m \\
+        &= \sum_{m=1}^{k} \mathbf{a}_m \otimes \mathbf{b}_m \otimes \mathbf{c}_m, \\
+\end{aligned}
+\end{equation}
+where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$. Each rank-1 tensor can be written as outer product of 3 row vectors $\mathbf{a}_m$, $\mathbf{b}_m$ and $\mathbf{d}_m$. The smallest $k$ makes the equation true is the tensor rank of $\mathbf{T}$. We then group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrices $\mathbf{C} \in \mathbb{R}^{k \times d}$. Now the number of parameters is reduced to $(|V| + |R| + d) \times k$ which is comparable smaller. \\
+\noindent
+Naturally, matrix $\mathbf{A}$ can be interpreted as word embedding described above. Similar to word embedding, we can represent semantic role $b_j$ using one-hot encoded column vector $\mathbf{r}_j$ where $|\mathbf{r}_j| = |R|$ and $R$ is the set of semantic roles. So $\mathbf{B}$ can be considered as role embedding matrix. By computing inner product between $\mathbf{r}_j$ and $\mathbf{B}$ as $\mathbf{B}_{(j)} = \mathbf{r}_j \mathbf{B}$, we obtain the low-dimensional vector $\mathbf{B}_{(j)} \in \mathbb{R}^k$ which is the $j$-th row of matrix $\mathbf{B}$. From equation \eqref{eq:trd}, the vector $\mathbf{T}_{(ij)}$ can be computed as: 
+\begin{equation} \label{eq:rbwe_tensor}
+\begin{aligned}
+    \mathbf{T}_{(ij)}
+        &= \sum_{m=1}^{k} \mathbf{a}_{m_{(i)}} \otimes \mathbf{b}_{m_{(j)}} \otimes \mathbf{c}_m \\
+        &= \sum_{m=1}^{k} \mathbf{a}_{m_{(i)}} \mathbf{b}_{m_{(j)}}  \mathbf{c}_m \\
+\end{aligned}
+\end{equation}
+\noindent
+To get rid of the outer product and make it easier to implement, we use the decomposition matrices defined above. Thus the vector $\mathbf{T}_{(ij)}$ can be written as a vector: 
+\begin{equation} \label{eq:rbwe}
+\begin{aligned}
+    \mathbf{p} 
+        &= (\mathbf{A}_{(i)}\circ \mathbf{B}_{(j)}) \mathbf{C} \\
+        &= (\mathbf{w}_i \mathbf{A} \circ \mathbf{r}_j \mathbf{B}) \mathbf{C} \\
+\end{aligned}
+\end{equation}
+which is a representation of a participant in an event. "$\circ$" is Hadamard product which computes element-wise multiplication between two vectors. This can be interpreted as the composition method of word embedding vector and role embedding vector. 
 
 
 
