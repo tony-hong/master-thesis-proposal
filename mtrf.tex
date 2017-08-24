@@ -157,7 +157,7 @@ which is a representation of a participant in an event. "$\circ$" is Hadamard pr
 
 
 \section{Model Design}
-
+To tackle the role filler prediction task, \citet{tilk2016event} proposed the \textit{non-incremental role filler}\textbf{(NNRF)}, a 2-layer neural network model. As in Figure \ref{fig:NNRF}, from input to output, the model uses role based word representations of event participants as input. Parameters are learned together with the model. The embedding vectors are composed using sum method into an representation of event participants except the target participant. Then it passes through one non-linearity layer with parametric rectified linear unit. After that, a softmax regression classifier is used for prediction. 
 
 
 \begin{figure}[t]
@@ -165,6 +165,31 @@ which is a representation of a participant in an event. "$\circ$" is Hadamard pr
 \includegraphics[width=0.7\textwidth]{MTNNRF.png}
 \caption{\label{fig:MTNNRF} Model architecture of multitask version of non-incremental role filler.}
 \end{figure}
+
+
+In the \textbf{NNRF} model, embedding vectors of event participants are sum up together to represent the whole event. Nonetheless, this is only a simple method to composite event participants. Each participant has same weight in the event. Additionally, means of parameters can shift in a large range the after the sum operation. How can we improve this? We need an exploration of composition methods. \\
+We separate all possible methods in two groups. The first group is \textbf{non-parametric methods} which have no extra parameters like addition, multiplication and concatenation of event participant vectors. Another group is \textbf{parametric methods} which need more parameters like recursive unit \citep{socher2013recursive}, recurrent unit \citet{mikolov2010recurrent}, or long-short-term-memory recurrent unit \citep{hochreiter1997LSTM}. Considering the sequence of participants, there are two different conditions: the participant order is unknown and the opposite case. In this work, we focus on non-parametric methods in the condition that participant order is not provided and leave other cases for future exploration. \\
+\noindent
+Multiplication is an effective composition method for distributed memory models. However, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But usually the concatenated feature can not be used directly. An extra feature extractor is needed, which turns it into a parametric method. \\ 
+\noindent
+We propose the \textbf{mean} composition method which compute the mean of all the  vectors of event participants to represent the event as one vector. Computing mean instead of sum can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of the hidden values. \\
+Since it is a non-parametric method, we also want to add a weight before the mean composition. Instead of using a fully-connected layer, we apply the PReLU to each embedding vector of participant here. So the parameters inside PReLU can also act as weights of each participant. 
+\noindent
+This model is described in Figure \ref{fig:MTRFv4}. 
+\begin{equation} \label{eq:nonlinearity}
+\begin{aligned}
+    \mathbf{h}_l
+        &= PReLU_l(\mathbf{p}_l) \\
+\end{aligned}
+\end{equation}
+\noindent
+Using the mean method, the embedding vectors are composed as:
+\begin{equation} \label{eq:mean_comp}
+\begin{aligned}
+    \mathbf{e}
+        &= \frac{1}{L} \sum_{l=1}^{L} \mathbf{h}_{l} \\
+\end{aligned}
+\end{equation}
 
 
 
@@ -207,6 +232,7 @@ where suffix $(x)$ is the $x$-th element of the vector. And the conditional prob
         \sum_{j=1}^{|R|} exp(\mathbf{o}_r)_{(j)} }   \\
 \end{aligned}
 \end{equation}
+
 
 
 \subsection{Target Role Specific Classifier}
