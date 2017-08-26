@@ -275,6 +275,27 @@ where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its di
 
 
 
+\section{Experiments}
+\subsection{Model Selection}
+
+
+
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l|l|l|l|l|l}
+Dataset &   Semantic Roles  &   NN RF   &   MTRF v3 &   MTRF v4     &   MTRF v4(0.01)    \\ \hline
+P07     &   A0, A1, A2      &   42      &   44      &   \textbf{52} &   \textbf{52}     \\
+MSTNN   &   A0, A1          &   34      &   34      &   38          &   \textbf{39}     \\
+F-Loc   &   AM-LOC          &   46      &   46      &   44          &   \textbf{47}     \\
+F-Inst  &   AM-MNR          &   52      &   48      &   \textbf{53} &   49              \\
+GDS-all &   A1              &   55      &   56      &   60          &   \textbf{61}     \\
+\end{tabular}
+\caption{\label{tab:widgets} Experiment result of models on human thematic fit judgement correlation task.}
+\end{table}
+
+
 
 \section{Evaluation}
 
