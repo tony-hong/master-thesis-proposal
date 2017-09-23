@@ -62,13 +62,13 @@ where the event participants are actually head nouns or noun-noun compounds insi
 \end{equation*} 
 where each argument is assigned with a semantic role label. $cut.01$ is the verbal predicate $cut$ with sense $01$ which is \textit{"make an incision or separation"}. Now the ARG0 role can be defined exactly as \textit{"the subject which makes incision"}. To obtain this representation from raw text, one needs to solve semantic role labelling task. 
 
+The \textit{semantic role labelling} (SRL) task is to assign semantic role labels to arguments of predicates in sentences automatically. After many years of research, pre-trained semantic role labelling systems are quite reliable (see Section \ref{sec:srl}). Yet most of these works only assign labels to whole constituents instead of syntactic heads that are denoting event participants. \citet{SayeedEtAl2015} proposed an unsupervised method of assigning semantic roles to syntactic heads in arguments. The raw text are firstly processed by SENNA which is a neural network based semantic role labeller \citep{collobert2011natural}. Then the head nouns are extracted from arguments using Malt Parser, a state-of-the-art dependency parser \citep{nivre2006maltparser}, together with hand-crafted heuristics. The annotated corpus they constructed is named as \textbf{SDS2015} here. 
 
-\noindent
-Distributed representation of words is useful in natural language understanding, natural language generation and machine translation. There are many efforts on learning word embedding from large scale text corpora. Nevertheless for generality, most of these works only use raw word as input without using any semantic features. 
+Since both raw words and semantic role labels are symbols, it has limited representing power. If one wants to compare events quantitatively, it is not possible to use symbolic representation. \textit{Distributional semantic model} (DSM) is a corpus-based method to construct numerical semantic representation. In this method, vectors with co-occurrence counts as weights are representation of linguistic units. The semantic similarity between two units can be quantified as the similarity of two representation vectors (see Section \ref{sec:dsm}). But when it comes to practice, the semantic space of DSM is discrete, high-dimensional and sparse. When someone wants to induce on complex events with large number of participants, using sparse vectors is unfeasible. \textit{Distributed representation} of words, also named as \textit{word embedding}, is a well-established technique based on continuous feature space. Each word is represented by a low-dimensional dense vector with real number parameters, where those parameters are learnt during training of a prediction task given the context. There are many efforts on learning word embeddings from large scale corpora (see Section \ref{sec:repr}). 
+
+The main problem is that only few works learn embeddings at the event level. \citet{tilk2016event} proposed two models trained on SDS2015 to learn a representation of events and their participants. To obtain a probability distribution over role-fillers given the event information, the models aim to perform \textit{role-filler prediction}: In each event, given the role label of one target word, and also given all other words and their role labels, the task is to predict the target word to fill the target role. The predicate is considered as a special role label which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. They reported great improvement over previous systems on thematic fit evaluation and competitive performance on event similarity evaluation. However, the definition of notion \textit{role} is vague. It is hard to explain why predicates and semantic role-fillers are treated as the same. In addition to that, there is a problem of event embedding if we only focus on role-filler prediction. The event embeddings with same argument words but different roles can be very similar to each other. For example, the embedding vector of $([_\text{ARG0 }\text{boy}], [_\text{PREDICATE }\text{eat}], [_\text{ARG1 }\text{apple}])$ can be very similar to the embedding vector of $([_\text{ARG0 }\text{apple}], [_\text{PREDICATE }\text{eat}], [_\text{ARG1 }\text{boy}])$, where $cut$ is the shared predicate. 
 
 
-\noindent
-The semantic role labeling task is to assign semantic role labels to the event participants in an event. After many years of research, pre-trained semantic role labeling systems are quite reliable. However, most of these works only assign labels to the whole constituents or phrases. \citet{Sayeed2014} proposed an unsupervised method of assigning semantic roles to headwords in event participants to construct a corpus. The raw text are firstly processed by a state-of-the-art semantic role labeller SENNA \citep{Collobert}. Then a dependency parser Malt Parser is used to extract the headwords of the event participants together with some heuristics.
 
 
 \noindent
@@ -77,6 +77,13 @@ In this paper, we present a model ...
 
 
 \section{Related Works}
+\noindent
+Distributed representation of words is useful in natural language understanding, natural language generation and machine translation. There are many efforts on learning word embedding from large scale text corpora. Nevertheless for generality, most of these works only use raw word as input without using any semantic features. 
+
+
+\noindent
+The semantic role labeling task is to assign semantic role labels to the event participants in an event. After many years of research, pre-trained semantic role labeling systems are quite reliable. However, most of these works only assign labels to the whole constituents or phrases. \citet{Sayeed2014} proposed an unsupervised method of assigning semantic roles to headwords in event participants to construct a corpus. The raw text are firstly processed by a state-of-the-art semantic role labeller SENNA \citep{Collobert}. Then a dependency parser Malt Parser is used to extract the headwords of the event participants together with some heuristics.
+
 
 \subsection{Representation Learning}
 
