@@ -140,29 +140,37 @@ Construct distributional memory model.
 
 
 
-\section{Representation of Event Participants}
+\section{Representation of Predicates and Participants}
 \subsection{Event-Participant Embedding} \label{sec:epe}
-We intend to learn meaningful representation in semantic space of words and roles. Firstly we define the symbolic representation for words. Word $a_i$ is encoded as one-hot row vector $\mathbf{w}_i = [00...1...0]$ containing exactly one $1$ value in the position of word index $i$ and other values are all $0$, where $|\mathbf{w}_i| = |V|$ and $V$ is the word vocabulary. In this vector space, words are mutual exclusive to each other.  \\
-\noindent
-Futher than that, we need to obtain a distributed representation that is smoother. So we compute the inner product between $\mathbf{w}_i$ and a embedding matrix $\mathbf{A} \in \mathbb{R}^{|V| \times k}$ as $\mathbf{A}_{(i)} = \mathbf{w}_i \mathbf{A}$. The vector $\mathbf{w}_i$ is now mapped to low-dimensional vector $\mathbf{A}_{(i)} \in \mathbb{R}^k$ which is the $i$-th row of matrix $\mathbf{A}$. The symbolic representations of words are transformed into distributed representations. \\
-\noindent
-In addition to word embedding, we want to learn the representation of words given a specific semantic role. Performing matricization on a order-3 tensor which contains word-role-word tuple onto a matrix can obtain vectors from different semantic spaces \citep{baroni2010distributional}. Inspiring by this idea, we add one more dimension of semantic role to the word embedding matrix and obtain a third-order tensor $\mathbf{T} \in \mathbb{R}^{|V| \times |R| \times d}$. For each word $\mathbf{w}_i$ and each semantic role $\mathbf{r}_j$, there is a corresponding vector $\mathbf{T}_{(ij)}$ with length of $d$ where $i \in [1, |V|]$ and $j \in [1, |R|]$. This vector is named as \textit{role-specific word embedding} vector \citep{tilk2016event} which can be further simplified to \textbf{event participant embedding} vector.
+We intend to learn meaningful representation of event structure in semantic space. Firstly we define the symbolic representation for words. Word $a_i$ is encoded as one-hot row vector $\mathbf{w}_i = [00...1...0]$ containing exactly one $1$ value in the position of word index $i$ and other values are all $0$, where $|\mathbf{w}_i| = |V|$ and $V$ is the word vocabulary. In this vector space, words are mutual exclusive to each other. Similarly, we can represent role label $b_j$ using one-hot encoded column vector $\mathbf{r}_j$ where $|\mathbf{r}_j| = |R|$ and $R$ is the set of role labels. 
 
+Further than that, we need to obtain a distributed representation that is continuous in the feature space. So we compute the inner product between $\mathbf{w}_i$ and a embedding matrix $\mathbf{A} \in \mathbb{R}^{|V| \times k}$ as $\mathbf{A}_{(i)} = \mathbf{w}_i \mathbf{A}$. The vector $\mathbf{w}_i$ is now mapped to low-dimensional vector $\mathbf{A}_{(i)} \in \mathbb{R}^k$ which is the $i$-th row of matrix $\mathbf{A}$. The symbolic representation of words is transformed into word embedding. 
+
+In addition to word embedding, we want to learn the representation of words given a specific role label. We add one more dimension of role label to the word embedding matrix and obtain a third-order tensor $\mathbf{T} \in \mathbb{R}^{|V| \times |R| \times d}$. For each word $\mathbf{w}_i$ and each role label $\mathbf{r}_j$, there is a corresponding vector $\mathbf{T}_{(ij)}$ with length of $d$ where $i \in [1, |V|]$ and $j \in [1, |R|]$. We define this vector as \textbf{event-participant embedding vector}. 
 
 
 \subsection{Tensor Factorisation} \label{sec:tf}
-Although the role-specific word embedding is a versatile representation, it suffer the curse of dimensionality. There are $|V| \times |R| \times d$ parameters in the order-3 tensor $\mathbf{T}$. Since word vocabulary size $|V|$ is often very big (more than $50,000$), the number of parameters in the tensor is too huge, which makes the model hard to converge. \todo[]{more drawbacks} \\
-\noindent
-\citet{tilk2016event} proposed an effective tensor factorisation method on the parameter tensor to reduce the number of parameters. Similarly, we perform tensor rank decomposition \citep{hitchcock1927expression} on the embedding tensor in real space:
+The event-participant embedding has too many parameters, which leads to curse of dimensionality. There are $|V| \times |R| \times d$ parameters in the order-3 tensor $\mathbf{T}$. Since word vocabulary size $|V|$ is often very big (more than $50,000$), the number of parameters in the tensor is too huge, which makes the model hard to converge. 
+
+We perform tensor rank decomposition \citep{hitchcock1927expression} on the embedding tensor in real space:
+\begin{equation} \label{eq:trd_org}
+\begin{aligned}
+    \mathbf{T}   
+        &= \sum_{m=1}^{k} \lambda_m \mathbf{T}'_m \\
+        &= \sum_{m=1}^{k} \lambda_m \mathbf{a}_m \otimes \mathbf{b}_m \otimes \mathbf{d}_m, \\
+\end{aligned}
+\end{equation}
+where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$ and $lambda_m$ is the weight of rank $m$. Each rank-1 tensor can be written as outer product of 3 row vectors $\mathbf{a}_m$, $\mathbf{b}_m$ and $\mathbf{d}_m$. Since all parameters are learnt during training, we let $\mathbf{c}_m$ equal to $\lambda_m \mathbf{d}_m$. So the equation becomes:
 \begin{equation} \label{eq:trd}
 \begin{aligned}
     \mathbf{T}   
-        &= \sum_{m=1}^{k} \mathbf{T}'_m \\
         &= \sum_{m=1}^{k} \mathbf{a}_m \otimes \mathbf{b}_m \otimes \mathbf{c}_m, \\
 \end{aligned}
 \end{equation}
-where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$. Each rank-1 tensor can be written as outer product of 3 row vectors $\mathbf{a}_m$, $\mathbf{b}_m$ and $\mathbf{d}_m$. The smallest $k$ makes the equation true is the tensor rank of $\mathbf{T}$. We then group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrices $\mathbf{C} \in \mathbb{R}^{k \times d}$. Now the number of parameters is reduced to $(|V| + |R| + d) \times k$ which is comparable smaller. \\
-\noindent
+where the smallest $k$ makes the equation true is the tensor rank of $\mathbf{T}$. Now the number of parameters is reduced to $(|V| + |R| + d) \times k$ which is comparable smaller. 
+
+We then group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrices $\mathbf{C} \in \mathbb{R}^{k \times d}$. 
+
 Naturally, matrix $\mathbf{A}$ can be interpreted as word embedding described above. Similar to word embedding, we can represent semantic role $b_j$ using one-hot encoded column vector $\mathbf{r}_j$ where $|\mathbf{r}_j| = |R|$ and $R$ is the set of semantic roles. So $\mathbf{B}$ can be considered as role embedding matrix. By computing inner product between $\mathbf{r}_j$ and $\mathbf{B}$ as $\mathbf{B}_{(j)} = \mathbf{r}_j \mathbf{B}$, we obtain the low-dimensional vector $\mathbf{B}_{(j)} \in \mathbb{R}^k$ which is the $j$-th row of matrix $\mathbf{B}$. From equation \eqref{eq:trd}, the vector $\mathbf{T}_{(ij)}$ can be computed as: 
 \begin{equation} \label{eq:rbwe_tensor}
 \begin{aligned}
