@@ -250,33 +250,34 @@ where suffix $(x)$ is the $x$-th element of the vector.
 \caption{\label{fig:MTNNRF} Model architecture of multitask version of non-incremental role filler.}
 \end{figure}
 
-
-
-
-In the \textbf{NNRF} model, embedding vectors of event participants are sum up together to represent the whole event. Nonetheless, this is only a simple method to composite event participants. Each participant has same weight in the event. Additionally, means of parameters can shift in a large range the after the sum operation. How can we improve this? We need an exploration of composition methods. \\
-We separate all possible methods in two groups. The first group is \textbf{non-parametric methods} which have no extra parameters like addition, multiplication and concatenation of event participant vectors. Another group is \textbf{parametric methods} which need more parameters like recursive unit \citep{socher2013recursive}, recurrent unit \citet{mikolov2010recurrent}, or long-short-term-memory recurrent unit \citep{hochreiter1997LSTM}. Considering the sequence of participants, there are two different conditions: the participant order is unknown and the opposite case. In this work, we focus on non-parametric methods in the condition that participant order is not provided and leave other cases for future exploration. \\
-\noindent
-Multiplication is an effective composition method for distributed memory models. However, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But usually the concatenated feature can not be used directly. An extra feature extractor is needed, which turns it into a parametric method. \\ 
-\noindent
-We propose the \textbf{mean} composition method which compute the mean of all the  vectors of event participants to represent the event as one vector. Computing mean instead of sum can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of the hidden values. \\
-Since it is a non-parametric method, we also want to add a weight before the mean composition. Instead of using a fully-connected layer, we apply the PReLU to each embedding vector of participant here. So the parameters inside PReLU can also act as weights of each participant. 
-\noindent
-This model is described in Figure \ref{fig:MTRFv4}. 
-\begin{equation} \label{eq:nonlinearity}
+For each target target role, there is a different weight matrix to perform classification. \citet{tilk2016event} performed a similar technique like the role-specific word embedding. At first weight matrix $\mathbf{W}_c^{(b_y)}$ is defined for each target role $b_y$. Then those matrices $\mathbf{W}_c^{(b_y)}$ are stacked from $b_1$ to $b_{|R|}$. A weight tensor $\mathbf{T}^{(c)} \in \mathbb{R}^{d \times |R| \times |V|}$ is obtained. But this tensor suffer the same dimensionality problem as event-participant embedding tensor. So tensor rank decomposition is applied again on the weight tensor, and extract the corresponding weight matrices for $b_y$ as follow: 
+\begin{equation} \label{eq:trd_cls}
 \begin{aligned}
-    \mathbf{h}_l
-        &= PReLU_l(\mathbf{p}_l) \\
+    \mathbf{T}_{(y)}^{(c)}
+        &= \sum_{m=1}^{k^{(c)}} \mathbf{c}_{m}^{(c)} \otimes \mathbf{b}_{m_{(y)}}^{(c)} \otimes \mathbf{a}_m^{(c)} \\
 \end{aligned}
 \end{equation}
-\noindent
-Using the mean method, the embedding vectors are composed as:
-\begin{equation} \label{eq:mean_comp}
+Similarly, vectors $\mathbf{c}_{m}^{(c)}$ are grouped by row into matrices $\mathbf{C}_c \in \mathbb{R}^{d \times k^{(c)}}$ and $\mathbf{a}_m^{(c)}$ are grouped by column into matrices $\mathbf{A}_c \in \mathbb{R}^{k^{(c)} \times |V|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, the weight matrix in equation \eqref{eq:output}  can be written as:
+\begin{equation} \label{eq:cls}
 \begin{aligned}
-    \mathbf{e}
-        &= \frac{1}{L} \sum_{l=1}^{L} \mathbf{h}_{l} \\
+    \mathbf{W}_c
+        &= \mathbf{C}_c \ diag(\mathbf{b}_y) \ \mathbf{A}_c \\
+\end{aligned}
+\end{equation}
+where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embedding matrices $\mathbf{B}_c \in \mathbb{R}^{k^{(c)} \times |R|}$ can be defined for target roles. The weight matrices can be further written as:
+\begin{equation} \label{eq:cls_temb}
+\begin{aligned}
+    \mathbf{W}_c
+        &= \mathbf{C}_c \ diag(\mathbf{r}_y \mathbf{B}_c) \ \mathbf{A}_c \\
 \end{aligned}
 \end{equation}
 
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.7\textwidth]{MTNNRF.png}
+\caption{\label{fig:MTNNRF} Model architecture of multitask version of non-incremental role filler.}
+\end{figure}
 
 
 \subsection{Multitask Learning} \label{sec:mtl}
@@ -318,39 +319,6 @@ where suffix $(x)$ is the $x$-th element of the vector. And the conditional prob
         \sum_{j=1}^{|R|} exp(\mathbf{o}_r)_{(j)} }   \\
 \end{aligned}
 \end{equation}
-
-
-
-\subsection{Target Role Specific Classifier}
-For each target role or target word, we need a different weight matrix to perform classification. How can we integrate the information of target role or target word with two weight matrices in an fully interpretable way without any additional parameters? We perform a similar technique like the role-specific word embedding. \\
-At first we define weight matrix $\mathbf{W}_w$ and weight matrix $\mathbf{W}_r$ for each target word $a_x$ and target role $b_y$. Then we stack $\mathbf{W}_w$ and $\mathbf{W}_r$ from $a_1$ to $a_{|V|}$ and from $b_1$ to $b_{|R|}$. Two weight tensors $\mathbf{T}^{(w)} \in \mathbb{R}^{d \times |R| \times |V|}$ and $\mathbf{T}^{(r)} \in \mathbb{R}^{d \times |V| \times |R|}$ are obtained. But these tensors suffer the same dimensionality problem as role based embedding tensor. So we apply tensor rank decomposition again on two weight tensors, and extract the corresponding weight matrices for $a_x$ and $b_y$ as follow: 
-\begin{equation} \label{eq:trd_cls}
-\begin{aligned}
-    \mathbf{T}_{(x)}^{(w)}
-        &= \sum_{m=1}^{k^{(w)}} \mathbf{c}_{m}^{(w)} \otimes \mathbf{b}_{m_{(x)}}^{(w)} \otimes \mathbf{a}_m^{(w)} \\
-    \mathbf{T}_{(y)}^{(r)}
-        &= \sum_{m=1}^{k^{(r)}} \mathbf{c}_{m}^{(r)} \otimes  \mathbf{a}_{m_{(y)}}^{(r)} \otimes \mathbf{b}_m^{(r)} \\
-\end{aligned}
-\end{equation}
-Similarly, we group vectors $\mathbf{c}_{m}^{(w)}$, $\mathbf{c}_{m}^{(r)}$ by row into matrices $\mathbf{C}_w \in \mathbb{R}^{d \times k^{(w)}}$, $\mathbf{C}_r \in \mathbb{R}^{d \times k^{(r)}}$ and group $\mathbf{a}_m^{(w)}$, $\mathbf{b}_m^{(r)}$ by column into matrices $\mathbf{A}_w \in \mathbb{R}^{k^{(w)} \times |V|}$, $\mathbf{B}_r \in \mathbb{R}^{k^{(r)} \times |R|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, two weight matrices in equation \eqref{eq:output}  can be written as: 
-\begin{equation} \label{eq:cls}
-\begin{aligned}
-    \mathbf{W}_w
-        &= \mathbf{C}_w \ diag(\mathbf{b}_y) \ \mathbf{A}_w \\
-    \mathbf{W}_r
-        &= \mathbf{C}_r \ diag(\mathbf{a}_x) \ \mathbf{B}_r \\
-\end{aligned}
-\end{equation}
-where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Since there is a vector $\mathbf{b}_y$ representing target role $b_y$ and there is a vector $\mathbf{a}_x$ representing target word $a_x$. Now we can define the embedding matrices $\mathbf{B}_w \in \mathbb{R}^{k^{(w)} \times |R|}$, $\mathbf{A}_r \in \mathbb{R}^{k^{(r)} \times |V|}$ for target roles and target words. The weight matrices can be further written as: 
-\begin{equation} \label{eq:cls_temb}
-\begin{aligned}
-    \mathbf{W}_w
-        &= \mathbf{C}_w \ diag(\mathbf{r}_y \mathbf{B}_w) \ \mathbf{A}_w \\
-    \mathbf{W}_r
-        &= \mathbf{C}_r \ diag(\mathbf{w}_x \mathbf{A}_r) \ \mathbf{B}_r \\
-\end{aligned}
-\end{equation}
-
 
 
 \begin{figure}[t]
