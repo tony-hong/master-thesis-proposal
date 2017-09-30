@@ -281,15 +281,10 @@ where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its di
 
 
 \subsection{Multitask Learning} \label{sec:mtl}
-The \textbf{NNRF} model is trained to solve the role filler prediction task. When we want to obtain the representation of the event, there is a problem if we only focus on role filler prediction. The representations with same arguments but different roles can be very similar to each other. For example, the embedding vector of $(boy_{ARG0}, eat_{PREDICATE}, apple_{ARG1})$ can be very similar to the embedding vector of  $(apple_{ARG0}, eat_{PREDICATE}, boy_{ARG1})$. \\
-To tackle this problem we add one more auxiliary task which is  \textbf{semantic role prediction} task:
-\begin{itemize}
-  \item  predict the target semantic role given the corresponding target role role filler and the other event participants  in an event.
-\end{itemize}
-This task can be considered as a regularisation of the objective function of the role filler prediction task.
-\noindent
+In addition to role-filler prediction, we also want to perform role label prediction. This task can be considered as a regularisation of the objective function of the role-filler prediction task. Using this idea, we design a model named \textbf{multitask role filler (MTRF)} described in Figure \ref{fig:MTNNRF} which differs with \textbf{NNRF} only in the last layer. 
+
 Since we want to obtain the probability distribution of target word or target role, in the last layer a softmax regression classifier is used for each task. The output vectors of these classifiers are computed as:
-\begin{equation} \label{eq:output}
+\begin{equation} \label{eq:output_mt}
 \begin{aligned}
     \mathbf{o}_w
         &= \mathbf{e}\mathbf{W}_w + \mathbf{b}_w \\
@@ -320,11 +315,39 @@ where suffix $(x)$ is the $x$-th element of the vector. And the conditional prob
 \end{aligned}
 \end{equation}
 
+For each target role or target word, we apply tensor factorisation again to obtain target role/word specific classifiers. At first we define weight matrix $\mathbf{W}_w$ and weight matrix $\mathbf{W}_r$ for each target word $a_x$ and target role $b_y$. Then we stack $\mathbf{W}_w$ and $\mathbf{W}_r$ from $a_1$ to $a_{|V|}$ and from $b_1$ to $b_{|R|}$. Two weight tensors $\mathbf{T}^{(w)} \in \mathbb{R}^{d \times |R| \times |V|}$ and $\mathbf{T}^{(r)} \in \mathbb{R}^{d \times |V| \times |R|}$ are obtained. But these tensors suffer the same dimensionality problem as event-participant embedding tensor. So we apply tensor rank decomposition again on two weight tensors, and extract the corresponding weight matrices for $a_x$ and $b_y$ as follow: 
+\begin{equation} \label{eq:trd_mt_cls}
+\begin{aligned}
+    \mathbf{T}_{(x)}^{(w)}
+        &= \sum_{m=1}^{k^{(w)}} \mathbf{c}_{m}^{(w)} \otimes \mathbf{b}_{m_{(x)}}^{(w)} \otimes \mathbf{a}_m^{(w)} \\
+    \mathbf{T}_{(y)}^{(r)}
+        &= \sum_{m=1}^{k^{(r)}} \mathbf{c}_{m}^{(r)} \otimes  \mathbf{a}_{m_{(y)}}^{(r)} \otimes \mathbf{b}_m^{(r)} \\
+\end{aligned}
+\end{equation}
+Similarly, we group vectors $\mathbf{c}_{m}^{(w)}$, $\mathbf{c}_{m}^{(r)}$ by row into matrices $\mathbf{C}_w \in \mathbb{R}^{d \times k^{(w)}}$, $\mathbf{C}_r \in \mathbb{R}^{d \times k^{(r)}}$ and group $\mathbf{a}_m^{(w)}$, $\mathbf{b}_m^{(r)}$ by column into matrices $\mathbf{A}_w \in \mathbb{R}^{k^{(w)} \times |V|}$, $\mathbf{B}_r \in \mathbb{R}^{k^{(r)} \times |R|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, two weight matrices in equation \eqref{eq:output}  can be written as: 
+\begin{equation} \label{eq:cls_mt}
+\begin{aligned}
+    \mathbf{W}_w
+        &= \mathbf{C}_w \ diag(\mathbf{b}_y) \ \mathbf{A}_w \\
+    \mathbf{W}_r
+        &= \mathbf{C}_r \ diag(\mathbf{a}_x) \ \mathbf{B}_r \\
+\end{aligned}
+\end{equation}
+where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Since there is a vector $\mathbf{b}_y$ representing target role $b_y$ and there is a vector $\mathbf{a}_x$ representing target word $a_x$. Now we can define the embedding matrices $\mathbf{B}_w \in \mathbb{R}^{k^{(w)} \times |R|}$, $\mathbf{A}_r \in \mathbb{R}^{k^{(r)} \times |V|}$ for target roles and target words. The weight matrices can be further written as: 
+\begin{equation} \label{eq:cls_mt_temb}
+\begin{aligned}
+    \mathbf{W}_w
+        &= \mathbf{C}_w \ diag(\mathbf{r}_y \mathbf{B}_w) \ \mathbf{A}_w \\
+    \mathbf{W}_r
+        &= \mathbf{C}_r \ diag(\mathbf{w}_x \mathbf{A}_r) \ \mathbf{B}_r \\
+\end{aligned}
+\end{equation}
+
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{BOP.png}
-\caption{\label{fig:BOP} Model architecture of multitask role filler.}
+\caption{\label{fig:BOP} Model architecture of bag-of-event-participants.}
 \end{figure}
 
 
