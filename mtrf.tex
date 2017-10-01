@@ -385,10 +385,35 @@ So the parameters inside PReLU can also act as weights of each participant. Usin
 This model is named as \textbf{bag-of-event-participants (BOP)} described in Figure \ref{fig:BOP}. 
 
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{BOPRes.png}
+\caption{\label{fig:BOPRes} Model architecture of bag-of-event-participants with skip connection.}
+\end{figure}
 
 
-\section{Experiments}
-\subsection{Model Selection}
+\subsection{Residual Learning} \label{sec:residual}
+
+
+\newpage
+
+\section{Experiments}  \label{sec:exp}
+\subsection{Corpus and Prepossessing} \label{sec:corpus}
+
+
+
+
+
+
+
+\section{Evaluation}  \label{sec:evaluation}
+\subsection{Human Thematic Fit Judgement Correlation Task}  \label{sec:thematicfit}
+To improve performance of DM on thematic fit task, \citet{greenberg2015improving} employed clustering on candidate role-fillers to construct better representation for prototypical role-filler. They obtained good performance on less frequent roles like ARGM-MNR and ARGM-LOC. 
+
+\subsection{Event Similarity Correlation task}  \label{sec:wordsim}
+
+
+\subsection{Event Similarity Correlation task}  \label{sec:eventsim}
 
 
 
@@ -396,23 +421,16 @@ This model is named as \textbf{bag-of-event-participants (BOP)} described in Fig
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l|l|l|l|l|l}
-Dataset &   Semantic Roles  &   NN RF   &   MTRF v3 &   MTRF v4     &   MTRF v4(0.01)    \\ \hline
-P07     &   A0, A1, A2      &   42      &   44      &   \textbf{52} &   \textbf{52}     \\
-MSTNN   &   A0, A1          &   34      &   34      &   38          &   \textbf{39}     \\
-F-Loc   &   AM-LOC          &   46      &   46      &   44          &   \textbf{47}     \\
-F-Inst  &   AM-MNR          &   52      &   48      &   \textbf{53} &   49              \\
-GDS-all &   A1              &   55      &   56      &   60          &   \textbf{61}     \\
+\begin{tabular}{l|l|l||l|l|l|l||l}
+Dataset &   TypeDM  &   SDDM    &   NNRF    &   MTRF    &   BOP &   BOP Res     &   BOP Res*    \\ \hline
+P07     &   53      &   51      &   48      &   48      &   52  &   \textbf{54} &   51          \\
+MSTNN   &   32      &   24      &   39      &   39      &   42  &   \textbf{42} &   42          \\
+F-Loc   &   23      &   19      &   51      &   48      &   44  &   45          &   44          \\
+F-Inst  &   36      &   19      &   51      &   50      &   49  &   \textbf{51} &   50          \\
+GDS-all &   53      &   40      &   62      &   61      &   60  &   61          &   61          \\
 \end{tabular}
 \caption{\label{tab:widgets} Experiment result of models on human thematic fit judgement correlation task.}
 \end{table}
-
-
-
-\section{Evaluation}
-
-\subsection{Human thematic fit judgement correlation task}
-
 
 
 
