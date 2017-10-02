@@ -88,9 +88,45 @@ Using the same event-participant embedding as input, we add non-linearity to the
 To compare with previous baselines, all models are trained on the SDS2015. Hyper-parameters are tuned to optimise for different purposes (see Section \ref{sec:exp}). The output probabilities of the models on word prediction are evaluated on human thematic fit judgement correlation task (see Section \ref{sec:thematicfit}). The word embeddings are evaluated on several word similarity tasks (see Section \ref{sec:wordsim}). Last but not least, the event embeddings are evaluated on a event similarity correlation task (see Section \ref{sec:eventsim}). The results show that our models has significant improvement over the current best system on specific evaluations while has state-of-the-art performance on the other evaluations. The word embedding and event embedding extracted from the event-participant embedding we learnt also has state-of-the-art performance. 
 
 
+\begin{table}[t]
+\centering
+\begin{tabular}{l|l}
+\textbf{Thematic Role}  &   \textbf{Definition} \\ \hline
+AGENT                   &   The volitional causer of an event \\
+PATIENT (THEME)         &   The participant most directly affected by an event \\
+INSTRUMENT              &   The inanimate force or object used in an event \\
+LOCATION                &   The location or spatial orientation of the event \\
+\end{tabular}
+\caption{\label{tab:thematic} Definitions of common thematic roles.}
+\end{table}
+
 
 \section{Background}
+\section{Background}
 \subsection{Event Knowledge and Representation} \label{sec:event}
+In psycholinguistics and cognitive science, experiments have shown that event knowledge plays a crucial role in human sentence processing \citep{camblin2007interplay}. On one hand, predicates prime event participant referring to good fillers of their semantic role in an event \citep{ferretti2001integrating}. On the other hand, priming effect can be also found from event participants to predicates \citep{mcrae2005basis}. These two works reveal that model performances of predicate prediction and participant prediction can be evaluated via correlation with human judgement. In a wider range, event-level information affects verbal arguments processing of human \citep{bicknell2010effects}. Comprehenders integrate information not only from predicate but also other event participants mentioned in discourse. Overall, it is necessary to obtain representation of events from sentences. 
+
+In early research, events were represented using first order logic. For the event in the example sentence (\ref{eg:sent1}), the representation is:
+\begin{equation*} \label{eg:fol}
+\begin{aligned}
+    & cut(\text{cook}, \text{cake}) \land with(\text{knife}) \land in(\text{kitchen}) \\
+\end{aligned}
+\end{equation*}
+where it is hard to refer to predicates. Later on, \citet{davidson1967logical} proposed a method that linguistic predicates consider an event as one of their logical arguments explicitly. So the representation of the sentence (\ref{eg:sent1}) becomes: 
+\begin{equation*} \label{eg:davidsonian}
+\begin{aligned}
+    & \exists e\ cut(e, \text{cook}, \text{cake}) \land with(e, \text{knife}) \land in(e, \text{kitchen}) \\
+\end{aligned}
+\end{equation*}
+where the predicate $cut$ is a description of an event $e$. This representation, named as \textit{Davidsonian event representation}, has a drawback that it is hard to distinguish the roles of $cook$ and $cake$. Combining with thematic roles mentioned in session \ref{sec:intro}, \citet{parsons1990events} updated the representation to: 
+\begin{equation*} \label{eg:neodavidsonian}
+\begin{aligned}
+    \exists e\ cut(e)
+    & \land \text{AGENT}(e, \text{cook}) \land \text{PATIENT}(e, \text{cake}) \\
+    & \land \text{INSTRUMENT}(e, \text{knife}) \land \text{LOCATION}(e, \text{kitchen}) \\
+\end{aligned}
+\end{equation*}
+where each thematic role is acting as a logical predicate of the event $e$ and the corresponding participant. This representation, named as \textit{neo-Davidsonian event representation}, is highly compatible with semantic role models. 
 
 
 \subsection{Semantic Role Models} \label{sec:semanticrole}
