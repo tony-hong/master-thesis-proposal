@@ -130,12 +130,36 @@ where each thematic role is acting as a logical predicate of the event $e$ and t
 
 
 \subsection{Semantic Role Models} \label{sec:semanticrole}
+Thematic role is the oldest semantic role model which is formalised by \citet{gruber1965studies} and \citet{fillmore1968case} in modern time. The inventory of roles usually contains AGENT, PATIENT, INSTRUMENT and LOCATION \citep{aarts2013english}. Table \ref{tab:thematic} shows informal definitions of them \citep{jurafsky2014speech}. One disadvantage of thematic role is that the range of role inventory is difficult to decide. Even worse, the formal definitions of thematic roles are controversial. 
+
+The Proposition Bank (PropBank) is an annotated corpus of semantic roles based on Penn TreeBank \citep{palmer2005proposition}. It provides an effective semantic role model. Table \ref{tab:semantic} shows definitions of semantic roles in PropBank style used in this paper. The definitions are based on the PropBank Annotation Guidelines \citep{bonial2010propbank} except the fact that the notion of argument is replaced by event participant. Arguments required for the valency of a predicate are listed with numbers. Modifiers, which are relatively stable across predicates, are marked with ArgMs. While PropBank focuses on verbal predicate, NomBank adds annotations to nominal predicates. 
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l|l}
+\textbf{Semantic Role}  &   \textbf{Definition} \\ \hline
+ARG0                    &   Proto-agent, the event participant that most likely to be the agent, \\ 
+                        &   volitional causer or experiencer \\ \hline
+ARG1                    &   Proto-patient, the event participant that most likely to be the patient \\ \hline
+ARG2                    &   The instrument, benefactive or attribute \\ \hline
+ARG3                    &   The starting point, benefactive or attribute \\ \hline
+ARG4                    &   The ending point \\ \hline
+ARGM-MNR                &   The event participant that specifies how the action is performed \\ \hline
+ARGM-LOC                &   The event participant that indicates where the action takes place \\ \hline
+ARGM-TMP                &   The event participant that shows when an action took place \\ \hline
+\end{tabular}
+\caption{\label{tab:semantic} Definitions of semantic roles in PropBank style used in this paper.}
+\end{table}
 
 
 \subsection{Semantic Role Labelling} \label{sec:srl}
-The semantic role labeling task is to assign semantic role labels to the event participants in an event. After many years of research, pre-trained semantic role labeling systems are quite reliable. However, most of these works only assign labels to the whole constituents or phrases. \citet{Sayeed2014} proposed an unsupervised method of assigning semantic roles to headwords in event participants to construct a corpus. The raw text are firstly processed by a state-of-the-art semantic role labeller SENNA \citep{Collobert}. Then a dependency parser Malt Parser is used to extract the headwords of the event participants together with some heuristics.
+Semantic role labelling is a well-study task which was defined formally at CoNLL 2004, 2005 shared tasks which aimed to annotate phrasal arguments of verbal predicates in the sentences \citep{carreras-marquez:2004:CONLL, carreras-marquez:2005:CoNLL}. The CoNLL 2008, 2009 shared tasks introduced a new task where the semantic dependencies are annotated instead of phrasal arguments \citep{surdeanu-EtAl:2008:CONLL, hajivc-EtAl:2009:CoNLL-2009-ST}. 
+
+Generally speaking, modern SRL system is a statistical model that can predict the semantic role labels given the sentences. Many early work used syntactic parses as input and estimate classifiers locally with a set of constraints \citep{punyakanok2008importance}. \citet{tackstrom2015efficient} interpreted the model as a graphical model and use multi-layer neural network to enforce the constraints. Later work focus on application of distributed representation to avoid feature engineering and result in better generalisation. \citet{collobert2011natural} proposed a convolution neural network model using distributed representation that only rely on lexical features. The fine-tuned model with additional features, SENNA, has state-of-the-art performance. The running time of SENNA is fast so it can be used on large corpus. 
 
 There are many state-of-the-art SRL systems \citep{collobert2011natural, titov2011bayesian}. \citet{roth2016neural} proposed PathLSTM which made use of syntactic features. But \citet{marcheggiani2017simple} claimed that syntactic features is not necessary for semantic role labeling.
+
 
 \subsection{Distributional Semantic Model} \label{sec:dsm}
 Distributed representation of words is useful in natural language understanding, natural language generation and machine translation. There are many efforts on learning word embedding from large scale text corpora. Nevertheless for generality, most of these works only use raw word as input without using any semantic features. 
