@@ -188,7 +188,7 @@ Event
   publisher={Stanford: CSLI Publications}
 }
 
-verb to noun; Ins, Loc
+predicate to argument; Ins, Loc
 @article{ferretti2001integrating,
   title={Integrating verbs, situation schemas, and thematic role concepts},
   author={Ferretti, Todd R and McRae, Ken and Hatherell, Andrea},
@@ -200,7 +200,7 @@ verb to noun; Ins, Loc
   publisher={Elsevier}
 }
 
-noun to verb
+argument to predicate
 @article{mcrae2005basis,
   title={A basis for generating expectancies for verbs from nouns},
   author={McRae, Ken and Hare, Mary and Elman, Jeffrey L and Ferretti, Todd},
@@ -375,6 +375,15 @@ SRL
   url       = {http://www.aclweb.org/anthology/C10-1011}
 }
 
+@inproceedings{collobert2007fast,
+  title={Fast semantic extraction using a novel neural network architecture},
+  author={Collobert, Ronan and Weston, Jason},
+  booktitle={Annual meeting-association for computational linguistics},
+  volume={45},
+  pages={560},
+  year={2007}
+}
+
 @article{punyakanok2008importance,
   title={The importance of syntactic parsing and inference in semantic role labeling},
   author={Punyakanok, Vasin and Roth, Dan and Yih, Wen-tau},
@@ -426,6 +435,14 @@ Comp of 05, 09, 12
   url       = {http://www.aclweb.org/anthology/N15-1121}
 }
 
+@inproceedings{zhou2015end,
+  title={End-to-end learning of semantic role labeling using recurrent neural networks.},
+  author={Zhou, Jie and Xu, Wei},
+  booktitle={ACL (1)},
+  pages={1127--1137},
+  year={2015}
+}
+
 @InProceedings{roth2016neural,
   author    = {Roth, Michael  and  Lapata, Mirella},
   title     = {Neural Semantic Role Labeling with Dependency Path Embeddings},
@@ -443,6 +460,35 @@ Comp of 05, 09, 12
   author={Marcheggiani, Diego and Frolov, Anton and Titov, Ivan},
   journal={arXiv preprint arXiv:1701.02593},
   year={2017}
+}
+
+graph conv
+@article{marcheggiani2017encoding,
+  title={Encoding Sentences with Graph Convolutional Networks for Semantic Role Labeling},
+  author={Marcheggiani, Diego and Titov, Ivan},
+  journal={arXiv preprint arXiv:1703.04826},
+  year={2017}
+}
+
+
+------------------------
+Corpora
+------------------------
+@inproceedings{ferraresi2008introducing,
+  title={Introducing and evaluating ukWaC, a very large web-derived corpus of English},
+  author={Ferraresi, Adriano and Zanchetta, Eros and Baroni, Marco and Bernardini, Silvia},
+  booktitle={Proceedings of the 4th Web as Corpus Workshop (WAC-4) Can we beat Google},
+  pages={47--54},
+  year={2008}
+}
+
+@article{british2007british,
+  title={British National Corpus version 3 (BNC XML edition)},
+  author={British National Corpus Consortium and others},
+  journal={Distributed by Oxford University Computing Services on behalf of the BNC Consortium. Retrieved February},
+  volume={13},
+  pages={2012},
+  year={2007}
 }
 
 
@@ -602,6 +648,39 @@ Embedding
   year={2013}
 }
 
+@inproceedings{pennington2014glove,
+  title={Glove: Global vectors for word representation},
+  author={Pennington, Jeffrey and Socher, Richard and Manning, Christopher},
+  booktitle={Proceedings of the 2014 conference on empirical methods in natural language processing (EMNLP)},
+  pages={1532--1543},
+  year={2014}
+}
+
+@inproceedings{levy2014neural,
+  title={Neural word embedding as implicit matrix factorization},
+  author={Levy, Omer and Goldberg, Yoav},
+  booktitle={Advances in neural information processing systems},
+  pages={2177--2185},
+  year={2014}
+}
+
+@article{levy2015improving,
+  title={Improving distributional similarity with lessons learned from word embeddings},
+  author={Levy, Omer and Goldberg, Yoav and Dagan, Ido},
+  journal={Transactions of the Association for Computational Linguistics},
+  volume={3},
+  pages={211--225},
+  year={2015}
+}
+
+@inproceedings{levy2014linguistic,
+  title={Linguistic regularities in sparse and explicit word representations},
+  author={Levy, Omer and Goldberg, Yoav},
+  booktitle={Proceedings of the eighteenth conference on computational natural language learning},
+  pages={171--180},
+  year={2014}
+}
+
 
 ------------------------
 Thematic fit / Selectional preference
@@ -669,6 +748,24 @@ Maths
   pages={164--189},
   year={1927},
   publisher={Wiley Online Library}
+}
+
+problems of tensor
+@inproceedings{sutskever2011generating,
+  title={Generating text with recurrent neural networks},
+  author={Sutskever, Ilya and Martens, James and Hinton, Geoffrey E},
+  booktitle={Proceedings of the 28th International Conference on Machine Learning (ICML-11)},
+  pages={1017--1024},
+  year={2011}
+}
+
+problems of tensor
+@inproceedings{kiros2014multimodal,
+  title={Multimodal neural language models},
+  author={Kiros, Ryan and Salakhutdinov, Ruslan and Zemel, Rich},
+  booktitle={Proceedings of the 31st International Conference on Machine Learning (ICML-14)},
+  pages={595--603},
+  year={2014}
 }
 
 
@@ -767,6 +864,22 @@ Evaluation
   publisher={MIT Press}
 }
 
+@article{hill2016simlex,
+  title={Simlex-999: Evaluating semantic models with (genuine) similarity estimation},
+  author={Hill, Felix and Reichart, Roi and Korhonen, Anna},
+  journal={Computational Linguistics},
+  year={2016},
+  publisher={MIT Press}
+}
+
+@inproceedings{agirre2015semeval,
+  title={SemEval-2015 Task 2: Semantic Textual Similarity, English, Spanish and Pilot on Interpretability.},
+  author={Agirre, Eneko and Banea, Carmen and Cardie, Claire and Cer, Daniel M and Diab, Mona T and Gonzalez-Agirre, Aitor and Guo, Weiwei and Lopez-Gazpio, Inigo and Maritxalar, Montse and Mihalcea, Rada and others},
+  booktitle={SemEval@ NAACL-HLT},
+  pages={252--263},
+  year={2015}
+}
+
 
 ------------------------
 software
@@ -860,13 +973,7 @@ Roleo 2016
   publisher={Elsevier}
 }
 
-@inproceedings{kiros2014multimodal,
-  title={Multimodal neural language models},
-  author={Kiros, Ryan and Salakhutdinov, Ruslan and Zemel, Rich},
-  booktitle={Proceedings of the 31st International Conference on Machine Learning (ICML-14)},
-  pages={595--603},
-  year={2014}
-}
+
 @inproceedings{alumae2013multi,
   title={Multi-domain neural network language model.},
   author={Alum{\"a}e, Tanel},
@@ -876,13 +983,6 @@ Roleo 2016
   organization={Citeseer}
 }
 
-@inproceedings{sutskever2011generating,
-  title={Generating text with recurrent neural networks},
-  author={Sutskever, Ilya and Martens, James and Hinton, Geoffrey E},
-  booktitle={Proceedings of the 28th International Conference on Machine Learning (ICML-11)},
-  pages={1017--1024},
-  year={2011}
-}
 @article{memisevic2010learning,
   title={Learning to represent spatial transformations with factored higher-order Boltzmann machines},
   author={Memisevic, Roland and Hinton, Geoffrey E},
@@ -926,7 +1026,6 @@ recurrent neural networks.}
 
 @INPROCEEDINGS{bergstra+al:2010-scipy,
      author = {Bergstra, James and Breuleux, Olivier and Bastien, Fr{\'{e}}d{\'{e}}ric and Lamblin, Pascal and Pascanu, Razvan and Desjardins, Guillaume and Turian, Joseph and Warde-Farley, David and Bengio, Yoshua},
-      month = jun,
       title = {Theano: a {CPU} and {GPU} Math Expression Compiler},
   booktitle = {Proceedings of the Python for Scientific Computing Conference ({SciPy})},
        year = {2010},
