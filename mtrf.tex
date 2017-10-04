@@ -158,46 +158,20 @@ Semantic role labelling is a well-study task which was defined formally at CoNLL
 
 Generally speaking, modern SRL system is a statistical model that can predict the semantic role labels given the sentences. Many early work used syntactic parses as input and estimate classifiers locally with a set of constraints \citep{punyakanok2008importance}. \citet{tackstrom2015efficient} interpreted the model as a graphical model and use multi-layer neural network to enforce the constraints. Later work focus on application of distributed representation to avoid feature engineering and result in better generalisation. \citet{collobert2011natural} proposed a convolution neural network model using distributed representation that only rely on lexical features. The fine-tuned model with additional features, SENNA, has state-of-the-art performance. The running time of SENNA is fast so it can be used on large corpus. 
 
-There are many state-of-the-art SRL systems \citep{collobert2011natural, titov2011bayesian}. \citet{roth2016neural} proposed PathLSTM which made use of syntactic features. But \citet{marcheggiani2017simple} claimed that syntactic features is not necessary for semantic role labeling.
+More recently, \citet{lei-EtAl:2015:NAACL-HLT} employ low-rank tensor factorisation to induce a compact representation of the full cross product of atomic features. \citet{roth2016neural} proposed PathLSTM which made use of dependency path as input. \citet{marcheggiani2017simple} claimed that syntactic features is not necessary for semantic role labelling and proposed a deep LSTM model to obtain competitive performance. 
 
 
 \subsection{Distributional Semantic Model} \label{sec:dsm}
-Distributed representation of words is useful in natural language understanding, natural language generation and machine translation. There are many efforts on learning word embedding from large scale text corpora. Nevertheless for generality, most of these works only use raw word as input without using any semantic features. 
+Distributional semantic model (DSM) depends on distributional hypothesis \citep{harris1954distributional, miller1991contextual} claiming that the semantic similarity between two linguistic units can be measured by the overlap among their contexts. A DSM can be viewed as an order-2 tensor where one dimension is index of word (or lexical unit) and another dimension is the feature that used to capture context information. Generally in early work of DSM, a matrix was constructed based on lexical co-occurrences of words in a large corpus. Then each word can be represented by a high-dimensional sparse vector in this matrix. This however does not consider the linguistic information within the context. To include such information, later work encode syntactic relation or lexico-syntactic pattern \citep{pado2007integration, erk2008structured, rothenhausler2009unsupervised} (performance?). 
 
+\citet{baroni2010distributional} claimed that it is possible to construct a general model for semantic memory, a stable long-term knowledge of human, to tackle different semantic tasks. They proposed Distributional Memory (DM) framework which is an order-3 tensor which contains word-relation-word tuple. Performing matricisation on the tensor onto a matrix, vectors from different semantic spaces can be obtained. On tasks of a broad range, their best model, named as TypeDM, obtained state-of-the-art performance. This can be interpreted as the advantage of the distributional representation on multiple semantic tasks. Furthermore, the tensor like structure is both flexible and expressive for semantic information modelling. 
+
+In addition to syntactic information, \citet{sayeed2014combining} extracts shallow semantic representation using semantic role labeller SENNA and constructs DM upon them. Combining syntactic and semantic features, they build a fully unsupervised distributional memory model, named as SDDM, especially for thematic fit judgement task. SDDM outperforms syntax-based thematic fit model by a large margin, which indicates that semantic information is essential in thematic fit task. 
+
+There are three major drawbacks of distributional semantic model. Firstly, like we mentioned above, representation vector has the problem of sparsity. In addition, the parameters of the vectors is discrete in count-based vector space. Although many alternative weighting functions and smoothing techniques has been proposed, it is hard to decide which is the most optimised. Last but not least, these models usually suffer curse of dimensionality. Because the Euclidean distance between two vectors is meaningless in high-dimensional space, when the representation vectors are used as input of distance-based method like nearest-neighbour classifier or clustering, the result can be unexpected. 
 
 \subsection{Distributed Representation} \label{sec:repr}
-Words can be represented with vectors in adjacent matrix using count based method. But when it comes to the practice, this kind of method has a problem of sparsity. The vector of count-based method is discrete, high-dimensional and sparse. Distributed representation is an effective method to tackle sparsity of high-dimensional vectors. \\
-\noindent
-\citet{mikolov2013distributed} proposed recurrent neural network based language model.
-
-
-\subsection{Cognitive Modelling}
-\subsubsection{Event Level Model}
-Event-level knowledge does affect human expectations for verbal arguments \citep{baroni2010distributional}. \\
-\noindent 
-Regarding to models of events, \citet{tilk2016event} proposed two models: \textit{non-incremental model} and \textit{incremental model}. For the \textit{non-incremental model}, they simply summed all the vectors $p$ of event participants together to represent the event $e$ as a vector:
-\begin{equation} \label{eq:20}
-\begin{aligned}
-    \mathbf{e}
-        &= \sum_{l=1}^{L} \mathbf{p}_{l} \\
-\end{aligned}
-\end{equation}
-where $L$ is the number of participants in event $e$. \\
-\noindent
-When it comes to the \textit{incremental model}, they added a recurrent unit to express participant order not only within event but also across different events. Moreover, a binary indicator $b$ is used to detect the event boundaries. $b$ equals to $1$ if the target word belongs to current event, otherwise $0$. So the event representation vector is: 
-\begin{equation} \label{eq:21}
-\begin{aligned}
-    \mathbf{e}
-        &= \mathbf{p} + \mathbf{h_{t-1}}\mathbf{W}_h + b\mathbf{v}
-\end{aligned}
-\end{equation} 
-where $\mathbf{v}$ is the parameter vector of event boundary. $\mathbf{h_{t-1}}$ is the hidden vector of last time step in the recurrent unit. $\mathbf{W}_h$ is the parameter matrix of recurrent unit. 
-
-\subsubsection{Thematic Fit Evaluation}
-\citet{sayeed2014combining} 
-Extract thematic features using semantic role labeler SENNA \citep{collobert2011natural}.
-Construct distributional memory model. 
-
+Distributed representation, pioneered by \citet{hinton1986learning}, is an effective method to handle sparsity and curse of dimensionality in symbolic representation. This kind of representation is powerful because it can represent $n$ feature with $k$ values to describe $k^n$ symbols \citep{Goodfellow-et-al-2016}. Specifically the distributed representation of words, popularly known as word embedding, can be learnt in the training of statistical statistical language model \citep{bengio2003neural}. Language modelling is a task to predict a target word given its context. \citet{mikolov2013distributed} proposed recurrent neural network based language model. To tackle multiple tasks in natural language processing, SENNA by \citet{collobert2011natural} share the word embedding across tasks of language modeling, part-of-speech tagging, chunking, named entity recognition, semantic role labelling. 
 
 
 \section{Representation of Predicates and Participants}
