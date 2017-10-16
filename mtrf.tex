@@ -25,7 +25,7 @@
 
 %% \usepackage[numbers]{natbib}
 
-\title{Learning Representations of Semantic Role Fillers in Events with Neural Networks}
+\title{Multi-task Learning for Event-Participant Embeddings}
 \author{Author: Xudong Hong \\ 
 Supervisor: Asad Sayeed, Vera Demberg}
 
@@ -33,7 +33,8 @@ Supervisor: Asad Sayeed, Vera Demberg}
 \maketitle
 
 \begin{abstract}
-We introduce several neural network models to learn embeddings containing both lexical and semantic features of events and event participants. Possible methods to compose word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk2016event}, we represent the order-3 tensor with three matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multitask style to perform both semantic role-filler prediction and semantic role label prediction. Comparing to previous work, the model has improved on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. The high-level features of the model can be used in incremental semantic role labelling.  
+\noindent
+We introduce several neural network models to learn embeddings containing both lexical and semantic features of events and event participants. Possible methods to compose word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk2016event}, we represent the order-3 tensor with three matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multitask style to perform both semantic role-filler prediction and semantic role prediction. Comparing to previous work, the model has improved on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. The high-level features of the model can be used in incremental semantic role labelling.  
 \end{abstract}
 
 
