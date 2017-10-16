@@ -48,17 +48,18 @@ In natural language understanding, the representation of events and their partic
 the event-level information is actually the same. The event is described by the predicate $cut$ and the participants of this event are $cook$, $cake$, $knife$ and $kitchen$. Although the syntactic roles of participant $cook$ in two sentences are different (subject in sentence \eqref{eg:sent1} and object in sentence \eqref{eg:sent2}), they are both the $cutter$ of the $cake$. This shared information can be capture by a level of shallow semantic representation: \textit{semantic roles} \citep{jurafsky2014speech}. 
 
 Semantic roles express the abstract roles of participant can taken in an event. In this level of representation, event participants can be mapped to arguments where they located. Using \textit{thematic role}, an inventory of conceptual argument roles (see Section \ref{sec:semanticrole}), the two sentences in earlier example can be annotated as: 
-\begin{equation*} \label{eg:thematic}
-\begin{aligned}
-    & [_\text{AGENT }\text{The }\textbf{cook}]\ cut\ [_\text{PATIENT }\text{the }\textbf{cake}]\ [_\text{INSTRUMENT }\text{with }\textbf{knife}]\ [_\text{LOCATION }\text{in the }\textbf{kitchen}]. \\
-    & [_\text{LOCATION }\text{In the }\textbf{kitchen}],\ [_\text{PATIENT }\text{the }\textbf{cake }]\ is \ cut\ [_\text{INSTRUMENT }\text{with }\textbf{knife}]\ [_\text{AGENT }\text{by the }\textbf{cook}].\\
-\end{aligned}
-\end{equation*} 
+\begin{eqnarray} \label{eg:thematic}
+  \nonumber & &[_{\text{AGENT}} \text{The }\textbf{cook}]\ cut\ [_{\text{PATIENT}}\text{the }\textbf{cake}]\ [_{\text{INSTRUMENT}}\text{with }\textbf{knife}]\\  
+    & &[_{\text{LOCATION}}\text{in the }\textbf{kitchen}]. \\
+  \nonumber & &[_{\text{LOCATION }}\text{In the }\textbf{kitchen}],\ [_{\text{PATIENT }}\text{the }\textbf{cake }]\ is \ cut\ \\
+    & &[_{\text{INSTRUMENT }}\text{with }\textbf{knife}]\ [_{\text{AGENT }}\text{by the }\textbf{cook}]. 
+\end{eqnarray} 
 where the event participants are actually head nouns or noun-noun compounds inside arguments of the predicate $cut$. $The\ cook$, volitional causer of the event, has a AGENT role and $the\ cake$, the participant mostly affected by the event, has a PATIENT role. But it has been shown that it is hard to define thematic role formally. As a result, the PropBank \citep{palmer2005proposition} style semantic role model is introduced where each semantic role is associated with a specific verb sense. So the representation of two sentences can be unified as: 
 \begin{equation*} \label{eg:probank}
 \begin{aligned}
-    & \text{Predicate: cut.}\textbf{01} \\
-    & \text{Arguments: } [_\text{ARG0 }\text{The }\textbf{cook}], \ [_\text{ARG1 }\text{the }\textbf{cake}], \ [_\text{ARGM-MNR }\text{with a }\textbf{knife}], \ [_\text{ARGM-LOC }\text{in the }\textbf{kitchen}]
+    & \text{Predicate: }&&cut.\textbf{01} \\
+    & \text{Arguments: }&&[_{\text{ARG0 }}\text{The }\textbf{cook}], \ [_{\text{ARG1 }}\text{the }\textbf{cake}], \ [_{\text{ARGM-MNR }}\text{with a }\textbf{knife}], \\
+    &           &&[_{\text{ARGM-LOC }}\text{in the }\textbf{kitchen}]
 \end{aligned}
 \end{equation*} 
 where each argument is assigned with a semantic role label. $cut.01$ is the verbal predicate $cut$ with sense $01$ which is \textit{"make an incision or separation"}. Now the ARG0 role can be defined exactly as \textit{"the subject which makes incision"}. To obtain this representation from raw text, one needs to solve semantic role labelling task (see Section \ref{sec:srl}). 
