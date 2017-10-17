@@ -66,6 +66,8 @@ where each argument is assigned with a semantic role label. $cut.01$ is the verb
 
 Since both raw words and semantic role labels are symbols, it has limited representing power. If someone wants to compare events quantitatively, it is not possible to use the \textit{symbolic representation} where each symbol represent a single state of the entry. There are some previous works construct representation of linguistic units e.g. \textit{Distributional semantic model} (DSM) (see Section \ref{sec:dsm}). Amoung them, \textit{Distributed representation} of words, also named as \textit{word embedding}, is a well-established technique based on continuous feature space. Each word is represented by a low-dimensional dense vector with real number parameters, where those parameters are learnt during training of a prediction task given the context. There are many efforts on learning word embeddings from large scale corpora (see Section \ref{sec:repr}). 
 
+
+\subsection{Main Problem and Previous Work}
 The main problem is that only a few works learn embeddings of information inside events. \citet{tilk2016event} proposed two models trained to learn a representation of events and their participants. To obtain a probability distribution over role-fillers given the event information, the models aim to perform \textit{role-filler prediction}: In each event, given the role label of one target word, and also given all other words and their role labels, the task is to predict the target word to fill the target role. The predicate is considered as a special role label which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. They reported great improvement over previous systems on thematic fit evaluation and competitive performance on event similarity evaluation. However, the definition of notion \textit{role} is vague. It is hard to explain why predicates and semantic role-fillers are treated as the same. In addition to that, there is a problem of event embedding if we only focus on role-filler prediction. The event embeddings with same argument words but different roles can be very similar to each other. For example, the embedding vector of $([_\text{ARG0 }\text{boy}], [_\text{PREDICATE }\text{eat}], [_\text{ARG1 }\text{apple}])$ can be very similar to the embedding vector of $([_\text{ARG0 }\text{apple}], [_\text{PREDICATE }\text{eat}], [_\text{ARG1 }\text{boy}])$, where $cut$ is the shared predicate. 
 
 
@@ -90,6 +92,9 @@ To compare with previous baselines, all models are trained, validated and tested
 Our model is a state-of-the-art system in selectional preference task. The selectional preference features are useful for referent prediction in discourse level \citep{modi2017modeling}. The word embedding we learn can be further employed in discourse relation classification, paraphrase detection, word sense disambiguation, sentiment analysis and machine translation. The composite features of predicate and target semantic role label can be used for argument classification in semantic role labelling \citep{roth2016neural}. 
 
 
+
+\section{Background}
+
 \begin{table}[t]
 \centering
 \begin{tabular}{l|l}
@@ -103,7 +108,6 @@ LOCATION                &   The location or spatial orientation of the event \\
 \end{table}
 
 
-\section{Background}
 \subsection{Event Knowledge and Representation} \label{sec:event}
 In psycholinguistics and cognitive science, experiments have shown that event knowledge plays a crucial role in human sentence processing \citep{camblin2007interplay}. On one hand, predicates prime event participant referring to good fillers of their semantic role in an event \citep{ferretti2001integrating}. On the other hand, priming effect can be also found from event participants to predicates \citep{mcrae2005basis}. These two works reveal that model performances of predicate prediction and participant prediction can be evaluated via correlation with human judgement. In a wider range, event-level information affects verbal arguments processing of human \citep{bicknell2010effects}. Comprehenders integrate information not only from predicate but also other event participants mentioned in discourse. Overall, it is necessary to obtain representation of events from sentences. 
 
@@ -207,6 +211,8 @@ where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$ and
 \end{equation}
 where the smallest $k$ makes the equation true is the tensor rank of $\mathbf{T}$. Now the number of parameters is reduced to $(|V| + |R| + d) \times k$ which is comparable smaller. 
 
+
+\subsection{Interpretation of Factored Tensor} \label{sec:tf-expl}
 We then group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrices $\mathbf{C} \in \mathbb{R}^{k \times d}$. 
 
 [TODO: formal interpretation] Naturally, matrix $\mathbf{A}$ can be interpreted as word embedding described above. $\mathbf{B}$ can be considered as role embedding matrix. By computing inner product between $\mathbf{r}_j$ and $\mathbf{B}$ as $\mathbf{B}_{(j)} = \mathbf{r}_j \mathbf{B}$, we obtain the low-dimensional vector $\mathbf{B}_{(j)} \in \mathbb{R}^k$ which is the $j$-th row of matrix $\mathbf{B}$. 
@@ -333,6 +339,9 @@ where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its di
 \end{equation}
 
 
+
+\section{Bag-of-Event-Participant Model} \label{sec:bop}
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.7\textwidth]{MTNNRF.png}
@@ -340,7 +349,7 @@ where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its di
 \end{figure}
 
 
-\section{Composition Method for Event Embedding} \label{sec:composition}
+\subsection{Composition Method for Event Embedding} \label{sec:composition}
 In the NNRF model, embedding vectors of event participants are sum up together to represent the whole event. Nonetheless, this is only a simple method to composite event participants. Each participant has same weight in the event. Additionally, means of parameters can shift in a large range the after the sum operation. How can we improve this? We need an exploration of composition methods. 
 
 We separate all possible methods in two groups. The first group is \textbf{non-parametric methods} which have no extra parameters like addition, multiplication and concatenation of event participant vectors. Another group is \textbf{parametric methods} which need more parameters like recursive unit \citep{socher2013recursive}, recurrent unit \citet{mikolov2010recurrent}, or long-short-term-memory recurrent unit \citep{hochreiter1997LSTM}. So the NNRF is classified as non-parametric composition method. 
