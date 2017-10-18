@@ -389,15 +389,42 @@ whehe $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{BOPRes.png}
-\caption{\label{fig:BOPRes} Model architecture of bag-of-event-participants with skip connection.}
+\caption{\label{fig:BOPRes} Model architecture of bag-of-predicates/participants with residual learning.}
 \end{figure}
 
 
 \subsection{Residual Learning} \label{sec:residual}
+All models presented above contain two factored tensors. It has been shown that training model with factored tensors is difficult \citep{sutskever2011generating, kiros2014multimodal}. Due to the fact that each tensor element is represented as a product of three parameters, gradient explosion or vanishing problem happens more likely during the training. To tackle the gradient explosion or vanishing problem in deep neural networks, \citet{he2016deep} proposed the \textit{deep residual learning} framework. They have the observation that in a way of constructing a deep model from a shallow model, one needs to add additional layers which are identity mapping over other layers copied from the shallow model. As a result, we can force the layers to fit a residual mapping. Formally, a residual block containing two hidden layers using $PReLU$ activation function can be written as: 
+\begin{equation} \label{eq:res-block}
+\begin{aligned}
+    \mathbf{h}^{(1)}
+        &= PReLU(\mathbf{x}\mathbf{W}^{(1)}) \\
+    \mathbf{h}^{(2)}
+        &= PReLU(\mathbf{h}^{(1)}\mathbf{W}^{(2)} + \mathbf{x}) \\
+\end{aligned}
+\end{equation}
+Inspiring by this idea, we employ residual learning in our BOP model. For the event-participant embedding in equation \eqref{eq:rbe-nnrf}, there are two product operators, the Hadamard product and the dot product. We want to construct the residual block here to separate weight flow between two product operators. So we rewrite the event-participant embedding vector as: 
+\begin{equation} \label{eq:rbe-bopres}
+\begin{aligned}
+    \mathbf{p}_l
+        &= (\mathbf{w}_i \mathbf{A}_e \circ \mathbf{r}_j \mathbf{B}_e) \mathbf{C}_e \\
+        &= \mathbf{r}_l \mathbf{C}_e \\
+\end{aligned}
+\end{equation}
+where $\mathbf{r}_l$, the composition of word embedding and semantic role label embedding, is treated as the residual. The original weight of the event-participant embedding goes into non-linear layer as equation \eqref{eq:nonlinearity-bop} and then dot products the weight matrix $\mathbf{W}_h$, but the weight of the residual goes into the event embedding directly as:
+\begin{equation} \label{eq:hidden-bopres}
+\begin{aligned}
+    & \mathbf{h}_l^{(1)}
+        = PReLU_l(\mathbf{r}_l \mathbf{C}_e) \\
+    & \mathbf{h}_{l}
+        = \mathbf{h}_{l}^{(1)}\mathbf{W}_h + \mathbf{r}_l \\
+\end{aligned}
+\end{equation}
+Then the model perform the mean composition as  equation \eqref{eq:mean-comp-bop}. Since we only have one non-linearity layer in BOP, so the second non-linearity layer in residual block is removed. This model is named as \textbf{bag-of-predicates/participants with residual learning (BOP Res)} described in Figure \ref{fig:BOPRes}. 
+
 
 
 \newpage
-
 \section{Experiments}  \label{sec:exp}
 \subsection{Corpus and Prepossessing} \label{sec:corpus}
 
