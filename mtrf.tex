@@ -197,7 +197,7 @@ In addition to word embedding, we want to learn the representation of words give
 There are $|V| \times |R| \times d$ parameters in the order-3 tensor $\mathbf{T}$. Since word vocabulary size $|V|$ is often very big (more than $50,000$), the number of parameters in the tensor grows tremendously when $|R|$ or $d$ increases, which makes the model hard to converge. The huge number of parameters in event-participant embedding can result in curse of dimensionality. Moreover, \citep{tilk2016event} pointed out that this kind of embedding tensor lacks parameter sharing across word embedding matrices between different role labels, while words with the same semantic role label actually have common characteristics. In order to capture these characteristics, we need a method to share weights between word embedding matrices. 
 
 We perform tensor rank decomposition \citep{hitchcock1927expression} on the embedding tensor in real space:
-\begin{equation} \label{eq:trd_org}
+\begin{equation} \label{eq:trd-org}
 \begin{aligned}
     \mathbf{T}   
         &= \sum_{m=1}^{k} \lambda_m \mathbf{T}'_m \\
@@ -248,35 +248,35 @@ which is a representation of a participant in an event. "$\circ$" is Hadamard pr
 \section{Model Design}
 \subsection{Non-incremental Role Filler} \label{sec:nnrf}
 To perform the role-filler prediction, \citet{tilk2016event} proposed the \textit{non-incremental role filler} \textbf{(NNRF)} which is a 2-layer neural network model. As in Figure \ref{fig:NNRF}, from input to output, the model uses event-participant embeddings as input. Parameters are learnt together with the model. The embedding vector of the $l$-th entry in an event can be represented as:
-\begin{equation} \label{eq:rbe_nnrf}
+\begin{equation} \label{eq:rbe-nnrf}
 \begin{aligned}
     \mathbf{p}_l
         &= (\mathbf{w}_i \mathbf{A}_e \circ \mathbf{r}_j \mathbf{B}_e) \mathbf{C}_e \\
 \end{aligned}
 \end{equation}
 The embedding vectors are composed using sum method into an representation of words except the target word as:
-\begin{equation} \label{eq:sum_comp}
+\begin{equation} \label{eq:sum-comp}
 \begin{aligned}
     \mathbf{e}
         &= \sum_{l=1}^{L} \mathbf{p}_{l} \\
 \end{aligned}
 \end{equation}
 where $l$ is the index of the participant and $L$ is the number of participants in current event $e$. Then it passes through one non-linearity layer with parametric rectified linear unit \citep{he2015delving} as follow:
-\begin{equation} \label{eq:nonlinearity_nnrf}
+\begin{equation} \label{eq:nonlinearity-nnrf}
 \begin{aligned}
     \mathbf{h}
         &= PReLU(\mathbf{e} + \mathbf{b}_e) \\
 \end{aligned}
 \end{equation}
 where $\mathbf{b}_e$ is the bias vector of this layer. After that, a softmax regression classifier is used for prediction. The output vector of this classifier is computed as:
-\begin{equation} \label{eq:output_nnrf}
+\begin{equation} \label{eq:output-nnrf}
 \begin{aligned}
     \mathbf{o}
         &= \mathbf{h}\mathbf{W}_c + \mathbf{b}_c \\
 \end{aligned}
 \end{equation}
 where $\mathbf{W}_c\in \mathbb{R}^{d \times |V|}$ is a weight matrix of the target word classifier and $\mathbf{b}_c$ is the corresponding bias. The conditional probability of target word $a_x$ given event $e$ and target role $b_y$ is:
-\begin{equation} \label{eq:softmax_nnrf}
+\begin{equation} \label{eq:softmax-nnrf}
 \begin{aligned}
     p(a_x | e, b_y)
         &= Softmax(\mathbf{o})_{(x)} \\
@@ -332,8 +332,8 @@ Similarly, vectors $\mathbf{c}_{m}^{(c)}$ are grouped by row into matrices $\mat
         &= \mathbf{C}_c \ diag(\mathbf{b}_y) \ \mathbf{A}_c \\
 \end{aligned}
 \end{equation}
-where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embedding matrices $\mathbf{B}_c \in \mathbb{R}^{k^{(c)} \times |R|}$ can be defined for target roles. The weight matrices can be further written as:
-\begin{equation} \label{eq:cls_temb}
+where suffix $(x)$ is the $x$-th element of the vector. And the conditional probability of target role $b_y$ given event $e$ and target word $a_x$ is:
+\begin{equation} \label{eq:softmax-r}
 \begin{aligned}
     \mathbf{W}_c
         &= \mathbf{C}_c \ diag(\mathbf{r}_y \mathbf{B}_c) \ \mathbf{A}_c \\
@@ -370,20 +370,20 @@ In this work, we focus on non-parametric methods in the condition that participa
 We propose the \textbf{mean} composition method which compute the mean of all the  vectors of event participants to represent the event as one vector. Computing mean instead of sum can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of the weights of hidden vector. 
 
 Since it is a non-parametric method, we also want to add a weight before the mean composition. Instead of using a fully-connected layer, we apply the PReLU to each embedding vector of participant to obtain the hidden vector: 
-\begin{equation} \label{eq:nonlinearity_bop}
+\begin{equation} \label{eq:nonlinearity-bop}
 \begin{aligned}
     \mathbf{h}_l
         &= PReLU_l(\mathbf{p}_l) \\
 \end{aligned}
 \end{equation}
 So the parameters inside PReLU can also act as weights of each participant. Using the mean method, the embedding vectors are composed as:
-\begin{equation} \label{eq:mean_comp_bop}
+\begin{equation} \label{eq:mean-comp-bop}
 \begin{aligned}
     \mathbf{e}
         &= \frac{1}{L} \sum_{l=1}^{L} \mathbf{h}_{l} \\
 \end{aligned}
 \end{equation}
-whehe $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. This model is named as \textbf{bag-of-event-participants (BOP)} described in Figure \ref{fig:BOP}. 
+whehe $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. This model is named as \textbf{bag-of-predicates/participants (BOP)} described in Figure \ref{fig:BOP}. 
 
 
 \begin{figure}[t]
