@@ -109,15 +109,6 @@ papers in Saarland
 ------------------------
 paper
 ------------------------
-@inproceedings{mikolov2010recurrent,
-  title={Recurrent neural network based language model.},
-  author={Mikolov, Tomas and Karafi{\'a}t, Martin and Burget, Lukas and Cernock{\`y}, Jan and Khudanpur, Sanjeev},
-  booktitle={Interspeech},
-  volume={2},
-  pages={3},
-  year={2010}
-}
-
 @inproceedings{le2014distributed,
   title={Distributed representations of sentences and documents},
   author={Le, Quoc and Mikolov, Tomas},
@@ -245,6 +236,17 @@ composition
   number={4},
   pages={489--505},
   year={2010},
+  publisher={Elsevier}
+}
+
+mismatch of corpus and human exp.
+@article{amsel2015close,
+  title={Close, but no garlic: Perceptuomotor and event knowledge activation during language comprehension},
+  author={Amsel, Ben D and DeLong, Katherine A and Kutas, Marta},
+  journal={Journal of memory and language},
+  volume={82},
+  pages={118--132},
+  year={2015},
   publisher={Elsevier}
 }
 
@@ -517,6 +519,17 @@ DSM
   publisher={Taylor \& Francis}
 }
 
+@article{landauer1997solution,
+  title={A solution to Plato's problem: The latent semantic analysis theory of acquisition, induction, and representation of knowledge.},
+  author={Landauer, Thomas K and Dumais, Susan T},
+  journal={Psychological review},
+  volume={104},
+  number={2},
+  pages={211},
+  year={1997},
+  publisher={American Psychological Association}
+}
+
 @phdthesis{pado2007integration,
   title={The Integration of Syntax and Semantic Plausibility in a Wide-Coverage Model of Human Sentence Processing},
   author={Pado, Ulrike},
@@ -683,7 +696,7 @@ Embedding
 
 
 ------------------------
-Thematic fit / Selectional preference
+Thematic fit
 ------------------------
 @article{trueswell1994semantic,
   title={Semantic influences on parsing: Use of thematic role information in syntactic ambiguity resolution},
@@ -727,12 +740,130 @@ Thematic fit / Selectional preference
   organization={Association for Computational Linguistics}
 }
 
+
+------------------------
+Selectional preference
+------------------------
+@inproceedings{erk2007simple,
+  title={A simple, similarity-based model for selectional preferences},
+  author={Erk, Katrin},
+  booktitle={ANNUAL MEETING-ASSOCIATION FOR COMPUTATIONAL LINGUISTICS},
+  volume={45},
+  number={1},
+  pages={216},
+  year={2007}
+}
+
+@inproceedings{ritter2010latent,
+  title={A latent dirichlet allocation method for selectional preferences},
+  author={Ritter, Alan and Etzioni, Oren and others},
+  booktitle={Proceedings of the 48th Annual Meeting of the Association for Computational Linguistics},
+  pages={424--434},
+  year={2010},
+  organization={Association for Computational Linguistics}
+}
+
+@inproceedings{seaghdha2010latent,
+  title={Latent variable models of selectional preference},
+  author={S{\'e}aghdha, Diarmuid O},
+  booktitle={Proceedings of the 48th Annual Meeting of the Association for Computational Linguistics},
+  pages={435--444},
+  year={2010},
+  organization={Association for Computational Linguistics}
+}
+
+@inproceedings{van2014neural,
+  title={A neural network approach to selectional preference acquisition},
+  author={Van de Cruys, Tim},
+  booktitle={Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  pages={26--35},
+  year={2014}
+}
+
 @inproceedings{van2014neural,
   title={A Neural Network Approach to Selectional Preference Acquisition.},
   author={Van de Cruys, Tim},
   booktitle={EMNLP},
   pages={26--35},
   year={2014}
+}
+
+
+------------------------
+Related Works
+------------------------
+!!!
+@inproceedings{dasigi2014modeling,
+  title={Modeling newswire events using neural networks for anomaly detection},
+  author={Dasigi, Pradeep and Hovy, Eduard},
+  booktitle={Proceedings of COLING 2014, the 25th International Conference on Computational Linguistics: Technical Papers},
+  pages={1414--1422},
+  year={2014}
+}
+
+MT
+@inproceedings{grissom2014don,
+  title={Don’t until the final verb wait: Reinforcement learning for simultaneous machine translation},
+  author={Grissom II, Alvin and He, He and Boyd-Graber, Jordan and Morgan, John and Daum{\'e} III, Hal},
+  booktitle={Proceedings of the 2014 Conference on empirical methods in natural language processing (EMNLP)},
+  pages={1342--1352},
+  year={2014}
+}
+
+@inproceedings{granroth2016happens,
+  title={What Happens Next? Event Prediction Using a Compositional Neural Network Model.},
+  author={Granroth-Wilding, Mark and Clark, Stephen},
+  booktitle={AAAI},
+  pages={2727--2733},
+  year={2016}
+}
+
+
+------------------------
+Future Applications
+------------------------
+DRC
+@article{shi2017need,
+  title={On the Need of Cross Validation for Discourse Relation Classification},
+  author={Shi, Wei and Demberg, Vera and Campus, Saarland Informatics},
+  journal={EACL 2017},
+  pages={150},
+  year={2017}
+}
+
+DRC
+@inproceedings{rutherford2017systematic,
+  title={A Systematic Study of Neural Discourse Models for Implicit Discourse Relation},
+  author={Rutherford, Attapol and Demberg, Vera and Xue, Nianwen},
+  booktitle={Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Volume 1, Long Papers},
+  volume={1},
+  pages={281--291},
+  year={2017}
+}
+
+@inproceedings{konstas2014incremental,
+  author    = {Konstas, Ioannis  and  Keller, Frank  and  Demberg, Vera  and  Lapata, Mirella},
+  title     = {Incremental Semantic Role Labeling with Tree Adjoining Grammar},
+  booktitle = {Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  month     = {October},
+  year      = {2014},
+  address   = {Doha, Qatar},
+  publisher = {Association for Computational Linguistics},
+  pages     = {301--312},
+  url       = {http://www.aclweb.org/anthology/D14-1036}
+}
+
+incremental parsing
+@inproceedings{konstas2015semantic,
+  author    = {Konstas, Ioannis  and  Keller, Frank},
+  title     = {Semantic Role Labeling Improves Incremental Parsing},
+  booktitle = {Proceedings of the 53rd Annual Meeting of the Association for Computational Linguistics and the 7th International Joint Conference on Natural Language Processing (Volume 1: Long Papers)},
+  month     = {July},
+  year      = {2015},
+  address   = {Beijing, China},
+  publisher = {Association for Computational Linguistics},
+  pages     = {1191--1201},
+  url       = {http://www.aclweb.org/anthology/P15-1115}
 }
 
 
@@ -772,6 +903,26 @@ problems of tensor
 ------------------------
 NN
 ------------------------
+@article{hochreiter1997LSTM,
+  title={Long short-term memory},
+  author={Hochreiter, Sepp and Schmidhuber, J{\"u}rgen},
+  journal={Neural computation},
+  volume={9},
+  number={8},
+  pages={1735--1780},
+  year={1997},
+  publisher={MIT Press}
+}
+
+@inproceedings{mikolov2010recurrent,
+  title={Recurrent neural network based language model.},
+  author={Mikolov, Tomas and Karafi{\'a}t, Martin and Burget, Lukas and Cernock{\`y}, Jan and Khudanpur, Sanjeev},
+  booktitle={Interspeech},
+  volume={2},
+  pages={3},
+  year={2010}
+}
+
 @inproceedings{socher2013recursive,
   title={Recursive deep models for semantic compositionality over a sentiment treebank},
   author={Socher, Richard and Perelygin, Alex and Wu, Jean Y and Chuang, Jason and Manning, Christopher D and Ng, Andrew Y and Potts, Christopher and others},
@@ -787,17 +938,6 @@ NN
   author={Chung, Junyoung and Gulcehre, Caglar and Cho, KyungHyun and Bengio, Yoshua},
   journal={arXiv preprint arXiv:1412.3555},
   year={2014}
-}
-
-@article{hochreiter1997LSTM,
-  title={Long short-term memory},
-  author={Hochreiter, Sepp and Schmidhuber, J{\"u}rgen},
-  journal={Neural computation},
-  volume={9},
-  number={8},
-  pages={1735--1780},
-  year={1997},
-  publisher={MIT Press}
 }
 
 @inproceedings{he2015delving,
@@ -856,6 +996,7 @@ Books
 ------------------------
 Evaluation
 ------------------------
+GS
 @article{grefenstette2015concrete,
   title={Concrete models and empirical evaluations for the categorical compositional distributional model of meaning},
   author={Grefenstette, Edward and Sadrzadeh, Mehrnoosh},
@@ -912,33 +1053,6 @@ software
 ------------------------
 Roleo 2016
 ------------------------
-
-@inproceedings{van2014neural,
-  title={A neural network approach to selectional preference acquisition},
-  author={Van de Cruys, Tim},
-  booktitle={Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
-  pages={26--35},
-  year={2014}
-}
-
-@InProceedings{konstas-keller:2015:ACL-IJCNLP,
-  author    = {Konstas, Ioannis  and  Keller, Frank},
-  title     = {Semantic Role Labeling Improves Incremental Parsing},
-  booktitle = {Proceedings of the 53rd Annual Meeting of the Association for Computational Linguistics and the 7th International Joint Conference on Natural Language Processing (Volume 1: Long Papers)},
-  month     = {July},
-  year      = {2015},
-  address   = {Beijing, China},
-  publisher = {Association for Computational Linguistics},
-  pages     = {1191--1201},
-  url       = {http://www.aclweb.org/anthology/P15-1115}
-}
-
-@article{grissom2014don,
-  title={Don’t Until the Final Verb Wait: Reinforcement Learning for Simultaneous Machine Translation},
-  author={Grissom II, Alvin C and Boyd-Graber, Jordan and Boyd, Jordan and He, He and Morgan, John and Daum{\'e} III, Hal},
-  year={2014}
-}
-
 @article{tan2012scalable,
   title={A scalable distributed syntactic, semantic, and lexical language model},
   author={Tan, Ming and Zhou, Wenli and Zheng, Lei and Wang, Shaojun},
@@ -950,8 +1064,6 @@ Roleo 2016
   publisher={MIT Press}
 }
 
-
-
 @inproceedings{chelba1998exploiting,
   title={Exploiting syntactic structure for language modeling},
   author={Chelba, Ciprian and Jelinek, Frederick},
@@ -961,7 +1073,7 @@ Roleo 2016
   organization={Association for Computational Linguistics}
 }
 
-
+Perplexity
 @article{klakow2002testing,
   title={Testing the correlation of word error rate and perplexity},
   author={Klakow, Dietrich and Peters, Jochen},
@@ -973,7 +1085,7 @@ Roleo 2016
   publisher={Elsevier}
 }
 
-
+Multi-LM
 @inproceedings{alumae2013multi,
   title={Multi-domain neural network language model.},
   author={Alum{\"a}e, Tanel},
@@ -993,6 +1105,8 @@ Roleo 2016
   year={2010},
   publisher={MIT Press}
 }
+
+BP
 @article{rumelhart1986learning,
   title={Learning representations by back-propagating errors},
   author={Rumelhart, David E and Hinton, Geoffrey E and Williams, Ronald J},
@@ -1001,6 +1115,8 @@ Roleo 2016
   pages={9},
   year={1986}
 }
+
+Adagrad
 @article{duchi2011adaptive,
   title={Adaptive subgradient methods for online learning and stochastic optimization},
   author={Duchi, John and Hazan, Elad and Singer, Yoram},
@@ -1026,15 +1142,12 @@ recurrent neural networks.}
 
 @INPROCEEDINGS{bergstra+al:2010-scipy,
      author = {Bergstra, James and Breuleux, Olivier and Bastien, Fr{\'{e}}d{\'{e}}ric and Lamblin, Pascal and Pascanu, Razvan and Desjardins, Guillaume and Turian, Joseph and Warde-Farley, David and Bengio, Yoshua},
+      month = jun,
       title = {Theano: a {CPU} and {GPU} Math Expression Compiler},
   booktitle = {Proceedings of the Python for Scientific Computing Conference ({SciPy})},
        year = {2010},
    location = {Austin, TX},
        note = {Oral Presentation},
-   abstract = {Theano is a compiler for mathematical expressions in Python that combines the convenience of NumPy’s syntax with the speed of optimized native machine language. The user composes mathematical expressions in a high-level description that mimics NumPy’s syntax and semantics, while being statically typed and
-functional (as opposed to imperative). These expressions allow Theano to provide symbolic differentiation. Before performing computation, Theano optimizes the choice of expressions, translates
-them into C++ (or CUDA for GPU), compiles them into dynamically loaded Python modules, all automatically. Common machine learning algorithms implemented with Theano are from 1.6× to 7.5× faster than competitive alternatives (including those implemented with C/C++, NumPy/SciPy and MATLAB) when compiled for the
-CPU and between 6.5× and 44× faster when compiled for the GPU. This paper illustrates how to use Theano, outlines the scope of the compiler, provides benchmarks on both CPU and GPU processors, and explains its overall design.}
 }
 
 @article{Binder2001,
