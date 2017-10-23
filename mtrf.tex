@@ -295,14 +295,14 @@ For each target target role, there is a different weight matrix to perform class
         &= \sum_{m=1}^{k^{(c)}} \mathbf{c}_{m}^{(c)} \otimes \mathbf{b}_{m_{(y)}}^{(c)} \otimes \mathbf{a}_m^{(c)} \\
 \end{aligned}
 \end{equation}
-Similarly, vectors $\mathbf{c}_{m}^{(c)}$ are grouped by row into matrices $\mathbf{C}_c \in \mathbb{R}^{d \times k^{(c)}}$ and $\mathbf{a}_m^{(c)}$ are grouped by column into matrices $\mathbf{A}_c \in \mathbb{R}^{k^{(c)} \times |V|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, the weight matrix in equation \eqref{eq:output_nnrf}  can be written as:
+Similarly, vectors $\mathbf{c}_{m}^{(c)}$ are grouped by row into matrices $\mathbf{C}_c \in \mathbb{R}^{d \times k^{(c)}}$ and $\mathbf{a}_m^{(c)}$ are grouped by column into matrices $\mathbf{A}_c \in \mathbb{R}^{k^{(c)} \times |V|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, the weight matrix in equation \eqref{eq:output}  can be written as:
 \begin{equation} \label{eq:cls}
 \begin{aligned}
     \mathbf{W}_c
         &= \mathbf{C}_c \ diag(\mathbf{b}_y) \ \mathbf{A}_c \\
 \end{aligned}
 \end{equation}
-Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embedding matrices $\mathbf{B}_c \in \mathbb{R}^{k^{(c)} \times |R|}$ can be defined for target roles. The weight matrices can be further written as:
+where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embedding matrices $\mathbf{B}_c \in \mathbb{R}^{k^{(c)} \times |R|}$ can be defined for target roles. The weight matrices can be further written as:
 \begin{equation} \label{eq:cls_temb}
 \begin{aligned}
     \mathbf{W}_c
@@ -318,25 +318,38 @@ Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embed
 \end{figure}
 
 
-For each target target role, there is a different weight matrix to perform classification. \citet{tilk2016event} performed a similar technique like the role-specific word embedding. At first weight matrix $\mathbf{W}_c^{(b_y)}$ is defined for each target role $b_y$. Then those matrices $\mathbf{W}_c^{(b_y)}$ are stacked from $b_1$ to $b_{|R|}$. A weight tensor $\mathbf{T}^{(c)} \in \mathbb{R}^{d \times |R| \times |V|}$ is obtained. But this tensor suffer the same dimensionality problem as event-participant embedding tensor. So tensor rank decomposition is applied again on the weight tensor, and extract the corresponding weight matrices for $b_y$ as follow: 
-\begin{equation} \label{eq:trd_cls}
+\subsection{Multitask Learning} \label{sec:mtl}
+In addition to role-filler prediction, we also want to perform semantic role prediction. This task can be considered as a regularisation of the objective function of the role-filler prediction task. Using this idea, we design a model named \textbf{multitask role filler (MTRF)} described in Figure \ref{fig:MTNNRF} which differs with \textbf{NNRF} only in the last layer. 
+
+Since we want to obtain the probability distribution of target word or target role, in the last layer a softmax regression classifier is used for each task. The output vectors of these classifiers are computed as:
+\begin{equation} \label{eq:output-mt}
 \begin{aligned}
-    \mathbf{T}_{(y)}^{(c)}
-        &= \sum_{m=1}^{k^{(c)}} \mathbf{c}_{m}^{(c)} \otimes \mathbf{b}_{m_{(y)}}^{(c)} \otimes \mathbf{a}_m^{(c)} \\
+    \mathbf{o}_w
+        &= \mathbf{e}\mathbf{W}_w + \mathbf{b}_w \\
+    \mathbf{o}_r
+        &= \mathbf{e}\mathbf{W}_r + \mathbf{b}_r \\
 \end{aligned}
 \end{equation}
-Similarly, vectors $\mathbf{c}_{m}^{(c)}$ are grouped by row into matrices $\mathbf{C}_c \in \mathbb{R}^{d \times k^{(c)}}$ and $\mathbf{a}_m^{(c)}$ are grouped by column into matrices $\mathbf{A}_c \in \mathbb{R}^{k^{(c)} \times |V|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, the weight matrix in equation \eqref{eq:output}  can be written as:
-\begin{equation} \label{eq:cls}
+where $\mathbf{W}_w \in \mathbb{R}^{d \times |V|}$ is a weight matrix of the target word classifier,  $\mathbf{W}_r \in \mathbb{R}^{d \times |R|}$ is a weight matrix of the target role classifier and $\mathbf{b}_w$, $\mathbf{b}_r$ are the corresponding biases of the classifier. The conditional probability of target word $a_x$ given event $e$ and target role $b_y$ is:
+\begin{equation} \label{eq:softmax-w}
 \begin{aligned}
-    \mathbf{W}_c
-        &= \mathbf{C}_c \ diag(\mathbf{b}_y) \ \mathbf{A}_c \\
+    p(a_x | e, b_y)
+        &= Softmax(\mathbf{o}_w)_{(x)} \\
+        &= \frac{
+        exp(\mathbf{o}_w)_{(x)}
+        }{
+        \sum_{i=1}^{|V|} exp(\mathbf{o}_w)_{(i)} }   \\
 \end{aligned}
 \end{equation}
 where suffix $(x)$ is the $x$-th element of the vector. And the conditional probability of target role $b_y$ given event $e$ and target word $a_x$ is:
 \begin{equation} \label{eq:softmax-r}
 \begin{aligned}
-    \mathbf{W}_c
-        &= \mathbf{C}_c \ diag(\mathbf{r}_y \mathbf{B}_c) \ \mathbf{A}_c \\
+    p(b_y | e, a_x)
+        &= Softmax(\mathbf{o}_r)_{(y)} \\
+        &= \frac{
+        exp(\mathbf{o}_r)_{(y)}
+        }{
+        \sum_{j=1}^{|R|} exp(\mathbf{o}_r)_{(j)} }   \\
 \end{aligned}
 \end{equation}
 
