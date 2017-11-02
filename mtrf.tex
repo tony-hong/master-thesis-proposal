@@ -22,15 +22,17 @@
 \usepackage{paralist}
 \graphicspath{ {figs/} }
 
-
 %% \usepackage[numbers]{natbib}
+
 
 \title{Multi-task Learning for Event-Participant Embeddings}
 \author{Author: Xudong Hong \\ 
-Supervisor: Asad Sayeed, Vera Demberg}
+Supervisors: Asad Sayeed, Vera Demberg}
+
 
 \begin{document}
 \maketitle
+
 
 \begin{abstract}
 \noindent
@@ -64,11 +66,39 @@ where the event participants are actually head nouns or noun-noun compounds insi
 \end{equation*} 
 where each argument is assigned with a semantic role label. $cut.01$ is the verbal predicate $cut$ with sense $01$ which is \textit{"make an incision or separation"}. Now the ARG0 role can be defined exactly as \textit{"the subject which makes incision"}. To obtain this representation from raw text, one needs to solve semantic role labelling task (see Section \ref{sec:srl}). 
 
-Since both raw words and semantic role labels are symbols, it has limited representing power. If someone wants to compare events quantitatively, it is not possible to use the \textit{symbolic representation} where each symbol represent a single state of the entry. There are some previous works construct representation of linguistic units e.g. \textit{Distributional semantic model} (DSM) (see Section \ref{sec:dsm}). Amoung them, \textit{Distributed representation} of words, also named as \textit{word embedding}, is a well-established technique based on continuous feature space. Each word is represented by a low-dimensional dense vector with real number parameters, where those parameters are learnt during training of a prediction task given the context. There are many efforts on learning word embeddings from large scale corpora (see Section \ref{sec:repr}). 
+Since both raw words and semantic role labels are symbols, it has limited representing power. If someone wants to compare events quantitatively, it is not possible to use the \textit{symbolic representation} where each symbol represents a single state of the entry. There are some previous works construct numerical representation of linguistic units e.g. \textit{Distributional semantic model} (DSM) (see Section \ref{sec:dsm}). Among them, \textit{Distributed representation} of words, also named as \textit{word embedding}, is a well-established technique based on continuous feature space. Each word is represented by a low-dimensional dense vector with real number parameters which are learnt during training of a prediction task given the context. There are many efforts on learning word embeddings from large-scale corpora (see Section \ref{sec:repr}). 
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l|ll}
+\textbf{Event 1}    &   \textbf{Event 2}    &   \textbf{Similarity} \\
+                    &   \textbf{Foil Event} &   \textbf{Similarity} \\  \hline
+(investor, buy, share)      &   (investor, purchase, share)     &   0.96    \\
+                            &   (share, purchase, investor)     &   0.81    \\    \hline
+(employee, buy, property)   &   (employee, purchase, property)  &   0.95    \\
+                            &   (property, purchase, employee)  &   0.80    \\    \hline
+(supporter, buy, ticket)    &   (supporter, purchase, ticket)   &   0.96    \\
+                            &   (ticket, purchase, supporter)   &   0.83    \\
+\end{tabular}
+\caption{\label{tab:eventsim} Some examples of similarity scores between two events using event embedding vectors in NNRF model. The metric is cosine similarity. }
+\end{table}
 
 
 \subsection{Main Problem and Previous Work}
-The main problem is that only a few works learn embeddings of information inside events. \citet{tilk2016event} proposed two models trained to learn a representation of events and their participants. To obtain a probability distribution over role-fillers given the event information, the models aim to perform \textit{role-filler prediction}: In each event, given the role label of one target word, and also given all other words and their role labels, the task is to predict the target word to fill the target role. The predicate is considered as a special role label which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. They reported great improvement over previous systems on thematic fit evaluation and competitive performance on event similarity evaluation. However, the definition of notion \textit{role} is vague. It is hard to explain why predicates and semantic role-fillers are treated as the same. In addition to that, there is a problem of event embedding if we only focus on role-filler prediction. The event embeddings with same argument words but different roles can be very similar to each other. For example, the embedding vector of $([_\text{ARG0 }\text{boy}], [_\text{PREDICATE }\text{eat}], [_\text{ARG1 }\text{apple}])$ can be very similar to the embedding vector of $([_\text{ARG0 }\text{apple}], [_\text{PREDICATE }\text{eat}], [_\text{ARG1 }\text{boy}])$, where $cut$ is the shared predicate. 
+The main problem is that only a few works learn embeddings at the level of events. \citet{tilk2016event} proposed two models to learn a representation of events and their participants. To obtain a probability distribution over \textit{role-fillers} given event information, the models aim to perform \textit{role-filler prediction}: 
+\begin{itemize}
+    \item  In each event, given the role label of one target word, and also given all other words and their role labels, the task is to predict the target word to fill the target role,
+\end{itemize}
+where the verbal predicate is considered as a special role $verb$ which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. To reduce the number of parameters, they factored the tensor into three matrices. They reported great improvement over previous systems on thematic fit evaluation and competitive performance on event similarity evaluation. 
+
+However, there are some major disadvantages in their work. Firstly, the definition of the notion \textit{role} is vague. It is hard to explain why predicates and semantic arguments are treated as the same, though they have a special role $verb$ for verbal predicates. This leads to an ambiguous definition of \textit{role-filler} which originally means the argument to fill one specific semantic role. Their representation is also inconsistent with event representation in first-order logic. 
+
+In addition to that, there is a problem of event embedding similarity if we only focus on role-filler prediction. Because of the smoothing effect of distributed representation, the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a based event $([_{\text{ARG0}} \text{investor}], buy, [_{\text{ARG1}}\text{share}])$ and the foil event $([_{\text{ARG0}}\text{share}], purchase, [_{\text{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human will have a lower similarity judgement score between it and the based event. But for the similar event $([_{\text{ARG0}}\text{investor}], purchase, [_{\text{ARG1}}\text{share}])$ and the based event, human will have a high similarity judgement score. So the NNRF model is incompatible with human cognition. More examples are shown in Table \ref{tab:eventsim}. 
+
+Furthermore, the factored order-3 tensor structure is not fully explained. Along with the rapid growth of architecture complexity, explainability of models is becoming more and more important. Yet they did not give a thorough explanation of the word embedding they obtained. Moreover, there is no evaluation of their word embedding. As a result, it is risky to use the embedding on other tasks. 
+
+Last but not least, although the tensor-like structure of embedding is efficient and flexible, the training of the models are burdened by the gradient explosion or vanishing problem. Because in a factored order-3 tensor, each parameter is represented by a product of three parameters. To tackle this problem from the training aspect, they used Adagrad \citep{duchi2011adaptive} which adjusts learning rate during training. Although it alleviated the problem, it is not a solution on model architecture aspect. 
 
 
 \subsection{Major Tasks and Contribution}
