@@ -214,7 +214,45 @@ Distributed representation, pioneered by \citet{hinton1986learning}, is an effec
 The distributed representation of words, popularly known as word embedding, can be learnt in the training of \textit{neural net language model} \citep{bengio2003neural}. Most of early work aimed to solve language modelling which is the task to predict the target word given its context. Unlike DSMs or other count-based semantic models, the parameters in distributed representation vectors are learnt during the training of neural net language models. Later these models were further improved by making use of sequential information in previous context of target words. This can be done by adding recurrent units to hidden layers of neural net language model \citep{mikolov2010recurrent}. To learn high quality word embeddings with million words in the vocabulary from a billion scale of text, \citet{mikolov2013efficient} proposed two models, \textit{CBOW} and \textit{Skip-gram}, based on logistic regression. Context is the words around the target word in both models. In CBOW model, context representation is the sum of word embedding vectors of the words in the context. In Skip-gram model, the target word is used to predict the words in the context. The system they built, famously known as \textit{word2vec}, obtained competitive performance against more complex neural networks on syntactic and semantic relation tasks. To tackle multiple tasks in natural language processing, \citet{collobert2011natural} proposed a model which shares the word embedding across tasks of language modelling, part-of-speech tagging, chunking, named entity recognition, semantic role labelling. 
 
 
+\newpage
 \section{Representation of Predicates and Participants}
+We intend to learn meaningful representation of event structure in semantic space. In \textit{neo-Davidsonian event representation}, we notice that linguistic predicates can be further generalised. So we define a special role PRD for predicates. The example \ref{eg:neodavidsonian} can be rewritten as: 
+\begin{equation*} \label{eg:symbolic-thematic}
+\begin{aligned}
+    \exists e\ \text{PRD}(e, \text{cut})
+    & \land \text{AGENT}(e, \text{cook}) \land \text{PATIENT}(e, \text{cake}) \\
+    & \land \text{INSTRUMENT}(e, \text{knife}) \land \text{LOCATION}(e, \text{kitchen}) \\
+\end{aligned}
+\end{equation*}
+
+If we specify the sense of the predicate $cut$, thematic roles can be replaced with PropBank style semantic roles as: 
+\begin{equation*} \label{eg:symbolic-semantic}
+\begin{aligned}
+    \exists e\ \text{PRD}(e, \text{cut.01})
+    & \land \text{ARG0}(e, \text{cook}) \land \text{ARG1}(e, \text{cake}) \\
+    & \land \text{ARGM-MNR}(e, \text{knife}) \land \text{ARGM-LOC}(e, \text{kitchen}) \\
+\end{aligned}
+\end{equation*}
+This is a representation of the event in first order logic. We define a semantic role model for this paper. We join PropBank semantic roles and the special role PRD together as semantic roles. So the semantic role labels we use in this paper are defined in Table \ref{tab:semantic}. As we mention above, semantic arguments can be represented by the syntactic head words, so the notion of \textit{argument} in PropBank role labels is replaced by \textit{event participant}. 
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l|l|l} 
+\hline
+\textbf{ID} &   \textbf{Semantic Role Label}    &   \textbf{Definition} \\  \hline
+0           & PRD       &   the predicate denoting the event \\ \hline
+1           & ARG0      &   proto-agent, the event participant that most likely to be the agent, \\     &&   volitional causer or experiencer \\ \hline
+2           & ARG1      &   proto-patient, the event participant that most likely to be the patient, \\ &&   the event participant which is being affected by the action \\ \hline
+3           & ARG2      &   the event participant which is secondly likely to be the patient,  \\       &&   the benefactive or attribute \\ \hline
+4           & ARGM-MNR  &   the event participant that specifies how the action is performed \\ \hline
+5           & ARGM-LOC  &   the event participant that indicates where the action takes place \\ \hline
+6           & ARGM-TMP  &   the event participant that shows when an action took place \\ \hline
+\end{tabular}
+\caption{\label{tab:semantic} Definitions of semantic role labels in this paper.}
+\end{table}
+
+
 \subsection{Event-Participant Embedding} \label{sec:epe}
 We intend to learn meaningful representation of event structure in semantic space. Firstly we define the symbolic representation for words. Word $a_i$ is encoded as one-hot row vector $\mathbf{w}_i$ where $|\mathbf{w}_i| = |V|$ and $V$ is the word vocabulary. In this vector space, words are mutual exclusive to each other. Similarly, we can represent semantic role label $b_j$ using one-hot encoded column vector $\mathbf{r}_j$ where $|\mathbf{r}_j| = |R|$ and $R$ is the set of semantic role labels including semantic roles and a special role PREDICATE. 
 
