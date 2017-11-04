@@ -281,20 +281,34 @@ where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$ and
 \end{equation}
 where the smallest $k$ makes the equation true is the tensor rank of $\mathbf{T}$. Now the number of parameters is reduced to $(|V| + |R| + d) \times k$ which is comparable smaller. 
 
-
 \subsection{Interpretation of Factored Tensor} \label{sec:tf-expl}
-We then group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrices $\mathbf{C} \in \mathbb{R}^{k \times d}$. 
+To get a better matrix representation of the factored tensor in equation \eqref{eq:trd}, we group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrices $\mathbf{C} \in \mathbb{R}^{k \times d}$. As a result, word $i$ can be represented by a matrix: 
+\begin{equation} \label{eq:we-tensor}
+\begin{aligned}
+    \mathbf{T}_{(i)}
+        &= \sum_{m=1}^{k} \mathbf{a}_{m_{(i)}} \otimes \mathbf{b}_{m} \otimes \mathbf{c}_m \\
+        &= \mathbf{B} \ diag(\mathbf{w_i}\mathbf{A}) \ \mathbf{C}
+\end{aligned}
+\end{equation}
+where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Although there is an intuitive mapping between matrix $A$ and word embedding matrix we defined above, they are not equal to each other. Thus we claim that word embedding matrix $\mathbf{T}_{(i)}$ is the result of word representation vector $\mathbf{w_i}\mathbf{A}$ after several linear mappings. 
 
-[TODO: formal interpretation] Naturally, matrix $\mathbf{A}$ can be interpreted as word embedding described above. $\mathbf{B}$ can be considered as role embedding matrix. By computing inner product between $\mathbf{r}_j$ and $\mathbf{B}$ as $\mathbf{B}_{(j)} = \mathbf{r}_j \mathbf{B}$, we obtain the low-dimensional vector $\mathbf{B}_{(j)} \in \mathbb{R}^k$ which is the $j$-th row of matrix $\mathbf{B}$. 
-
-From equation \eqref{eq:trd}, the event-participant embedding vector $\mathbf{T}_{(ij)}$ can be computed as: 
-\begin{equation} \label{eq:rbwe_tensor}
+Due to the fact that in a vector space, the dot product of the matrix $diag(\mathbf{w_i}\mathbf{A})$ with either $\mathbf{B}$ or $\mathbf{C}$ can be considered as performing a linear mapping. So we can consider $diag(\mathbf{w_i}\mathbf{A})$ as the embedding of word $i$. Focusing on the non-zero part, the embedding becomes the vector $\mathbf{w_i}\mathbf{A}$ on the diagonal. Naturally, the matrix $\mathbf{A}$ can be interpreted as word embedding matrix described above. A similar interpretation can also be applied to semantic role label embedding. Each semantic role label can be represented by a matrix:
+\begin{equation} \label{eq:re-tensor}
+\begin{aligned}
+    \mathbf{T}_{(j)}
+        &= \sum_{m=1}^{k} \mathbf{a}_{m} \otimes \mathbf{b}_{m_{(j)}} \otimes \mathbf{c}_m \\
+        &= \mathbf{A} \ diag(\mathbf{r_j}\mathbf{B}) \ \mathbf{C}
+\end{aligned}
+\end{equation}
+By computing inner product between $\mathbf{r}_j$ and $\mathbf{B}$ as $\mathbf{B}_{(j)} = \mathbf{r}_j \mathbf{B}$, we obtain the low-dimensional vector $\mathbf{B}_{(j)} \in \mathbb{R}^k$ which is the $j$-th row of matrix $\mathbf{B}$. $\mathbf{B}$ can be considered as role embedding matrix. From equation \eqref{eq:trd}, the event-participant embedding vector $\mathbf{T}_{(ij)}$ can be computed as: 
+\begin{equation} \label{eq:rbwe-tensor}
 \begin{aligned}
     \mathbf{T}_{(ij)}
         &= \sum_{m=1}^{k} \mathbf{a}_{m_{(i)}} \otimes \mathbf{b}_{m_{(j)}} \otimes \mathbf{c}_m \\
         &= \sum_{m=1}^{k} \mathbf{a}_{m_{(i)}} \mathbf{b}_{m_{(j)}}  \mathbf{c}_m \\
 \end{aligned}
 \end{equation}
+
 To get rid of the outer product and make it easier to implement, we use the decomposition matrices defined above. Thus the vector $\mathbf{T}_{(ij)}$ can be written as a vector: 
 \begin{equation} \label{eq:rbwe}
 \begin{aligned}
