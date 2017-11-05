@@ -320,6 +320,10 @@ To get rid of the outer product and make it easier to implement, we use the deco
 which is a representation of a participant in an event. "$\circ$" is Hadamard product which computes element-wise multiplication between two vectors. This can be interpreted as the composition method of word embedding vector and role embedding vector. 
 
 
+\newpage
+\section{Multitask Role Filler Model} \label{sec:mtrf}
+
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.65\textwidth]{NNRF.png}
@@ -327,8 +331,7 @@ which is a representation of a participant in an event. "$\circ$" is Hadamard pr
 \end{figure}
 
 
-\section{Model Design}
-\subsection{Non-incremental Role Filler} \label{sec:nnrf}
+\subsection{Non-incremental Role Filler Model} \label{sec:nnrf}
 To perform the role-filler prediction, \citet{tilk2016event} proposed the \textit{non-incremental role filler} \textbf{(NNRF)} which is a 2-layer neural network model. As in Figure \ref{fig:NNRF}, from input to output, the model uses event-participant embeddings as input. Parameters are learnt together with the model. The embedding vector of the $l$-th entry in an event can be represented as:
 \begin{equation} \label{eq:rbe-nnrf}
 \begin{aligned}
@@ -432,6 +435,34 @@ where suffix $(x)$ is the $x$-th element of the vector. And the conditional prob
         exp(\mathbf{o}_r)_{(y)}
         }{
         \sum_{j=1}^{|R|} exp(\mathbf{o}_r)_{(j)} }   \\
+\end{aligned}
+\end{equation}
+
+For each target role or target word, we apply tensor factorisation again to obtain target role/word specific classifiers. At first we define weight matrix $\mathbf{W}_w$ and weight matrix $\mathbf{W}_r$ for each target word $a_x$ and target role $b_y$. Then we stack $\mathbf{W}_w$ and $\mathbf{W}_r$ from $a_1$ to $a_{|V|}$ and from $b_1$ to $b_{|R|}$. Two weight tensors $\mathbf{T}^{(w)} \in \mathbb{R}^{d \times |R| \times |V|}$ and $\mathbf{T}^{(r)} \in \mathbb{R}^{d \times |V| \times |R|}$ are obtained. But these tensors suffer the same dimensionality problem as event-participant embedding tensor. So we apply tensor rank decomposition again on two weight tensors, and extract the corresponding weight matrices for $a_x$ and $b_y$ as follow: 
+\begin{equation} \label{eq:trd-mt-cls}
+\begin{aligned}
+    \mathbf{T}_{(x)}^{(w)}
+        &= \sum_{m=1}^{k^{(w)}} \mathbf{c}_{m}^{(w)} \otimes \mathbf{b}_{m_{(x)}}^{(w)} \otimes \mathbf{a}_m^{(w)} \\
+    \mathbf{T}_{(y)}^{(r)}
+        &= \sum_{m=1}^{k^{(r)}} \mathbf{c}_{m}^{(r)} \otimes  \mathbf{a}_{m_{(y)}}^{(r)} \otimes \mathbf{b}_m^{(r)} \\
+\end{aligned}
+\end{equation}
+Similarly, we group vectors $\mathbf{c}_{m}^{(w)}$, $\mathbf{c}_{m}^{(r)}$ by row into matrices $\mathbf{C}_w \in \mathbb{R}^{d \times k^{(w)}}$, $\mathbf{C}_r \in \mathbb{R}^{d \times k^{(r)}}$ and group $\mathbf{a}_m^{(w)}$, $\mathbf{b}_m^{(r)}$ by column into matrices $\mathbf{A}_w \in \mathbb{R}^{k^{(w)} \times |V|}$, $\mathbf{B}_r \in \mathbb{R}^{k^{(r)} \times |R|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, two weight matrices in equation \eqref{eq:output-nnrf}  can be written as: 
+\begin{equation} \label{eq:cls-mt}
+\begin{aligned}
+    \mathbf{W}_w
+        &= \mathbf{C}_w \ diag(\mathbf{b}_y) \ \mathbf{A}_w \\
+    \mathbf{W}_r
+        &= \mathbf{C}_r \ diag(\mathbf{a}_x) \ \mathbf{B}_r \\
+\end{aligned}
+\end{equation}
+where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Since there is a vector $\mathbf{b}_y$ representing target role $b_y$ and there is a vector $\mathbf{a}_x$ representing target word $a_x$. Now we can define the embedding matrices $\mathbf{B}_w \in \mathbb{R}^{k^{(w)} \times |R|}$, $\mathbf{A}_r \in \mathbb{R}^{k^{(r)} \times |V|}$ for target roles and target words. The weight matrices can be further written as: 
+\begin{equation} \label{eq:cls-mt-temb}
+\begin{aligned}
+    \mathbf{W}_w
+        &= \mathbf{C}_w \ diag(\mathbf{r}_y \mathbf{B}_w) \ \mathbf{A}_w \\
+    \mathbf{W}_r
+        &= \mathbf{C}_r \ diag(\mathbf{w}_x \mathbf{A}_r) \ \mathbf{B}_r \\
 \end{aligned}
 \end{equation}
 
