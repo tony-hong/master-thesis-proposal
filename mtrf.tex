@@ -467,8 +467,46 @@ where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its di
 \end{equation}
 
 
+\subsection{Model Comparison} \label{sec:comp_mtrf}
+In order to show whether the event similarity problem is solved, we perform a model comparison between NNRF and MTRF. Two models are implemented with the same number of hyper-parameters, except MTRF has additional parameters in the target role classifier. We trained and validated both models on the RW-eng corpus (see Section \ref{sec:corpus}). 
 
+The data set is provided by \citet{grefenstette2015concrete} (see Section \ref{sec:eventsim}). Each row in the data set contains a participant ID, two events, a human evaluation score of their similarity from $1$ to $7$ and a HIGH/LOW tag indicating the similarity group of the entry. An example entry is:
+\begin{equation} \label{eg:event-sim}
+    participant1, (table, draw, eye), (table, attract, eye), 7, \text{HIGH}
+\end{equation}
+Naturally we can consider the subject $table$ has a ARG0 semantic role and the object $eye$ has a ARG1 semantic role in the event.
+
+The models are evaluated in two experiments. In the first experiment, for each entry which has a HIGH tag and the highest score (i.e. $7$) in the data set, we extract two events and construct a foil event for the second event. For example entry \eqref{eg:event-sim}, we have:
+\begin{equation}
+    (table, draw, eye), (table, draw, eye), (eye, attract, table)
+\end{equation}
+This subset is named as \textbf{foil event similarity (FSM)} data set. We extract the event embedding vector defined in equation  \eqref{eq:sum-comp} from two models. We then compute two similarities: similarity of the first event and the second event; similarity of the first event and the foil event. Generally the larger of the difference between these two similarities we obtain, the better model we have. The similarity score of two events is computed as cosine similarity of two event embedding vectors. For each model, the means of these two similarities are computed across FSM. The results are in Table \ref{tab:foil-mtrf}. MTRF has a lower mean similarity between based event and foil event. Moreover, it has a higher difference between two similarities.
+
+The second experiment is event similarity task \citep{grefenstette2015concrete}. We extract the event embedding vector for the first and second event. The similarity score of two events is computed as cosine similarity as well. Then we compute Spearman's rho correlation coefficient between model scores and human judgement scores. The result in every epoch is reported as a line chart in Figure \ref{fig:GS-NNRF-MTRF}. The correlation score keeps stable after $20$ epochs. MTRF has a higher score than NNRF at almost every epoch. Thus MTRF is better correlated with human performance. This indicates that with the additional semantic role prediction task, MTRF learns a better embedding of events. 
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{GS-NNRF-MTRF.png}
+\caption{\label{fig:GS-NNRF-MTRF} Event similarity evaluation by training epoch of NNRF and MTRF. $x$-axis is the number of training epochs. $y$-axis is the Spearman's rho between model scores andhuman judgements. }
+\end{figure}
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l|lll}
+    \textbf{Model}  &   $cos$(Event 1, Event 2)   &    $cos$(Event 1, Foil Event)    &  Difference  \\ \hline
+    \textbf{NNRF}   &   78  &   64  &   14  \\
+    \textbf{MTRF}   &   68  &   52  &   \textbf{16}  \\
+\end{tabular}
+\caption{\label{tab:foil-mtrf} Similar event similarity versus foil event similarity. }
+\end{table}
+
+
+
+\newpage
 \section{Bag-of-Event-Participant Model} \label{sec:bop}
+
 
 \begin{figure}[t]
 \centering
