@@ -259,9 +259,9 @@ This is a representation of the event in first order logic. We define a semantic
 
 
 \subsection{Event-Participant Embedding} \label{sec:epe}
-We intend to learn meaningful representation of event structure in semantic space. Firstly we define the symbolic representation for words. Word $a_i$ is encoded as one-hot row vector $\mathbf{w}_i$ where $|\mathbf{w}_i| = |V|$ and $V$ is the word vocabulary. In this vector space, words are mutual exclusive to each other. Similarly, we can represent semantic role label $b_j$ using one-hot encoded column vector $\mathbf{r}_j$ where $|\mathbf{r}_j| = |R|$ and $R$ is the set of semantic role labels including semantic roles and a special role PREDICATE. 
+After obtaining the semantic role model, we define the symbolic representation for words. Word $a_i$ is encoded as one-hot row vector $\mathbf{w}_i$ where $|\mathbf{w}_i| = |V|$ and $V$ is the word vocabulary. In this vector space, words are mutual exclusive to each other. Similarly, we can represent semantic role label $b_j$ using one-hot encoded column vector $\mathbf{r}_j$ where $|\mathbf{r}_j| = |R|$ and $R$ is the set of semantic role labels. 
 
-Further than that, we need to obtain a distributed representation that is continuous in the feature space. So we compute the inner product between $\mathbf{w}_i$ and a embedding matrix $\mathbf{A} \in \mathbb{R}^{|V| \times k}$ as $\mathbf{A}_{(i)} = \mathbf{w}_i \mathbf{A}$. The vector $\mathbf{w}_i$ is now mapped to low-dimensional vector $\mathbf{A}_{(i)} \in \mathbb{R}^k$ which is the $i$-th row of matrix $\mathbf{A}$. The symbolic representation of words is transformed into word embedding. 
+Further, we need to obtain a distributed representation that is continuous in the feature space. So we compute the inner product between $\mathbf{w}_i$ and a embedding matrix $\mathbf{A} \in \mathbb{R}^{|V| \times d}$ as $\mathbf{A}_{(i)} = \mathbf{w}_i \mathbf{A}$. The vector $\mathbf{w}_i$ is now mapped to low-dimensional vector $\mathbf{A}_{(i)} \in \mathbb{R}^d$ which is the $i$-th row of matrix $\mathbf{A}$. The symbolic representation of words is transformed into word embedding. 
 
 In addition to word embedding, we want to learn the representation of words given a specific semantic role label. We add one more dimension of semantic role label to the word embedding matrix and obtain a third-order tensor $\mathbf{T} \in \mathbb{R}^{|V| \times |R| \times d}$. For each word $\mathbf{w}_i$ and each semantic role label $\mathbf{r}_j$, there is a corresponding vector $\mathbf{T}_{(ij)}$ with length of $d$ where $i \in [1, |V|]$ and $j \in [1, |R|]$. We define this vector as \textbf{event-participant embedding vector}. 
 
@@ -322,7 +322,8 @@ To get rid of the outer product and make it easier to implement, we use the deco
         &= (\mathbf{w}_i \mathbf{A} \circ \mathbf{r}_j \mathbf{B}) \mathbf{C} \\
 \end{aligned}
 \end{equation}
-which is a representation of a participant in an event. "$\circ$" is Hadamard product which computes element-wise multiplication between two vectors. This can be interpreted as the composition method of word embedding vector and role embedding vector. 
+which is a representation of a participant in an event. "$\circ$" is Hadamard product which computes element-wise multiplication between two vectors. This can be interpreted as a multiplicative composition method of word embedding and role embedding. 
+
 
 
 \newpage
@@ -378,22 +379,22 @@ where $\mathbf{W}_c\in \mathbb{R}^{d \times |V|}$ is a weight matrix of the targ
 \end{equation}
 where suffix $(x)$ is the $x$-th element of the vector. 
 
-For each target target role, there is a different weight matrix to perform classification. \citet{tilk2016event} performed a similar technique like the role-specific word embedding. At first weight matrix $\mathbf{W}_c^{(b_y)}$ is defined for each target role $b_y$. Then those matrices $\mathbf{W}_c^{(b_y)}$ are stacked from $b_1$ to $b_{|R|}$. A weight tensor $\mathbf{T}^{(c)} \in \mathbb{R}^{d \times |R| \times |V|}$ is obtained. But this tensor suffer the same dimensionality problem as event-participant embedding tensor. So tensor rank decomposition is applied again on the weight tensor, and extract the corresponding weight matrices for $b_y$ as follow: 
-\begin{equation} \label{eq:trd_cls}
+For each target target role, there is a different weight matrix to perform classification. \citet{tilk2016event} applied a factorisation for the classifiers, which is similar to the method for role-specific word embedding. At first weight matrix $\mathbf{W}_c^{(b_y)}$ is defined for each target role $b_y$. Then those matrices $\mathbf{W}_c^{(b_y)}$ are stacked from $b_1$ to $b_{|R|}$. A weight tensor $\mathbf{T}^{(c)} \in \mathbb{R}^{d \times |R| \times |V|}$ is obtained. But this tensor suffer the same dimensionality problem as event-participant embedding tensor. So tensor rank decomposition is applied again on the weight tensor, and extract the corresponding weight matrices for $b_y$ as follow: 
+\begin{equation} \label{eq:trd-cls}
 \begin{aligned}
     \mathbf{T}_{(y)}^{(c)}
         &= \sum_{m=1}^{k^{(c)}} \mathbf{c}_{m}^{(c)} \otimes \mathbf{b}_{m_{(y)}}^{(c)} \otimes \mathbf{a}_m^{(c)} \\
 \end{aligned}
 \end{equation}
-Similarly, vectors $\mathbf{c}_{m}^{(c)}$ are grouped by row into matrices $\mathbf{C}_c \in \mathbb{R}^{d \times k^{(c)}}$ and $\mathbf{a}_m^{(c)}$ are grouped by column into matrices $\mathbf{A}_c \in \mathbb{R}^{k^{(c)} \times |V|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, the weight matrix in equation \eqref{eq:output}  can be written as:
+Similarly, vectors $\mathbf{c}_{m}^{(c)}$ are grouped by row into matrices $\mathbf{C}_c \in \mathbb{R}^{d \times k^{(c)}}$ and $\mathbf{a}_m^{(c)}$ are grouped by column into matrices $\mathbf{A}_c \in \mathbb{R}^{k^{(c)} \times |V|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, the weight matrix in equation \eqref{eq:output-nnrf}  can be written as:
 \begin{equation} \label{eq:cls}
 \begin{aligned}
     \mathbf{W}_c
         &= \mathbf{C}_c \ diag(\mathbf{b}_y) \ \mathbf{A}_c \\
 \end{aligned}
 \end{equation}
-where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its diagonal. Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embedding matrices $\mathbf{B}_c \in \mathbb{R}^{k^{(c)} \times |R|}$ can be defined for target roles. The weight matrices can be further written as:
-\begin{equation} \label{eq:cls_temb}
+Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embedding matrices $\mathbf{B}_c \in \mathbb{R}^{k^{(c)} \times |R|}$ can be defined for target roles. The weight matrices can be further written as:
+\begin{equation} \label{eq:cls-temb}
 \begin{aligned}
     \mathbf{W}_c
         &= \mathbf{C}_c \ diag(\mathbf{r}_y \mathbf{B}_c) \ \mathbf{A}_c \\
