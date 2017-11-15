@@ -594,28 +594,36 @@ where $\mathbf{r}_l$, the composition of word embedding and semantic role label 
 Then the model perform the mean composition as  equation \eqref{eq:mean-comp-bop}. Since we only have one non-linearity layer in BOP, so the second non-linearity layer in residual block is removed. This model is named as \textbf{bag-of-predicates/participants with residual learning (BOP Res)} described in Figure \ref{fig:BOPRes}. 
 
 
+\subsection{Model Comparison} \label{sec:comp-bop}
+
+
 
 \newpage
 \section{Experiments}  \label{sec:exp}
 \subsection{Corpus and Prepossessing} \label{sec:corpus}
+We use Rollenwechsel-English (RW-eng) corpus, a large-scale labelled semantic corpus with a head word of each argument using PropBank style role labels \citep{SayeedEtAl2015}. With head words of arguments, we have a direct access to the event participants without modifiers. This helps us to learn embeddings of generalised event knowledge. 
+
+The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. 
+
+We choose the first 3472 segments as training data, the next 14 segments as testing data and the last 14 segments as validation data. The word vocabulary for event predicates and participants is constructed with following steps: 
+\begin{enumerate}
+  \item  go through the training data, for each event, find out the entries denoting the event predicate and all event participants. 
+  \item  filter out every entry with FAILED tag in $algorithm$ attribute; only accept entry with POS tag starting with $n$, $v$, $j$, $r$; only accept entry with English characters and punctuation like $'$, $-$; 
+  \item  extract the lowercase form of the head word from each entry.
+  \item  lemmatized each word using WordNet lemmatizer in NLTK. 
+  \item  compute the frequency of each unique lemma. 
+  \item  generate the vocabulary from the top 50000 most frequent words. 
+\end{enumerate}
+
+
+\subsection{Model Implementation} \label{sec:implementation}
+We implement the models with Keras 2.0.5 \citep{chollet2015keras}. And then we deploy each model on high performance computer with one 48 cores Intel Xeon E7 CPU and one Nvidia Geforce Titan X GPU as neural network accelerator. 
 
 
 
-
-
-
-
+\newpage
 \section{Evaluation}  \label{sec:evaluation}
-\subsection{Human Thematic Fit Judgement Correlation Task}  \label{sec:thematicfit}
-To improve performance of DM on thematic fit task, \citet{greenberg2015improving} employed clustering on candidate role-fillers to construct better representation for prototypical role-filler. They obtained good performance on less frequent roles like ARGM-MNR and ARGM-LOC. 
-
-\subsection{Event Similarity Correlation task}  \label{sec:wordsim}
-
-
-\subsection{Event Similarity Correlation task}  \label{sec:eventsim}
-
-
-
+\subsection{Participant and Predicate Prediction}  \label{sec:wordprediction}
 
 
 \begin{table}[t]
