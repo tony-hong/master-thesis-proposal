@@ -95,6 +95,14 @@ where the verbal predicate is considered as a special role $verb$ which is not i
 However, there are some major disadvantages in their work. Firstly, the definition of the notion \textit{role} is vague. It is hard to explain why predicates and semantic arguments are treated as the same, though they have a special role $verb$ for verbal predicates. This leads to an ambiguous definition of \textit{role-filler} which originally means the argument to fill one specific semantic role. Their representation is also inconsistent with event representation in first-order logic. 
 
 In addition to that, there is a problem of event embedding similarity if we only focus on role-filler prediction. Because of the smoothing effect of distributed representation, the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a based event $([_{\text{ARG0}} \text{investor}], buy, [_{\text{ARG1}}\text{share}])$ and the foil event $([_{\text{ARG0}}\text{share}], purchase, [_{\text{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human will have a lower similarity judgement score between it and the based event. But for the similar event $([_{\text{ARG0}}\text{investor}], purchase, [_{\text{ARG1}}\text{share}])$ and the based event, human will have a high similarity judgement score. So the NNRF model is incompatible with human cognition. More examples are shown in Table \ref{tab:eventsim}. 
+% * <asayeed@mbl.ca> 2017-11-13T22:29:40.729Z:
+% 
+% Well I don't know if they're "major" disadvantages :)
+% 
+% * <asayeed@mbl.ca> 2017-11-13T22:30:35.273Z:
+% 
+% "based" event? ("foil" is pretty clear)
+% 
 
 Furthermore, the factored order-3 tensor structure is not fully explained. Along with the rapid growth of architecture complexity, explainability of models is becoming more and more important. Yet they did not give a thorough explanation of the word embedding they obtained. Moreover, there is no evaluation of their word embedding. As a result, it is risky to use the embedding on other tasks. 
 
@@ -118,6 +126,10 @@ Inspired by the role-specific word embedding, we define the \textbf{event-partic
 Using the same event-participant embedding as input, we add non-linearity to the models to construct multitask neural networks. To perform both role-filler prediction and semantic role prediction, we design two classifiers with their own loss functions. The models are optimised with different weight of each task (see Section \ref{sec:mtrf}). We find that tuning the loss weight results in models having their own advantages in different aspects. When it comes to the construction of event representation, there are two cases: participant order is known or unknown. In order to build a model which is compatible with first-order logic representation where conjunction connective does not imply order, we focus on the case that participant order is not given. After comparing several composition methods, we present an effective method to compose the event-level embedding using features from the hidden layer (see Section \ref{sec:bop}). It has been shown that gradient exploding or vanishing problem is more serious in training model with factorised tensors \citep{sutskever2011generating}.  Making use of the idea in residual learning, we add one skip connection inside the factor tensor (see Section \ref{sec:residual}). We find that this method can help with learning a better event-participant embedding.
 
 To compare with previous baselines, all models are trained, validated and tested on the same large scale corpus. We tune hyper-parameters to optimise for different purposes (see Section \ref{sec:exp}). On both three tasks, we compute the perplexity for each model(see Section \ref{sec:wordprediction}, \ref{sec:roleprediction}). The output probabilities of the models on word prediction are evaluated on human thematic fit judgement correlation task (see Section \ref{sec:thematicfit}). The word embeddings are evaluated on several word similarity tasks (see Section \ref{sec:wordsim}). Last but not least, the event embeddings are evaluated on an event similarity correlation task (see Section \ref{sec:eventsim}). The results show that our models have significant improvement over the current best system on specific evaluations while has state-of-the-art performance on the other evaluations. The word embedding and event embedding extracted from the event-participant embedding we learnt also has state-of-the-art performance. 
+% * <asayeed@mbl.ca> 2017-11-13T22:34:00.165Z:
+% 
+% This is a very thorough high-level overview, but it's easy to get lost.  Maybe put in some subsections or bullet points?
+% 
 
 Our model is a state-of-the-art system of thematic fit correlation task. The selectional preference features are useful for referent prediction in discourse-level \citep{modi2017modeling}. In simultaneous machine translation between language pairs with different verb position, adding predicate prediction leads to better translations \citep{grissom2014don}. The word embedding we learn can be further employed in discourse relation classification \citep{shi2017need, rutherford2017systematic}, paraphrase detection, word sense disambiguation, sentiment analysis and machine translation. The composite embedding of predicate and target head word can be used for argument classification in semantic role labelling \citep{roth2016neural}. Further, this model can be employed in incremental semantic parsing \citep{konstas2014incremental, konstas2015semantic} or inferences of logical forms (TODO: add ref). 
 
@@ -164,6 +176,11 @@ where the predicate $cut$ is a description of an event $e$. This representation,
 \end{aligned}
 \end{equation}
 where each thematic role is acting as a logical predicate of the event $e$ and the corresponding participant. This representation, named as \textit{neo-Davidsonian event representation}, is highly compatible with semantic role models. 
+% * <asayeed@mbl.ca> 2017-11-13T22:37:07.932Z:
+% 
+% Unfortunately neo-Davidsonian representations and the psycholinguistic work on this topic are only loosely connected. We introduced neo-Davidsonian representations to allow for incrementality in PLTAG-based semantic parsing.  Otherwise, most psycholinguistic work doesn't care about the formal status of the event.  Unless you want to justify things in terms of the output representation of a parse, is this necessary?
+% 
+% ^.
 
 
 \subsection{Semantic Role Model} \label{sec:semanticrole}
@@ -191,12 +208,20 @@ ArgM-CAU                &   the argument that indicates the reason for an action
 \end{tabular}
 \caption{\label{tab:propbank} Definitions of major semantic roles in PropBank style.}
 \end{table}
+% * <asayeed@mbl.ca> 2017-11-13T22:39:14.487Z:
+% 
+% There are even more, but we don't use them.  And we don't use ARGM-CAU, do we?
+% 
 
 
 \subsection{Semantic Role Labelling} \label{sec:srl}
 The \textit{semantic role labelling} (SRL) task is to assign semantic role labels to arguments of predicates in sentences automatically. It is a well-study task which was defined formally at CoNLL 2004, 2005 shared tasks which aimed to annotate phrasal arguments of verbal predicates in the sentences \citep{carreras-marquez:2004:CONLL, carreras-marquez:2005:CoNLL}. The CoNLL 2008, 2009 shared tasks introduced a new task where the semantic dependencies are annotated instead of phrasal arguments \citep{surdeanu-EtAl:2008:CONLL, hajivc-EtAl:2009:CoNLL-2009-ST}. 
 
 After many years of research, pre-trained semantic role labelling systems are quite reliable. Generally speaking, modern SRL system is a statistical model that can predict the semantic role labels given the sentences. Many early work used syntactic parses as input and estimate classifiers locally with a set of constraints \citep{punyakanok2008importance}. \citet{tackstrom2015efficient} interpreted the model as a graphical model and use a multi-layer neural network to enforce the constraints. Later works focus on the application of distributed representation to avoid feature engineering and result in better generalisation. \citet{collobert2007fast, collobert2011natural} proposed a convolution neural network model using a distributed representation that only relies on lexical features. The fine-tuned model with additional features, SENNA, has state-of-the-art performance. The running time of SENNA is fast so it can be used on a large corpus. 
+% * <asayeed@mbl.ca> 2017-11-13T22:40:52.091Z:
+% 
+% SENNA isn't state of the art performance anymore, is it? And after citing Täckström 2015, you can't say that 2007 and 2011 papers are "later works", now can you?
+% 
 
 More recently, \citet{lei-EtAl:2015:NAACL-HLT} employ low-rank tensor factorisation to induce a compact representation of the full cross product of atomic features. \citet{roth2016neural} proposed PathLSTM which made use of dependency path as input. \citet{marcheggiani2017simple} claimed that syntactic features are not necessary for semantic role labelling and proposed a deep LSTM model to obtain competitive performance. 
 
@@ -211,6 +236,10 @@ Distributional semantic model (DSM) is a corpus-based method to construct numeri
 In addition to syntactic information, \citet{sayeed2014combining} extracts shallow semantic representation using semantic role labeller SENNA and constructs DM upon them. Combining syntactic and semantic features, they build a fully unsupervised distributional memory model, named as SDDM, especially for thematic fit judgement task. SDDM outperforms syntax-based thematic fit model by a large margin, which indicates that semantic information is essential in the thematic fit task. 
 
 There are three major drawbacks of the distributional semantic model. Firstly when it comes to practice, the semantic space of DSM is high-dimensional and sparse. When someone wants to induce on complex events with a large number of participants, using sparse vectors is unfeasible. In addition, the parameters of the vectors are discrete in count-based vector space. Although many alternative weighting functions and smoothing techniques have been proposed, it is hard to decide which is the most optimised. Last but not least, these models usually suffer the curse of dimensionality. Because the Euclidean distance between two vectors is meaningless in high-dimensional space, when the representation vectors are used as input of distance-based algorithms like nearest-neighbour classifier or clustering, the result can be unexpected. Thus we need a better representation model in this paper. 
+% * <asayeed@mbl.ca> 2017-11-13T22:43:00.518Z:
+% 
+% Why is using sparse vectors infeasible for complex events? Because of the multiplicative nature of event composition in e.g. the Lenci 2011 (?) model of compositionality via DMs.
+% 
 
 \subsection{Distributed Representation} \label{sec:repr}
 Distributed representation, pioneered by \citet{hinton1986learning}, is an effective method to handle sparsity and curse of dimensionality in symbolic representation. In general symbolic representation like \textit{one-hot representation}, where one binary value is $1$ and the others are $0$ in representation vectors, the binary values are mutual exclusive. If each representation vector has $n$ features, it can only represent $n$ different states of the entry. In distributed representation, $n$ feature with $k$ possible values can describe $k^n$ different states \citep{Goodfellow-et-al-2016}. This is why distributed representation is powerful. 
@@ -240,6 +269,11 @@ If we specify the sense of the predicate $cut$, thematic roles can be replaced w
 \end{equation*}
 This is a representation of the event in first order logic. We define a semantic role model for this paper. We join PropBank semantic roles and the special role PRD together as semantic roles. So the semantic role labels we use in this paper are defined in Table \ref{tab:semantic}. As we mention above, semantic arguments can be represented by the syntactic head words, so the notion of \textit{argument} in PropBank role labels is replaced by \textit{event participant}. 
 
+% * <asayeed@mbl.ca> 2017-11-13T22:45:29.318Z:
+% 
+% Again do we need to commit to this kind of representation here?  I'm not saying categorically not to do it, merely that it needs to be justified.
+% 
+% ^.
 
 \begin{table}[t]
 \centering
@@ -507,6 +541,11 @@ The second experiment is event similarity task \citep{grefenstette2015concrete}.
 \end{tabular}
 \caption{\label{tab:foil-mtrf} Similar event similarity versus foil event similarity. }
 \end{table}
+% * <asayeed@mbl.ca> 2017-11-13T22:52:35.875Z:
+% 
+% Did I miss how many items there were in this data set? Can we get an idea of the significance of this difference? (I realize that this is not always easy to calculate, but at least the data set size and some sort of variances may be useful here.)
+% 
+% ^.
 
 
 
@@ -537,6 +576,10 @@ where $\mathbf{v}$ is the parameter vector of event boundary. $\mathbf{h_{t-1}}$
 
 \subsection{Mean Composition Method} \label{sec:mean-composition}
 In this work, we focus on non-parametric methods in the condition that participant order is not provided and leave the other for future exploration. Multiplication is an effective composition method for distributed memory models. Unfortunately, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But the concatenated feature cannot be used directly. An extra feature extractor on top of the concatenation is needed, which turns it into a parametric method. 
+% * <asayeed@mbl.ca> 2017-11-13T22:54:15.219Z:
+% 
+% "distributed semantic models" you mean...you're not referring to SDDM here right?
+% 
 
 We propose the \textbf{mean} composition method which computes the mean of all the vectors of event participants to represent the event as one vector. Computing the mean can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of weights of the hidden vector. 
 
@@ -563,6 +606,10 @@ whehe $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. 
 \caption{\label{fig:BOPRes} Model architecture of bag-of-predicates/participants with residual learning.}
 \end{figure}
 
+% * <asayeed@mbl.ca> 2017-11-13T22:55:19.201Z:
+% 
+% Would be worth it to maybe highlight somehow visually the differences between these models? As in the most salient feature that distinguishes them from each other/NNRF?
+% 
 
 \subsection{Residual Learning} \label{sec:residual}
 All models presented above contain two factored tensors. It has been shown that training model with factored tensors is difficult \citep{sutskever2011generating, kiros2014multimodal}. Due to the fact that each tensor element is represented as a product of three parameters, gradient explosion or vanishing problem happens more likely during the training. To tackle the gradient explosion or vanishing problem in deep neural networks, \citet{he2016deep} proposed the \textit{deep residual learning} framework. They have the observation that in a way of constructing a deep model from a shallow model, one needs to add additional layers which are identity mapping over other layers copied from the shallow model. As a result, we can force the layers to fit a residual mapping. Formally, a residual block containing two hidden layers using $PReLU$ activation function can be written as: 
@@ -661,6 +708,12 @@ We choose the result at the $30$-th epoch as the final result and compare these 
 \end{tabular}
 \caption{\label{tab:GS_mtrf} Event similarity evaluation comparing to previous models. $p\text{-value} < 0.05$ for all results. }
 \end{table}
+% * <asayeed@mbl.ca> 2017-11-13T22:59:17.281Z:
+% 
+% The meaning of this needs quite a bit more in-context explanation I think.  But I suppose that's why it's at the end here :)
+% 
+% ^.
+
 
 
 \section{Related Works}
