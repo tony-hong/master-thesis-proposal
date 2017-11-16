@@ -99,10 +99,20 @@ In addition to that, there is a problem of event embedding similarity if we only
 % 
 % Well I don't know if they're "major" disadvantages :)
 % 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T12:58:14.475Z:
+% 
+% Could you please give a more specific comment? Do you mean that I should change it to ‘limitation'? 
+% 
+In addition to that, there is a problem of event embedding similarity if we only focus on role-filler prediction. Because of the smoothing effect of distributed representation, the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a original event $([_{\texttt{ARG0}} \text{investor}], buy, [_{\texttt{ARG1}}\text{share}])$ and the foil event $([_{\texttt{ARG0}}\text{share}], purchase, [_{\texttt{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human will have a lower similarity judgement score between it and the original event. But for the similar event $([_{\texttt{ARG0}}\text{investor}], purchase, [_{\texttt{ARG1}}\text{share}])$ and the original event, human will have a high similarity judgement score. So the NNRF model is incompatible with human cognition. More examples are shown in Table \ref{tab:eventsim}. 
 % * <asayeed@mbl.ca> 2017-11-13T22:30:35.273Z:
 % 
 % "based" event? ("foil" is pretty clear)
 % 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T12:54:58.718Z:
+% 
+% Changed to 'original event'
+%
+% ^.
 
 Furthermore, the factored order-3 tensor structure is not fully explained. Along with the rapid growth of architecture complexity, explainability of models is becoming more and more important. Yet they did not give a thorough explanation of the word embedding they obtained. Moreover, there is no evaluation of their word embedding. As a result, it is risky to use the embedding on other tasks. 
 
@@ -130,6 +140,10 @@ To compare with previous baselines, all models are trained, validated and tested
 % 
 % This is a very thorough high-level overview, but it's easy to get lost.  Maybe put in some subsections or bullet points?
 % 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T12:59:10.662Z:
+% 
+% Is it only the paragraph above the comment or all three about contribution? 
+%
 
 Our model is a state-of-the-art system of thematic fit correlation task. The selectional preference features are useful for referent prediction in discourse-level \citep{modi2017modeling}. In simultaneous machine translation between language pairs with different verb position, adding predicate prediction leads to better translations \citep{grissom2014don}. The word embedding we learn can be further employed in discourse relation classification \citep{shi2017need, rutherford2017systematic}, paraphrase detection, word sense disambiguation, sentiment analysis and machine translation. The composite embedding of predicate and target head word can be used for argument classification in semantic role labelling \citep{roth2016neural}. Further, this model can be employed in incremental semantic parsing \citep{konstas2014incremental, konstas2015semantic} or inferences of logical forms (TODO: add ref). 
 
@@ -206,22 +220,32 @@ ArgM-TMP                &   the argument that shows when an action took place \\
 ArgM-PNC                &   the argument that shows motivation for some action \\ \hline
 ArgM-CAU                &   the argument that indicates the reason for an action \\ \hline
 \end{tabular}
-\caption{\label{tab:propbank} Definitions of major semantic roles in PropBank style.}
+\caption{\label{tab:propbank} Examples of semantic roles in PropBank style.}
 \end{table}
 % * <asayeed@mbl.ca> 2017-11-13T22:39:14.487Z:
 % 
 % There are even more, but we don't use them.  And we don't use ARGM-CAU, do we?
+% 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T13:00:01.637Z:
+% 
+% This is a summary of PropBank role. The role labels we use are in section 3. 
 % 
 
 
 \subsection{Semantic Role Labelling} \label{sec:srl}
 The \textit{semantic role labelling} (SRL) task is to assign semantic role labels to arguments of predicates in sentences automatically. It is a well-study task which was defined formally at CoNLL 2004, 2005 shared tasks which aimed to annotate phrasal arguments of verbal predicates in the sentences \citep{carreras-marquez:2004:CONLL, carreras-marquez:2005:CoNLL}. The CoNLL 2008, 2009 shared tasks introduced a new task where the semantic dependencies are annotated instead of phrasal arguments \citep{surdeanu-EtAl:2008:CONLL, hajivc-EtAl:2009:CoNLL-2009-ST}. 
 
-After many years of research, pre-trained semantic role labelling systems are quite reliable. Generally speaking, modern SRL system is a statistical model that can predict the semantic role labels given the sentences. Many early work used syntactic parses as input and estimate classifiers locally with a set of constraints \citep{punyakanok2008importance}. \citet{tackstrom2015efficient} interpreted the model as a graphical model and use a multi-layer neural network to enforce the constraints. Later works focus on the application of distributed representation to avoid feature engineering and result in better generalisation. \citet{collobert2007fast, collobert2011natural} proposed a convolution neural network model using a distributed representation that only relies on lexical features. The fine-tuned model with additional features, SENNA, has state-of-the-art performance. The running time of SENNA is fast so it can be used on a large corpus. 
+After many years of research, pre-trained semantic role labelling systems are quite reliable. Generally speaking, modern SRL system is a statistical model that can predict the semantic role labels given the sentences. Many early work used syntactic parses as input and estimate classifiers locally with a set of constraints \citep{punyakanok2008importance}. \citet{tackstrom2015efficient} interpreted the model as a graphical model and use a multi-layer neural network to enforce the constraints. Other works focus on the application of distributed representation to avoid feature engineering and result in better generalisation. \citet{collobert2007fast, collobert2011natural} proposed a convolution neural network model using a distributed representation that only relies on lexical features. The fine-tuned model with additional features, SENNA, has competitive performance. The running time of SENNA is fast so it can be used on a large corpus. 
 % * <asayeed@mbl.ca> 2017-11-13T22:40:52.091Z:
 % 
 % SENNA isn't state of the art performance anymore, is it? And after citing Täckström 2015, you can't say that 2007 and 2011 papers are "later works", now can you?
 % 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T13:03:41.920Z:
+% 
+% Changed to 'Other works'
+%
+% ^.
+
 
 More recently, \citet{lei-EtAl:2015:NAACL-HLT} employ low-rank tensor factorisation to induce a compact representation of the full cross product of atomic features. \citet{roth2016neural} proposed PathLSTM which made use of dependency path as input. \citet{marcheggiani2017simple} claimed that syntactic features are not necessary for semantic role labelling and proposed a deep LSTM model to obtain competitive performance. 
 
@@ -231,15 +255,21 @@ However, most of these works only assign labels to whole constituents instead of
 \subsection{Distributional Semantic Model} \label{sec:dsm}
 Distributional semantic model (DSM) is a corpus-based method to construct numerical semantic representation. DSM depends on \textit{distributional hypothesis} \citep{harris1954distributional, miller1991contextual} claiming that the semantic similarity between two linguistic units can be measured by the overlap among their contexts. A DSM can be viewed as an order-2 tensor where one dimension is indices of words (or lexical units) and another dimension is features that used to capture context information. Generally, in early work of DSM, a matrix was constructed based on lexical co-occurrences of words in a large corpus. Then each word can be represented by a high-dimensional sparse vector in this matrix. The semantic similarity between two units can be quantified as the similarity of two representation vectors. This, however, does not consider the linguistic information within the context. To include such information, later work encode syntactic relation or lexico-syntactic pattern \citep{pado2007integration, erk2008structured, rothenhausler2009unsupervised} (TODO: performance?). 
 
-\citet{baroni2010distributional} claimed that it is possible to construct a general model for semantic memory, a stable long-term knowledge of human, to tackle different semantic tasks. They proposed \textit{Distributional Memory} (DM) framework which is an order-3 tensor which contains word-relation-word tuple. Performing matricisation on the tensor onto a matrix, vectors from different semantic spaces can be obtained. On tasks of a broad range, their best model, named as TypeDM, obtained state-of-the-art performance. This can be interpreted as the advantage of the distributional representation on multiple semantic tasks. Furthermore, the tensor like structure is both flexible and expressive for semantic information modelling. 
+\citet{baroni2010distributional} claimed that it is possible to construct a general model for semantic memory, a stable long-term knowledge of human, to tackle different semantic tasks. They proposed \textit{Distributional Memory} (DM) framework which is an order-3 tensor which contains word-relation-word tuple. Performing matricisation on the tensor onto a matrix, vectors from different semantic spaces can be obtained. On tasks of a broad range, their best model, named as TypeDM, obtained competitive performance. This can be interpreted as the advantage of the distributional representation on multiple semantic tasks. Furthermore, the tensor like structure is both flexible and expressive for semantic information modelling. 
 
 In addition to syntactic information, \citet{sayeed2014combining} extracts shallow semantic representation using semantic role labeller SENNA and constructs DM upon them. Combining syntactic and semantic features, they build a fully unsupervised distributional memory model, named as SDDM, especially for thematic fit judgement task. SDDM outperforms syntax-based thematic fit model by a large margin, which indicates that semantic information is essential in the thematic fit task. 
 
-There are three major drawbacks of the distributional semantic model. Firstly when it comes to practice, the semantic space of DSM is high-dimensional and sparse. When someone wants to induce on complex events with a large number of participants, using sparse vectors is unfeasible. In addition, the parameters of the vectors are discrete in count-based vector space. Although many alternative weighting functions and smoothing techniques have been proposed, it is hard to decide which is the most optimised. Last but not least, these models usually suffer the curse of dimensionality. Because the Euclidean distance between two vectors is meaningless in high-dimensional space, when the representation vectors are used as input of distance-based algorithms like nearest-neighbour classifier or clustering, the result can be unexpected. Thus we need a better representation model in this paper. 
+There are three major drawbacks of the distributional semantic model. Firstly when it comes to practice, the semantic space of DSM is high-dimensional and sparse. When someone wants to induce on complex events with a large number of participants, the size of representation becomes enormous. It is time or space consuming to use this kind of representation in practice. In addition, the parameters of the vectors are discrete in count-based vector space. Although many alternative weighting functions and smoothing techniques have been proposed, it is hard to decide which is the most optimised. Last but not least, these models usually suffer the curse of dimensionality. Because the Euclidean distance between two vectors is meaningless in high-dimensional space, when the representation vectors are used as input of distance-based algorithms like nearest-neighbour classifier or clustering, the result can be unexpected. Thus we need a better representation model in this paper. 
 % * <asayeed@mbl.ca> 2017-11-13T22:43:00.518Z:
 % 
 % Why is using sparse vectors infeasible for complex events? Because of the multiplicative nature of event composition in e.g. the Lenci 2011 (?) model of compositionality via DMs.
 % 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T13:10:12.720Z:
+% 
+% I added more details. It is changed to ' the size of representation becomes enormous. It is time or space consuming to use this kind of representation in practice. '
+% 
+% ^.
+
 
 \subsection{Distributed Representation} \label{sec:repr}
 Distributed representation, pioneered by \citet{hinton1986learning}, is an effective method to handle sparsity and curse of dimensionality in symbolic representation. In general symbolic representation like \textit{one-hot representation}, where one binary value is $1$ and the others are $0$ in representation vectors, the binary values are mutual exclusive. If each representation vector has $n$ features, it can only represent $n$ different states of the entry. In distributed representation, $n$ feature with $k$ possible values can describe $k^n$ different states \citep{Goodfellow-et-al-2016}. This is why distributed representation is powerful. 
@@ -575,11 +605,15 @@ The second model proposed by \citet{tilk2016event}, \textit{incremental model}, 
 where $\mathbf{v}$ is the parameter vector of event boundary. $\mathbf{h_{t-1}}$ is the hidden vector of last time step in the recurrent unit. $\mathbf{W}_h$ is the parameter matrix of recurrent unit. 
 
 \subsection{Mean Composition Method} \label{sec:mean-composition}
-In this work, we focus on non-parametric methods in the condition that participant order is not provided and leave the other for future exploration. Multiplication is an effective composition method for distributed memory models. Unfortunately, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But the concatenated feature cannot be used directly. An extra feature extractor on top of the concatenation is needed, which turns it into a parametric method. 
+In this work, we focus on non-parametric methods in the condition that participant order is not provided and leave the other for future exploration. Multiplication is an effective composition method for distributional memory models. Unfortunately, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But the concatenated feature cannot be used directly. An extra feature extractor on top of the concatenation is needed, which turns it into a parametric method. 
 % * <asayeed@mbl.ca> 2017-11-13T22:54:15.219Z:
 % 
 % "distributed semantic models" you mean...you're not referring to SDDM here right?
 % 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T13:13:34.064Z:
+% 
+% Sorry, it is a typo. It is changed to 'distributional memory models'. 
+%
 
 We propose the \textbf{mean} composition method which computes the mean of all the vectors of event participants to represent the event as one vector. Computing the mean can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of weights of the hidden vector. 
 
@@ -609,6 +643,10 @@ whehe $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. 
 % * <asayeed@mbl.ca> 2017-11-13T22:55:19.201Z:
 % 
 % Would be worth it to maybe highlight somehow visually the differences between these models? As in the most salient feature that distinguishes them from each other/NNRF?
+% 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T13:14:37.312Z:
+% 
+% I updated with newest figures.  Do you mean I should write them in the text?
 % 
 
 \subsection{Residual Learning} \label{sec:residual}
