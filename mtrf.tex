@@ -688,7 +688,41 @@ Then the model perform the mean composition as  equation \eqref{eq:mean-comp-bop
 \subsection{Corpus and Prepossessing} \label{sec:corpus}
 We use Rollenwechsel-English (RW-eng) corpus, a large-scale labelled semantic corpus with a head word of each argument using PropBank style role labels \citep{SayeedEtAl2015}. With head words of arguments, we have a direct access to the event participants without modifiers. This helps us to learn embeddings of generalised event knowledge. 
 
-The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. 
+The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. The sentences are labelled using SENNA, a syntactic agnostic semantic role labeller with competitive performance. The head words are extracted with four heuristics: \texttt{MALT}, \texttt{MALT-SPAN}, \texttt{LINEAR} and \texttt{FAILED}. 
+
+One sample event in the corpus is here:
+\definecolor{bg}{rgb}{0.95, 0.95, 0.95}
+\begin{minted}
+[frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+bgcolor=bg,
+fontsize=\footnotesize,
+linenos]{xml}
+<text id="ukwac:http://www.exeterviews.co.uk/exeter-shopping2.php" />
+<s>
+<predicate>
+  <governor>release/vbg/13</governor>
+  <dependencies>
+    <dep algorithm="MALT" source="the/DT/3 large/JJ/4
+    stone/NNS/5" text="the large stone"
+    type="A0">stone/nns/5</dep>
+    <dep algorithm="FAILED" source="which/WDT/6" text="which"
+    type="R-A0">which/wdt/6</dep>
+    <dep source="release/VBG/13"
+    text="release" type="V">release/vbg/13</dep>
+    <dep algorithm="MALT_SPAN" source="their/PRP$/14 heat/NN/15"
+    text="their heat" type="A1">heat/nn/15</dep>
+    <dep algorithm="LINEAR" source="at/IN/16 night/NN/17"
+    text="at night" type="AM-TMP">night/nn/17</dep>
+    <dep algorithm="MALT" source="to/TO/18 ensure/VB/19 the/DT/20
+    grape/NNS/21 achieve/VBP/22 maximum/JJ/23 ripeness/NN/24"
+    text="to ensure the grape achieve maximum ripeness"
+    type="AM-PNC">achieve/vbp/22</dep>
+  </dependencies>
+</predicate>
+\end{minted}
+where event is arranged in XML format.  
 
 We choose the first 3472 segments as training data, the next 14 segments as testing data and the last 14 segments as validation data. The word vocabulary for event predicates and participants is constructed with following steps: 
 \begin{enumerate}
