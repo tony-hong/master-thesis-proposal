@@ -103,6 +103,12 @@ In addition to that, there is a problem of event embedding similarity if we only
 % 
 % Could you please give a more specific comment? Do you mean that I should change it to ‘limitation'? 
 % 
+% ^ <asayeed@mbl.ca> 2017-11-16T21:52:11.087Z:
+% 
+% Yes, that is a better word.
+%
+% ^ <xhong@coli.uni-saarland.de> 2017-11-17T15:10:36.118Z.
+
 In addition to that, there is a problem of event embedding similarity if we only focus on role-filler prediction. Because of the smoothing effect of distributed representation, the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a original event $([_{\texttt{ARG0}} \text{investor}], buy, [_{\texttt{ARG1}}\text{share}])$ and the foil event $([_{\texttt{ARG0}}\text{share}], purchase, [_{\texttt{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human will have a lower similarity judgement score between it and the original event. But for the similar event $([_{\texttt{ARG0}}\text{investor}], purchase, [_{\texttt{ARG1}}\text{share}])$ and the original event, human will have a high similarity judgement score. So the NNRF model is incompatible with human cognition. More examples are shown in Table \ref{tab:eventsim}. 
 % * <asayeed@mbl.ca> 2017-11-13T22:30:35.273Z:
 % 
@@ -144,6 +150,11 @@ To compare with previous baselines, all models are trained, validated and tested
 % 
 % Is it only the paragraph above the comment or all three about contribution? 
 %
+% ^ <asayeed@mbl.ca> 2017-11-16T21:53:28.466Z:
+% 
+% There are parts of the above three paragraphs that look like "steps" and some that read like "reasons".  I think they could be reorganized so that we can follow all the moving parts.  So yeah, all three.
+%
+% ^.
 
 Our model is a state-of-the-art system of thematic fit correlation task. The selectional preference features are useful for referent prediction in discourse-level \citep{modi2017modeling}. In simultaneous machine translation between language pairs with different verb position, adding predicate prediction leads to better translations \citep{grissom2014don}. The word embedding we learn can be further employed in discourse relation classification \citep{shi2017need, rutherford2017systematic}, paraphrase detection, word sense disambiguation, sentiment analysis and machine translation. The composite embedding of predicate and target head word can be used for argument classification in semantic role labelling \citep{roth2016neural}. Further, this model can be employed in incremental semantic parsing \citep{konstas2014incremental, konstas2015semantic} or inferences of logical forms (TODO: add ref). 
 
@@ -230,6 +241,11 @@ ArgM-CAU                &   the argument that indicates the reason for an action
 % 
 % This is a summary of PropBank role. The role labels we use are in section 3. 
 % 
+% ^ <asayeed@mbl.ca> 2017-11-16T21:54:38.832Z:
+% 
+% OK make it clear that this is only a sample of the ARGM ones.
+%
+% ^ <xhong@coli.uni-saarland.de> 2017-11-17T15:40:07.201Z.
 
 
 \subsection{Semantic Role Labelling} \label{sec:srl}
@@ -614,6 +630,12 @@ In this work, we focus on non-parametric methods in the condition that participa
 % 
 % Sorry, it is a typo. It is changed to 'distributional memory models'. 
 %
+% ^ <asayeed@mbl.ca> 2017-11-16T21:57:26.535Z:
+% 
+% But multiplication *isn't* an effective composition model for DMs due to the sparsity and the tendency to make everything 0.  The whole problem is that no one's been able to make a purely multiplicative model scale, right?
+%
+% ^.
+
 
 We propose the \textbf{mean} composition method which computes the mean of all the vectors of event participants to represent the event as one vector. Computing the mean can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of weights of the hidden vector. 
 
@@ -648,6 +670,11 @@ whehe $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. 
 % 
 % I updated with newest figures.  Do you mean I should write them in the text?
 % 
+% ^ <asayeed@mbl.ca> 2017-11-16T21:58:28.689Z:
+% 
+% Might be worth pointing out what your highlights mean.  Clarity never hurt.
+%
+% ^.
 
 \subsection{Residual Learning} \label{sec:residual}
 All models presented above contain two factored tensors. It has been shown that training model with factored tensors is difficult \citep{sutskever2011generating, kiros2014multimodal}. Due to the fact that each tensor element is represented as a product of three parameters, gradient explosion or vanishing problem happens more likely during the training. To tackle the gradient explosion or vanishing problem in deep neural networks, \citet{he2016deep} proposed the \textit{deep residual learning} framework. They have the observation that in a way of constructing a deep model from a shallow model, one needs to add additional layers which are identity mapping over other layers copied from the shallow model. As a result, we can force the layers to fit a residual mapping. Formally, a residual block containing two hidden layers using $PReLU$ activation function can be written as: 
