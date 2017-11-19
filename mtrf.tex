@@ -20,6 +20,7 @@
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{paralist}
+\usepackage{minted}
 \graphicspath{ {figs/} }
 
 %% \usepackage[numbers]{natbib}
@@ -36,7 +37,7 @@ Supervisors: Asad Sayeed, Vera Demberg}
 
 \begin{abstract}
 \noindent
-We introduce several neural network models to learn embeddings containing both lexical and semantic features of events and event participants. Possible methods to compose word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk2016event}, we represent the order-3 tensor with three matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multitask style to perform both semantic role-filler prediction and semantic role prediction. Comparing to previous work, the model has improved on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. The high-level features of the model can be used in incremental semantic role labelling.  
+We introduce several neural network models to learn embeddings containing both lexical and semantic features of events and event participants. Possible methods to compose word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk2016event}, we represent the order-3 tensor with three matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multi-task style to perform both semantic role-filler prediction and semantic role prediction. Comparing to previous work, the model has improved on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. The high-level features of the model can be used in incremental semantic role labelling.  
 \end{abstract}
 
 
@@ -51,20 +52,20 @@ the event-level information is actually the same. The event is described by the 
 
 Semantic roles express the abstract roles of a participant can take in an event. In this level of representation, event participants can be mapped to arguments where they located. Using \textit{thematic role}, an inventory of conceptual argument roles (see Section \ref{sec:semanticrole}), the two sentences in earlier example can be annotated as: 
 \begin{eqnarray} \label{eg:thematic}
-  \nonumber & &[_{\text{AGENT}} \text{The }\textbf{cook}]\ cut\ [_{\text{PATIENT}}\text{the }\textbf{cake}]\ [_{\text{INSTRUMENT}}\text{with }\textbf{knife}]\\  
-    & &[_{\text{LOCATION}}\text{in the }\textbf{kitchen}]. \\
-  \nonumber & &[_{\text{LOCATION }}\text{In the }\textbf{kitchen}],\ [_{\text{PATIENT }}\text{the }\textbf{cake }]\ is \ cut\ \\
-    & &[_{\text{INSTRUMENT }}\text{with }\textbf{knife}]\ [_{\text{AGENT }}\text{by the }\textbf{cook}]. 
+    \nonumber & &[_{\texttt{AGENT}} \text{The }\textbf{cook}]\ cut\ [_{\texttt{PATIENT}}\text{the }\textbf{cake}]\ [_{\texttt{INSTRUMENT}}\text{with }\textbf{knife}]\\  
+    &   &[_{\texttt{LOCATION}}\text{in the }\textbf{kitchen}]. \\
+    \nonumber & &[_{\texttt{LOCATION }}\text{In the }\textbf{kitchen}],\ [_{\texttt{PATIENT }}\text{the }\textbf{cake }]\ is \ cut\ \\
+    &   &[_{\texttt{INSTRUMENT }}\text{with }\textbf{knife}]\ [_{\texttt{AGENT }}\text{by the }\textbf{cook}]. 
 \end{eqnarray} 
-where the event participants are actually head nouns or noun-noun compounds inside arguments of the predicate $cut$. $The\ cook$, volitional causer of the event, has a AGENT role. And $the\ cake$, the participant mostly affected by the event, has a PATIENT role. But it has been shown that it is hard to define thematic role formally. As a result, the PropBank \citep{palmer2005proposition} style semantic role model is introduced where each semantic role is associated with a specific verb sense. So the representation of two sentences can be unified as: 
+where the event participants are actually head nouns or noun-noun compounds inside arguments of the predicate $cut$. $The\ cook$, volitional causer of the event, has a \texttt{AGENT} role. And $the\ cake$, the participant mostly affected by the event, has a \texttt{PATIENT} role. But it has been shown that it is hard to define thematic role formally. As a result, the PropBank \citep{palmer2005proposition} style semantic role model is introduced where each semantic role is associated with a specific verb sense. So the representation of two sentences can be unified as: 
 \begin{equation*} \label{eg:probank}
 \begin{aligned}
     & \text{Predicate: }&&cut.\textbf{01} \\
-    & \text{Arguments: }&&[_{\text{ARG0 }}\text{The }\textbf{cook}], \ [_{\text{ARG1 }}\text{the }\textbf{cake}], \ [_{\text{ARGM-MNR }}\text{with a }\textbf{knife}], \\
-    &           &&[_{\text{ARGM-LOC }}\text{in the }\textbf{kitchen}]
+    & \text{Arguments: }&&[_{\texttt{ARG0 }}\text{The }\textbf{cook}], \ [_{\texttt{ARG1 }}\text{the }\textbf{cake}], \ [_{\texttt{ARGM-MNR }}\text{with a }\textbf{knife}], \\
+    &                   &&[_{\texttt{ARGM-LOC }}\text{in the }\textbf{kitchen}]
 \end{aligned}
 \end{equation*} 
-where each argument is assigned with a semantic role label. $cut.01$ is the verbal predicate $cut$ with sense $01$ which is \textit{"make an incision or separation"}. Now the ARG0 role can be defined exactly as \textit{"the subject which makes incision"}. To obtain this representation from raw text, one needs to solve semantic role labelling task (see Section \ref{sec:srl}). 
+where each argument is assigned with a semantic role label. $cut.01$ is the verbal predicate $cut$ with sense $01$ which is \textit{"make an incision or separation"}. Now the \texttt{ARG0} role can be defined exactly as \textit{"the subject which makes incision"}. To obtain this representation from raw text, one needs to solve semantic role labelling task (see Section \ref{sec:srl}). 
 
 Since both raw words and semantic role labels are symbols, it has limited representing power. If someone wants to compare events quantitatively, it is not possible to use the \textit{symbolic representation} where each symbol represents a single state of the entry. There are some previous works construct numerical representation of linguistic units e.g. \textit{Distributional semantic model} (DSM) (see Section \ref{sec:dsm}). Among them, \textit{Distributed representation} of words, also named as \textit{word embedding}, is a well-established technique based on continuous feature space. Each word is represented by a low-dimensional dense vector with real number parameters which are learnt during training of a prediction task given the context. There are many efforts on learning word embeddings from large-scale corpora (see Section \ref{sec:repr}). 
 
@@ -84,7 +85,6 @@ Since both raw words and semantic role labels are symbols, it has limited repres
 \caption{\label{tab:eventsim} Some examples of similarity scores between two events using event embedding vectors in NNRF model. The metric is cosine similarity. }
 \end{table}
 
-
 \subsection{Main Problem and Previous Work}
 The main problem is that only a few works learn embeddings at the level of events. \citet{tilk2016event} proposed two models to learn a representation of events and their participants. To obtain a probability distribution over \textit{role-fillers} given event information, the models aim to perform \textit{role-filler prediction}: 
 \begin{itemize}
@@ -92,9 +92,7 @@ The main problem is that only a few works learn embeddings at the level of event
 \end{itemize}
 where the verbal predicate is considered as a special role $verb$ which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. To reduce the number of parameters, they factored the tensor into three matrices. They reported great improvement over previous systems on thematic fit evaluation and competitive performance on event similarity evaluation. 
 
-However, there are some major disadvantages in their work. Firstly, the definition of the notion \textit{role} is vague. It is hard to explain why predicates and semantic arguments are treated as the same, though they have a special role $verb$ for verbal predicates. This leads to an ambiguous definition of \textit{role-filler} which originally means the argument to fill one specific semantic role. Their representation is also inconsistent with event representation in first-order logic. 
-
-In addition to that, there is a problem of event embedding similarity if we only focus on role-filler prediction. Because of the smoothing effect of distributed representation, the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a based event $([_{\text{ARG0}} \text{investor}], buy, [_{\text{ARG1}}\text{share}])$ and the foil event $([_{\text{ARG0}}\text{share}], purchase, [_{\text{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human will have a lower similarity judgement score between it and the based event. But for the similar event $([_{\text{ARG0}}\text{investor}], purchase, [_{\text{ARG1}}\text{share}])$ and the based event, human will have a high similarity judgement score. So the NNRF model is incompatible with human cognition. More examples are shown in Table \ref{tab:eventsim}. 
+However, there are some limitations in their work. Firstly, the definition of the notion \textit{role} is vague. It is hard to explain why predicates and semantic arguments are treated as the same, though they have a special role $verb$ for verbal predicates. This leads to an ambiguous definition of \textit{role-filler} which originally means the argument to fill one specific semantic role. Their representation is also inconsistent with event representation in first-order logic. 
 % * <asayeed@mbl.ca> 2017-11-13T22:29:40.729Z:
 % 
 % Well I don't know if they're "major" disadvantages :)
@@ -125,7 +123,7 @@ Furthermore, the factored order-3 tensor structure is not fully explained. Along
 Last but not least, although the tensor-like structure of embedding is efficient and flexible, the training of the models are burdened by the gradient explosion or vanishing problem. Because in a factored order-3 tensor, each parameter is represented by a product of three parameters. To tackle this problem from the training aspect, they used Adagrad \citep{duchi2011adaptive} which adjusts learning rate during training. Although it alleviated the problem, it is not a solution on model architecture aspect. 
 
 
-\subsection{Major Tasks and Contribution}
+\subsection{Major Tasks}
 In this paper, we present several multi-task neural network models to learn embeddings at the inner level of an event. With a view to the explainability of the task, we separate \textit{role-filler prediction} into two sub-tasks: 
 \begin{itemize}
   \item  \textbf{Participant prediction}: in each event, given the predicate, the semantic role label of one target participant, the other participants and their semantic role labels, the task is to predict the target participant to fill the semantic role. 
@@ -137,9 +135,10 @@ Since lexical features of participant and predicate are homogeneous, we can cons
 \end{itemize}
 By forcing the models to solve semantic role prediction during training, the event embeddings with same words but different roles will be distinguished. 
 
+\subsection{Model Design and Experiments}
 Inspired by the role-specific word embedding, we define the \textbf{event-participant embedding} formally as the joint embedding of predicates that denote events and participants of events. The embedding vectors are stacked together to construct an order-3 tensor where each vector is indexed by a 2-tuple $(word, role\ label)$. As a result, each word can be represented as a matrix, indexed by a 1-tuple $(word)$, which can be considered as word embedding (see Section \ref{sec:epe}). Although the event-participant embedding is a versatile representation, it suffers curse of dimensionality. So we apply tensor factorisation on the event-participant embedding tensor, which represents the tensor with three matrices. After detailed analysis in the tensor space, we demonstrate that these matrices can be interpreted as word embedding, semantic role label embedding and weight of linear mapping correspondingly (see Section \ref{sec:tf}). 
 
-Using the same event-participant embedding as input, we add non-linearity to the models to construct multitask neural networks. To perform both role-filler prediction and semantic role prediction, we design two classifiers with their own loss functions. The models are optimised with different weight of each task (see Section \ref{sec:mtrf}). We find that tuning the loss weight results in models having their own advantages in different aspects. When it comes to the construction of event representation, there are two cases: participant order is known or unknown. In order to build a model which is compatible with first-order logic representation where conjunction connective does not imply order, we focus on the case that participant order is not given. After comparing several composition methods, we present an effective method to compose the event-level embedding using features from the hidden layer (see Section \ref{sec:bop}). It has been shown that gradient exploding or vanishing problem is more serious in training model with factorised tensors \citep{sutskever2011generating}.  Making use of the idea in residual learning, we add one skip connection inside the factor tensor (see Section \ref{sec:residual}). We find that this method can help with learning a better event-participant embedding.
+Using the same event-participant embedding as input, we add non-linearity to the models to construct multi-task neural networks. To perform both role-filler prediction and semantic role prediction, we design two classifiers with their own loss functions. The models are optimised with different weight of each task (see Section \ref{sec:mtrf}). We find that tuning the loss weight results in models having their own advantages in different aspects. When it comes to the construction of event representation, there are two cases: participant order is known or unknown. In order to build a model which is compatible with first-order logic representation where conjunction connective does not imply order, we focus on the case that participant order is not given. After comparing several composition methods, we present an effective method to compose the event-level embedding using features from the hidden layer (see Section \ref{sec:bop}). It has been shown that gradient exploding or vanishing problem is more serious in training model with factorised tensors \citep{sutskever2011generating}.  Making use of the idea in residual learning, we add one skip connection inside the factor tensor (see Section \ref{sec:residual}). We find that this method can help with learning a better event-participant embedding.
 
 To compare with previous baselines, all models are trained, validated and tested on the same large scale corpus. We tune hyper-parameters to optimise for different purposes (see Section \ref{sec:exp}). On both three tasks, we compute the perplexity for each model(see Section \ref{sec:wordprediction}, \ref{sec:roleprediction}). The output probabilities of the models on word prediction are evaluated on human thematic fit judgement correlation task (see Section \ref{sec:thematicfit}). The word embeddings are evaluated on several word similarity tasks (see Section \ref{sec:wordsim}). Last but not least, the event embeddings are evaluated on an event similarity correlation task (see Section \ref{sec:eventsim}). The results show that our models have significant improvement over the current best system on specific evaluations while has state-of-the-art performance on the other evaluations. The word embedding and event embedding extracted from the event-participant embedding we learnt also has state-of-the-art performance. 
 % * <asayeed@mbl.ca> 2017-11-13T22:34:00.165Z:
@@ -156,6 +155,7 @@ To compare with previous baselines, all models are trained, validated and tested
 %
 % ^.
 
+\subsection{Contribution}
 Our model is a state-of-the-art system of thematic fit correlation task. The selectional preference features are useful for referent prediction in discourse-level \citep{modi2017modeling}. In simultaneous machine translation between language pairs with different verb position, adding predicate prediction leads to better translations \citep{grissom2014don}. The word embedding we learn can be further employed in discourse relation classification \citep{shi2017need, rutherford2017systematic}, paraphrase detection, word sense disambiguation, sentiment analysis and machine translation. The composite embedding of predicate and target head word can be used for argument classification in semantic role labelling \citep{roth2016neural}. Further, this model can be employed in incremental semantic parsing \citep{konstas2014incremental, konstas2015semantic} or inferences of logical forms (TODO: add ref). 
 
 
