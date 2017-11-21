@@ -85,14 +85,33 @@ Since both raw words and semantic role labels are symbols, it has limited repres
 \caption{\label{tab:eventsim} Some examples of similarity scores between two events using event embedding vectors in NNRF model. The metric is cosine similarity. }
 \end{table}
 
-\subsection{Main Problem and Previous Work}
+\subsection{Main Problem and Previous Work} \label{sec:previous}
 The main problem is that only a few works learn embeddings at the level of events. \citet{tilk2016event} proposed two models to learn a representation of events and their participants. To obtain a probability distribution over \textit{role-fillers} given event information, the models aim to perform \textit{role-filler prediction}: 
 \begin{itemize}
     \item  In each event, given the role label of one target word, and also given all other words and their role labels, the task is to predict the target word to fill the target role,
 \end{itemize}
 where the verbal predicate is considered as a special role $verb$ which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. To reduce the number of parameters, they factored the tensor into three matrices. They reported great improvement over previous systems on thematic fit evaluation and competitive performance on event similarity evaluation. 
 
-However, there are some limitations in their work. Firstly, the definition of the notion \textit{role} is vague. It is hard to explain why predicates and semantic arguments are treated as the same, though they have a special role $verb$ for verbal predicates. This leads to an ambiguous definition of \textit{role-filler} which originally means the argument to fill one specific semantic role. Their representation is also inconsistent with event representation in first-order logic. 
+However, there are some limitations in their work. Firstly, there is a problem of event embedding similarity if we only focus on role-filler prediction. Because of the smoothing effect of distributed representation, the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a target event $([_{\texttt{ARG0}} \text{investor}], buy, [_{\texttt{ARG1}}\text{share}])$ and the foil event $([_{\texttt{ARG0}}\text{share}], purchase, [_{\texttt{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human will have a lower similarity judgement score between it and the target event. But for the similar event $([_{\texttt{ARG0}}\text{investor}], purchase, [_{\texttt{ARG1}}\text{share}])$ and the original event, human will have a high similarity judgement score. So the NNRF model is incompatible with human cognition. More examples are shown in Table \ref{tab:eventsim}. 
+% * <asayeed@mbl.ca> 2017-11-13T22:30:35.273Z:
+% 
+% "based" event? ("foil" is pretty clear)
+% 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-16T12:54:58.718Z:
+% 
+% Changed to 'original event'
+%
+% ^ <xhong@coli.uni-saarland.de> 2017-11-20T10:14:13.371Z:
+% 
+% Changed target event
+%
+% ^.
+
+In addition to that, although the tensor-like structure of embedding is efficient and flexible, the training of the models are burdened by the gradient explosion or vanishing problem. Because in a factored order-3 tensor, each parameter is represented by a product of three parameters. To tackle this problem from the training aspect, they used Adagrad \citep{duchi2011adaptive} which adjusts learning rate during training. Although it alleviated the problem, it is not a solution on model architecture aspect. 
+
+Furthermore, the factored order-3 tensor structure is not fully explained. Along with the rapid growth of architecture complexity, explainability of models is becoming more and more important. Yet they did not give a thorough explanation of the word embedding they obtained. Moreover, there is no evaluation of their word embedding. As a result, it is risky to use the embedding on other tasks. 
+
+Last but not least, the definition of the notion \textit{role} is vague. It is hard to explain why predicates and semantic arguments are treated as the same, though they have a special role $verb$ for verbal predicates. This leads to an ambiguous definition of \textit{role-filler} which originally means the argument to fill one specific semantic role. 
 % * <asayeed@mbl.ca> 2017-11-13T22:29:40.729Z:
 % 
 % Well I don't know if they're "major" disadvantages :)
@@ -107,23 +126,8 @@ However, there are some limitations in their work. Firstly, the definition of th
 %
 % ^ <xhong@coli.uni-saarland.de> 2017-11-17T15:10:36.118Z.
 
-In addition to that, there is a problem of event embedding similarity if we only focus on role-filler prediction. Because of the smoothing effect of distributed representation, the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a original event $([_{\texttt{ARG0}} \text{investor}], buy, [_{\texttt{ARG1}}\text{share}])$ and the foil event $([_{\texttt{ARG0}}\text{share}], purchase, [_{\texttt{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human will have a lower similarity judgement score between it and the original event. But for the similar event $([_{\texttt{ARG0}}\text{investor}], purchase, [_{\texttt{ARG1}}\text{share}])$ and the original event, human will have a high similarity judgement score. So the NNRF model is incompatible with human cognition. More examples are shown in Table \ref{tab:eventsim}. 
-% * <asayeed@mbl.ca> 2017-11-13T22:30:35.273Z:
-% 
-% "based" event? ("foil" is pretty clear)
-% 
-% ^ <xhong@coli.uni-saarland.de> 2017-11-16T12:54:58.718Z:
-% 
-% Changed to 'original event'
-%
-% ^.
 
-Furthermore, the factored order-3 tensor structure is not fully explained. Along with the rapid growth of architecture complexity, explainability of models is becoming more and more important. Yet they did not give a thorough explanation of the word embedding they obtained. Moreover, there is no evaluation of their word embedding. As a result, it is risky to use the embedding on other tasks. 
-
-Last but not least, although the tensor-like structure of embedding is efficient and flexible, the training of the models are burdened by the gradient explosion or vanishing problem. Because in a factored order-3 tensor, each parameter is represented by a product of three parameters. To tackle this problem from the training aspect, they used Adagrad \citep{duchi2011adaptive} which adjusts learning rate during training. Although it alleviated the problem, it is not a solution on model architecture aspect. 
-
-
-\subsection{Major Tasks}
+\subsection{Major Tasks} \label{sec:tasks}
 In this paper, we present several multi-task neural network models to learn embeddings at the inner level of an event. With a view to the explainability of the task, we separate \textit{role-filler prediction} into two sub-tasks: 
 \begin{itemize}
   \item  \textbf{Participant prediction}: in each event, given the predicate, the semantic role label of one target participant, the other participants and their semantic role labels, the task is to predict the target participant to fill the semantic role. 
@@ -135,7 +139,7 @@ Since lexical features of participant and predicate are homogeneous, we can cons
 \end{itemize}
 By forcing the models to solve semantic role prediction during training, the event embeddings with same words but different roles will be distinguished. 
 
-\subsection{Model Design and Experiments}
+\subsection{Model Design and Experiments} \label{sec:steps}
 Inspired by the role-specific word embedding, we define the \textbf{event-participant embedding} formally as the joint embedding of predicates that denote events and participants of events. The embedding vectors are stacked together to construct an order-3 tensor where each vector is indexed by a 2-tuple $(word, role\ label)$. As a result, each word can be represented as a matrix, indexed by a 1-tuple $(word)$, which can be considered as word embedding (see Section \ref{sec:epe}). Although the event-participant embedding is a versatile representation, it suffers curse of dimensionality. So we apply tensor factorisation on the event-participant embedding tensor, which represents the tensor with three matrices. After detailed analysis in the tensor space, we demonstrate that these matrices can be interpreted as word embedding, semantic role label embedding and weight of linear mapping correspondingly (see Section \ref{sec:tf}). 
 
 Using the same event-participant embedding as input, we add non-linearity to the models to construct multi-task neural networks. To perform both role-filler prediction and semantic role prediction, we design two classifiers with their own loss functions. The models are optimised with different weight of each task (see Section \ref{sec:mtrf}). We find that tuning the loss weight results in models having their own advantages in different aspects. When it comes to the construction of event representation, there are two cases: participant order is known or unknown. In order to build a model which is compatible with first-order logic representation where conjunction connective does not imply order, we focus on the case that participant order is not given. After comparing several composition methods, we present an effective method to compose the event-level embedding using features from the hidden layer (see Section \ref{sec:bop}). It has been shown that gradient exploding or vanishing problem is more serious in training model with factorised tensors \citep{sutskever2011generating}.  Making use of the idea in residual learning, we add one skip connection inside the factor tensor (see Section \ref{sec:residual}). We find that this method can help with learning a better event-participant embedding.
@@ -155,7 +159,7 @@ To compare with previous baselines, all models are trained, validated and tested
 %
 % ^.
 
-\subsection{Contribution}
+\subsection{Contribution} \label{sec:contribution}
 Our model is a state-of-the-art system of thematic fit correlation task. The selectional preference features are useful for referent prediction in discourse-level \citep{modi2017modeling}. In simultaneous machine translation between language pairs with different verb position, adding predicate prediction leads to better translations \citep{grissom2014don}. The word embedding we learn can be further employed in discourse relation classification \citep{shi2017need, rutherford2017systematic}, paraphrase detection, word sense disambiguation, sentiment analysis and machine translation. The composite embedding of predicate and target head word can be used for argument classification in semantic role labelling \citep{roth2016neural}. Further, this model can be employed in incremental semantic parsing \citep{konstas2014incremental, konstas2015semantic} or inferences of logical forms (TODO: add ref). 
 
 
@@ -561,35 +565,32 @@ The data set is provided by \citet{grefenstette2015concrete} (see Section \ref{s
 \end{equation}
 Naturally we can consider the subject $table$ has a ARG0 semantic role and the object $eye$ has a ARG1 semantic role in the event.
 
-The models are evaluated in two experiments. In the first experiment, for each entry which has a HIGH tag and the highest score (i.e. $7$) in the data set, we extract two events and construct a foil event for the second event. For example entry \eqref{eg:event-sim}, we have:
+The models are evaluated in two experiments. In the first experiment, we want to evaluate the difference between highly similar event pair and event pair containing foil event. For each entry which has a HIGH tag and the highest score (i.e. $7$) in the data set, we extract two events and construct a foil event for the second event. For example entry \eqref{eg:event-sim}, we have:
 \begin{equation}
-    (table, draw, eye), (table, draw, eye), (eye, attract, table)
+    (table, draw, eye), (table, attract, eye), (eye, attract, table)
 \end{equation}
-This subset is named as \textbf{foil event similarity (FSM)} data set. We extract the event embedding vector defined in equation  \eqref{eq:sum-comp} from two models. We then compute two similarities: similarity of the first event and the second event; similarity of the first event and the foil event. Generally the larger of the difference between these two similarities we obtain, the better model we have. The similarity score of two events is computed as cosine similarity of two event embedding vectors. For each model, the means of these two similarities are computed across FSM. The results are in Table \ref{tab:foil-mtrf}. MTRF has a lower mean similarity between original event and foil event. Moreover, it has a higher difference between two similarities. 
+This subset is named as \textbf{foil event similarity (FES)} data set  which has $2057$ entries. We do not deleted entries with same event pair but different experiment participants, because the event pair is more similar to each other if more experiment participants grade it with highest score. We obtain the event embedding vector defined in equation  \eqref{eq:sum-comp} from two models. We then compute two similarities: similarity of the first event and the second event; similarity of the first event and the foil event. Generally the larger of the difference between these two similarities we obtain, the better model we have. The similarity score of two events is computed as cosine similarity of two event embedding vectors. For each model, the means of these two similarities are computed across FSM. The results are in Table \ref{tab:foil-mtrf}. MTRF has a lower mean similarity between original event and foil event. Moreover, it has a higher difference between two similarities. 
 
 The second experiment is event similarity task \citep{grefenstette2015concrete}. We extract the event embedding vector for the first and second event. The similarity score of two events is computed as cosine similarity as well. Then we compute Spearman's rho correlation coefficient between model scores and human judgement scores. The result in every epoch is reported as a line chart in Figure \ref{fig:GS-NNRF-MTRF}. The correlation score keeps stable after $20$ epochs. MTRF has a higher score than NNRF at almost every epoch. Thus MTRF is better correlated with human performance. This indicates that with the additional semantic role prediction task, MTRF learns a better embedding of events. 
 
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.9\textwidth]{GS-NNRF-MTRF.png}
-\caption{\label{fig:GS-NNRF-MTRF} Event similarity evaluation by training epoch of NNRF and MTRF. $x$-axis is the number of training epochs. $y$-axis is the Spearman's rho between model scores andhuman judgements. }
-\end{figure}
-
-
 \begin{table}[t]
 \centering
-\begin{tabular}{l|lll}
-    \textbf{Model}  &   $cos$(Event 1, Event 2)   &    $cos$(Event 1, Foil Event)    &  Difference  \\ \hline
-    \textbf{NNRF}   &   78  &   64  &   14  \\
-    \textbf{MTRF}   &   68  &   52  &   \textbf{16}  \\
+\begin{tabular}{l|ll|l}
+    \textbf{Model}  &   (Event 1, Event 2)   &    (Event 1, Foil Event)    &  Difference of mean  \\ \hline
+    \textbf{NNRF}   &   78 $\pm 10$ &   64 $\pm 12$ &   14  \\
+    \textbf{MTRF}   &   68 $\pm 13$ &   52 $\pm 14$ &   \textbf{16}  \\
 \end{tabular}
-\caption{\label{tab:foil-mtrf} Similar event similarity versus foil event similarity. }
+\caption{\label{tab:foil-mtrf} Similar event similarity versus foil event similarity. Each score is cosine similarity multiplied by 100 and the standard deviation multiplied by 100 follows.}
 \end{table}
 % * <asayeed@mbl.ca> 2017-11-13T22:52:35.875Z:
 % 
 % Did I miss how many items there were in this data set? Can we get an idea of the significance of this difference? (I realize that this is not always easy to calculate, but at least the data set size and some sort of variances may be useful here.)
 % 
+% ^ <xhong@coli.uni-saarland.de> 2017-11-20T00:30:06.655Z:
+% 
+% I added the number of entries in the data set, standard deviations and explanation of motivation.
+%
 % ^.
 
 
@@ -632,6 +633,13 @@ In this work, we focus on non-parametric methods in the condition that participa
 % ^ <asayeed@mbl.ca> 2017-11-16T21:57:26.535Z:
 % 
 % But multiplication *isn't* an effective composition model for DMs due to the sparsity and the tendency to make everything 0.  The whole problem is that no one's been able to make a purely multiplicative model scale, right?
+%
+% ^ <xhong@coli.uni-saarland.de> 2017-11-20T08:55:12.079Z:
+% 
+% This claim is actually from two references of Tilk paper. 
+% In Lenci 2011, they used 'PRODUCT' method for composition and obtained their best model on Bicknell data set.
+% In Grefenstette 2015 paper we used for the baseline of event similarity, they obtained competitive performance on multiplicative method. 
+% Maybe I can use the general term 'multiplicative method' instead? 
 %
 % ^.
 
