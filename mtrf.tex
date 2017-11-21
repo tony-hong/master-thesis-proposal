@@ -805,7 +805,40 @@ When the validation loss stop decreasing for $dp$ epochs, we decrease the learni
 
 
 \subsection{Model Implementation} \label{sec:implementation}
-We implement the models with Keras 2.0.5 \citep{chollet2015keras}. And then we deploy each model on high performance computer with one 48 cores Intel Xeon E7 CPU and one Nvidia Geforce Titan X GPU as neural network accelerator. 
+We implement all models with Keras 2.0.5 \citep{chollet2015keras}. And then we deploy each model on high performance computer with one 48 cores Intel Xeon E7 CPU and 256 GB main memory. We use one Nvidia Geforce Titan X GPU with 12 GB video memory as neural network accelerator. Each model is trained until converged for about 8 days.
+
+\subsection{Model Selection} \label{sec:model-select}
+The hyper-parameters for model training we use are listed in Table \ref{tab:hyper}. Because the data scale is enormous, in order to speed-up the training process, we make use of all 12 GB video memory and set the $bs$ to $4000$. Using this batch size, we perform feature selection on learning rate. We train MTRF on the first $10\%$ of training set for $5$ epochs and observe the perplexity on test data. We compare the values in the set of $\{0.05, 0.1, 0.15\}$. The setting of $0.05$ has worst performance and the setting of $0.15$ causes gradient explosion from time to time. The experiments show that $0.1$ is the optimised setting. We adopt the setting of $es$ from \citet{tilk2016event}, set $dp$ as $1$ epoch smaller than $es$ and pick $dr$ according to \citet{he2016deep}. 
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l|l|l}
+\textbf{Hyper-parameter} &  \textbf{Description}    &   \textbf{Value}  \\ \hline
+$bs$    &   Batch size              &   4000    \\
+$lr$    &   Learning rate           &   0.1     \\
+$dp$    &   Decrease $lr$ after     &   4       \\
+$dr$    &   Decrease factor         &   0.1     \\
+$es$    &   Early stopping after    &   5       \\
+\end{tabular}
+\caption{\label{tab:hyper} Hyper-parameters for model training.}
+\end{table}
+
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l||l|lll}
+\textbf{Characteristics}    & \textbf{NNRF} & \textbf{MTRF} & \textbf{BOP} & \textbf{BOP Res} \\ \hline
+Event-participant embedding &   \checkmark  &   \checkmark  &   \checkmark  &   \checkmark  \\
+Multi-task learning         &   \texttimes  &   \checkmark  &   \checkmark  &   \checkmark  \\
+Mean composition method     &   \texttimes  &   \texttimes  &   \checkmark  &   \checkmark  \\
+Residual learning           &   \texttimes  &   \texttimes  &   \texttimes  &   \checkmark  \\
+\end{tabular}
+\caption{\label{tab:models} Summary of model characteristics. The first model NNRF is the baseline from \citet{tilk2016event} and the others are the model proposed in this paper}
+\end{table}
+
+
 
 
 
@@ -843,9 +876,9 @@ We choose the result at the $30$-th epoch as the final result and compare these 
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||lll|ll|l}
-\textbf{Model}          &   Add &   Kronecker   &   CBOW    &   NNRF    &   MTRF        &   Human   \\ \hline
-\textbf{$\rho$ * 100}   &   10  &   26          &   13      &   32 (34) &   \textbf{35} &   62      \\
+\begin{tabular}{l||lll|ll|l|l}
+\textbf{Model}          &   Add & Multiply & Kronecker & CBOW &   NNRF    &   MTRF  &   Human   \\ \hline
+\textbf{$\rho$ * 100}   &   10  &   16  &   26          &   13      &   32 (34) &   \textbf{35} &   62      \\
 \end{tabular}
 \caption{\label{tab:GS_mtrf} Event similarity evaluation comparing to previous models. $p\text{-value} < 0.05$ for all results. }
 \end{table}
@@ -855,6 +888,21 @@ We choose the result at the $30$-th epoch as the final result and compare these 
 % 
 % ^.
 
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l||l|l|l|l}
+\textbf{Model}  &   Adj.&   Noun    &   Verb    &   all \\ \hline
+GloVe       &       57  &   38      &   16      &   35  \\
+CBOW        &       58  &   48      &   25      &   43  \\
+skip-gram   &       60  &   44      &   31      &   46  \\
+MTRF        &       29  & \textbf{51} & 39      &   45  \\
+BOP         &       40  &   50      &   39      &   46  \\ \hline
+SOA         & \textbf{66} & 50  & \textbf{58} & \textbf{56} \\
+Human       &       -   &   -       &   -       &   67  \\
+\end{tabular}
+\caption{\label{tab:GS_mtrf} Word similarity evaluation on SimLex999 comparing to previous models. Each score is Spearman's $\rho$ * 100. $p\text{-value} < 0.05$ for all results. SOA is the state-of-the-art model. }
+\end{table}
 
 
 \section{Related Works}
