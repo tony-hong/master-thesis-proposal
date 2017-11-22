@@ -594,6 +594,16 @@ The second experiment is event similarity task \citep{grefenstette2015concrete}.
 % ^.
 
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{GS-NNRF-MTRF.png}
+\caption{\label{fig:GS-NNRF-MTRF} Event similarity evaluation by training epoch of NNRF and MTRF. $x$-axis is the number of training epochs. $y$-axis is the Spearman's rho between model scores andhuman judgements. }
+\end{figure}
+
+
+
+
+
 
 \newpage
 \section{Bag-of-Event-Participant Model} \label{sec:bop}
@@ -644,7 +654,7 @@ In this work, we focus on non-parametric methods in the condition that participa
 % ^.
 
 
-We propose the \textbf{mean} composition method which computes the mean of all the vectors of event participants to represent the event as one vector. Computing the mean can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of weights of the hidden vector. 
+We propose the \textbf{mean} composition function which computes the mean of all the vectors of event participants to represent the event as one vector. Computing the mean can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of weights of the hidden vector. 
 
 Since it is a non-parametric method, we also want to add a weight before the mean composition. Instead of using a fully-connected layer, we apply the PReLU to each embedding vector of participants to obtain the hidden vector: 
 \begin{equation} \label{eq:nonlinearity-bop}
@@ -660,7 +670,9 @@ So the parameters inside PReLU can also act as weights of each participant. Usin
         &= \frac{1}{L} \sum_{l=1}^{L} \mathbf{h}_{l} \\
 \end{aligned}
 \end{equation}
-whehe $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. This model is named as \textbf{bag-of-predicates/participants (BOP)} described in Figure \ref{fig:BOP}. 
+where $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. 
+
+Based on the MTRF model, we replace the composition function with mean composition function. The model is named as \textbf{bag-of-predicates/participants (BOP)} described in Figure \ref{fig:BOP} where the mean composition function is highlighted in the red border rectangle. 
 
 
 \begin{figure}[t]
@@ -710,7 +722,7 @@ where $\mathbf{r}_l$, the composition of word embedding and semantic role label 
         = \mathbf{h}_{l}^{(1)}\mathbf{W}_h + \mathbf{r}_l \\
 \end{aligned}
 \end{equation}
-Then the model perform the mean composition as  equation \eqref{eq:mean-comp-bop}. Since we only have one non-linearity layer in BOP, so the second non-linearity layer in residual block is removed. This model is named as \textbf{bag-of-predicates/participants with residual learning (BOP Res)} described in Figure \ref{fig:BOPRes}. 
+Then the model perform the mean composition as  equation \eqref{eq:mean-comp-bop}. Since we only have one non-linearity layer in BOP, so the second non-linearity layer in residual block is removed. This model is named as \textbf{bag-of-predicates/participants with residual learning (BOP Res)} described in Figure \ref{fig:BOPRes} where the residual block is highlighted in the red border rectangle. 
 
 
 \subsection{Model Comparison} \label{sec:comp-bop}
@@ -722,9 +734,7 @@ Then the model perform the mean composition as  equation \eqref{eq:mean-comp-bop
 \subsection{Corpus and Prepossessing} \label{sec:corpus}
 We use Rollenwechsel-English (RW-eng) corpus, a large-scale labelled semantic corpus with a head word of each argument using PropBank style role labels \citep{SayeedEtAl2015}. With head words of arguments, we have a direct access to the event participants without modifiers. This helps us to learn embeddings of generalised event knowledge. 
 
-The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. The sentences are labelled using SENNA, a syntactic agnostic semantic role labeller with competitive performance. The head words are extracted with four heuristics: \texttt{MALT}, \texttt{MALT-SPAN}, \texttt{LINEAR} and \texttt{FAILED}. 
-
-One sample event in the corpus is here:
+The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. The sentences are labelled using SENNA, a syntactic agnostic semantic role labeller with competitive performance, where sentences with multiple predicates are separated into several events. The head words are extracted with one of four heuristics: \texttt{MALT}, \texttt{MALT-SPAN}, \texttt{LINEAR} or \texttt{FAILED}. One sample event in the corpus is here: 
 \definecolor{bg}{rgb}{0.95, 0.95, 0.95}
 \begin{minted}
 [frame=lines,
@@ -865,7 +875,7 @@ F-Loc   &   23      &   19      &   51      &   48      &   44  &   45          
 F-Inst  &   36      &   19      &   51      &   50      &   49  &   \textbf{51} &   50          \\
 GDS-all &   53      &   40      &   62      &   61      &   60  &   61          &   61          \\
 \end{tabular}
-\caption{\label{tab:widgets} Experiment result of models on human thematic fit judgement correlation task.}
+\caption{\label{tab:eval-thematic} Experiment result of models on human thematic fit judgement correlation task.}
 \end{table}
 
 
