@@ -403,8 +403,8 @@ which is a representation of a participant in an event. "$\circ$" is Hadamard pr
 \end{figure}
 
 
-\subsection{Non-incremental Role Filler Model} \label{sec:nnrf}
-To perform the role-filler prediction, \citet{tilk2016event} proposed the \textit{non-incremental role filler} \textbf{(NNRF)} which is a 2-layer neural network model. As in Figure \ref{fig:NNRF}, from input to output, the model uses event-participant embeddings as input. Parameters are learnt together with the model. The embedding vector of the $l$-th entry in an event can be represented as:
+\subsection{Non-incremental Role-Filler Model} \label{sec:nnrf}
+To perform the role-filler prediction, \citet{tilk2016event} proposed the \textit{non-incremental role-filler} \textbf{(NNRF)} which is a 2-layer neural network model. As in Figure \ref{fig:NNRF}, from input to output, the model uses event-participant embeddings as input. Parameters are learnt together with the model. The embedding vector of the $l$-th entry in an event can be represented as:
 \begin{equation} \label{eq:rbe-nnrf}
 \begin{aligned}
     \mathbf{p}_l
@@ -471,12 +471,12 @@ Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embed
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.7\textwidth]{MTRF.png}
-\caption{\label{fig:MTNNRF} Model architecture of multi-task version of non-incremental role filler.}
+\caption{\label{fig:MTEP} Model architecture of multi-task version of non-incremental role filler.}
 \end{figure}
 
 
 \subsection{Multi-task Learning} \label{sec:mtl}
-In addition to role-filler prediction, we also want to perform semantic role prediction. This task can be considered as a regularisation of the objective function of the role-filler prediction task. We add one more classifier for this task to NNRF in the last layer. The model named \textbf{multi-task role filler (MTRF)} is described in Figure \ref{fig:MTNNRF} where the extra classifier is in the red border rectangle. 
+In addition to role-filler prediction, we also want to perform semantic role prediction. This task can be considered as a regularisation of the objective function of the role-filler prediction task. We add one more classifier for this task to NNRF in the last layer. The model, named \textbf{multi-task event (MTEP)}, is described in Figure \ref{fig:MTEP} where the extra classifier is in the red border rectangle. 
 
 Since we want to obtain the probability distribution of target word or target role, in the last layer a softmax regression classifier is used for each task. The output vectors of these classifiers are computed as:
 \begin{equation} \label{eq:output-mt}
@@ -562,7 +562,7 @@ The second experiment is event similarity task \citep{grefenstette2015concrete}.
 \begin{tabular}{l|ll|l}
     \textbf{Model}  &   (Event 1, Event 2)   &    (Event 1, Foil Event)    &  Difference of mean  \\ \hline
     \textbf{NNRF}   &   78 $\pm 10$ &   64 $\pm 12$ &   14  \\
-    \textbf{MTRF}   &   68 $\pm 13$ &   52 $\pm 14$ &   \textbf{16}  \\
+    \textbf{MTEP}   &   68 $\pm 13$ &   52 $\pm 14$ &   \textbf{16}  \\
 \end{tabular}
 \caption{\label{tab:foil-mtrf} Similar event similarity versus foil event similarity. Each score is cosine similarity multiplied by 100 and the standard deviation multiplied by 100 follows.}
 \end{table}
@@ -580,7 +580,7 @@ The second experiment is event similarity task \citep{grefenstette2015concrete}.
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{GS-NNRF-MTRF.png}
-\caption{\label{fig:GS-NNRF-MTRF} Event similarity evaluation by training epoch of NNRF and MTRF. $x$-axis is the number of training epochs. $y$-axis is the Spearman's rho between model scores andhuman judgements. }
+\caption{\label{fig:GS-NNRF-MTEP} Event similarity evaluation by training epoch of NNRF and MTEP. $x$-axis is the number of training epochs. $y$-axis is the Spearman's rho between model scores andhuman judgements. }
 \end{figure}
 
 
@@ -655,7 +655,7 @@ So the parameters inside PReLU can also act as weights of each participant. Usin
 \end{equation}
 where $\frac{1}{L}$ is used to compute the empirical mean of the hidden vector. 
 
-Based on the MTRF model, we replace the composition function with mean composition function. The model is named as \textbf{bag-of-predicates/participants (BOP)} described in Figure \ref{fig:BOP} where the mean composition function is highlighted in the red border rectangle. 
+Based on the MTEP model, we replace the composition function with mean composition function. The model is named as \textbf{bag-of-predicates/participants (BOP)} described in Figure \ref{fig:BOP} where the mean composition function is highlighted in the red border rectangle. 
 
 
 \begin{figure}[t]
@@ -830,7 +830,7 @@ $es$    &   Early stopping after    &   5       \\
 \begin{table}[t]
 \centering
 \begin{tabular}{l||l|lll}
-\textbf{Characteristics}    & \textbf{NNRF} & \textbf{MTRF} & \textbf{BOP} & \textbf{BOP Res} \\ \hline
+\textbf{Characteristics}    & \textbf{NNRF} & \textbf{MTEP} & \textbf{BOP} & \textbf{BOP Res} \\ \hline
 Event-participant embedding &   \checkmark  &   \checkmark  &   \checkmark  &   \checkmark  \\
 Multi-task learning         &   \texttimes  &   \checkmark  &   \checkmark  &   \checkmark  \\
 Mean composition method     &   \texttimes  &   \texttimes  &   \checkmark  &   \checkmark  \\
@@ -851,7 +851,7 @@ Residual learning           &   \texttimes  &   \texttimes  &   \texttimes  &   
 \begin{table}[t]
 \centering
 \begin{tabular}{l|l|l||l|l|l|l||l}
-Dataset &   TypeDM  &   SDDM    &   NNRF    &   MTRF    &   BOP &   BOP Res     &   BOP Res*    \\ \hline
+Dataset &   TypeDM  &   SDDM    &   NNRF    &   MTEP    &   BOP &   BOP Res     &   BOP Res*    \\ \hline
 P07     &   53      &   51      &   48      &   48      &   52  &   \textbf{54} &   51          \\
 MSTNN   &   32      &   24      &   39      &   39      &   42  &   \textbf{42} &   42          \\
 F-Loc   &   23      &   19      &   51      &   48      &   44  &   45          &   44          \\
@@ -872,16 +872,16 @@ To improve the performance of DM on thematic fit task, \citet{greenberg2015impro
 
 \subsection{Event Similarity Correlation Task}  \label{sec:eventsim}
 We use the dataset proporsed by \citet{grefenstette2015concrete}.
-We choose the result at the $30$-th epoch as the final result and compare these two systems with previous state-of-the-art models. The result is in Table \ref{tab:GS_mtrf}. 
+We choose the result at the $30$-th epoch as the final result and compare these two systems with previous state-of-the-art models. The result is in Table \ref{tab:GS-mtrf}. 
 
 
 \begin{table}[t]
 \centering
 \begin{tabular}{l||lll|ll|l|l}
-\textbf{Model}          &   Add & Multiply & Kronecker & CBOW &   NNRF    &   MTRF  &   Human   \\ \hline
+\textbf{Model}          &   Add & Multiply & Kronecker & CBOW &   NNRF    &   MTEP  &   Human   \\ \hline
 \textbf{$\rho$ * 100}   &   10  &   16  &   26          &   13      &   32 (34) &   \textbf{35} &   62      \\
 \end{tabular}
-\caption{\label{tab:GS_mtrf} Event similarity evaluation comparing to previous models. $p\text{-value} < 0.05$ for all results. }
+\caption{\label{tab:GS-mtrf} Event similarity evaluation comparing to previous models. $p\text{-value} < 0.05$ for all results. }
 \end{table}
 % * <asayeed@mbl.ca> 2017-11-13T22:59:17.281Z:
 % 
@@ -897,12 +897,12 @@ We choose the result at the $30$-th epoch as the final result and compare these 
 GloVe       &       57  &   38      &   16      &   35  \\
 CBOW        &       58  &   48      &   25      &   43  \\
 skip-gram   &       60  &   44      &   31      &   46  \\
-MTRF        &       29  & \textbf{51} & 39      &   45  \\
+MTEP        &       29  & \textbf{51} & 39      &   45  \\
 BOP         &       40  &   50      &   39      &   46  \\ \hline
 SOA         & \textbf{66} & 50  & \textbf{58} & \textbf{56} \\
 Human       &       -   &   -       &   -       &   67  \\
 \end{tabular}
-\caption{\label{tab:GS_mtrf} Word similarity evaluation on SimLex999 comparing to previous models. Each score is Spearman's $\rho$ * 100. $p\text{-value} < 0.05$ for all results. SOA is the state-of-the-art model. }
+\caption{\label{tab:wordsim} Word similarity evaluation on SimLex999 comparing to previous models. Each score is Spearman's $\rho$ * 100. $p\text{-value} < 0.05$ for all results. SOA is the state-of-the-art model. }
 \end{table}
 
 
