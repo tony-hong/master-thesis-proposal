@@ -600,18 +600,12 @@ The second experiment is event similarity task \citep{grefenstette2015concrete}.
 
 
 \subsection{Composition Method for Event Embedding} \label{sec:composition}
+When it comes to the construction of event representation, there are two cases: participant order is known or unknown. In order to build a model which is compatible with first-order logic representation where conjunction connective does not imply order, we focus on the case that participant order is not given. 
+
 In the NNRF model, embedding vectors of event participants are sum up together to represent the whole event. Nonetheless, this is only a simple method to composite event participants. Each participant has the same weight in the event. Additionally, means of parameters can shift in a large range the after the sum operation. How can we improve this? We need an exploration of composition methods. 
 
 We separate all possible methods into two groups. The first group is \textbf{non-parametric methods} which have no extra parameters like addition, multiplication and concatenation of event participant vectors. Another group is \textbf{parametric methods} which need more parameters like recursive unit \citep{socher2013recursive}, recurrent unit \citet{mikolov2010recurrent}, or long-short-term-memory recurrent unit \citep{hochreiter1997LSTM}. So the NNRF is classified as non-parametric composition method. 
 
-The second model proposed by \citet{tilk2016event}, \textit{incremental model}, is a parametric method. A recurrent unit is added to express participant order not only within event but also across different events. Moreover, a binary indicator $b$ is used to detect the event boundaries. $b$ equals to $1$ if the target word belongs to current event, otherwise $0$. So the event embedding vector is: 
-\begin{equation} \label{eq:incremental}
-\begin{aligned}
-    \mathbf{e} 
-        &= \mathbf{p} + \mathbf{h_{t-1}}\mathbf{W}_h + b\mathbf{v}, 
-\end{aligned}
-\end{equation}
-where $\mathbf{v}$ is the parameter vector of event boundary. $\mathbf{h_{t-1}}$ is the hidden vector of last time step in the recurrent unit. $\mathbf{W}_h$ is the parameter matrix of recurrent unit. 
 
 \subsection{Mean Composition Method} \label{sec:mean-composition}
 In this work, we focus on non-parametric methods in the condition that participant order is not provided and leave the other for future exploration. Multiplication is an effective composition method for distributional memory models. Unfortunately, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But the concatenated feature cannot be used directly. An extra feature extractor on top of the concatenation is needed, which turns it into a parametric method. 
@@ -907,6 +901,16 @@ Human       &       -   &   -       &   -       &   67  \\
 
 
 \section{Related Works}
+The second model proposed by \citet{tilk2016event}, \textit{incremental model}, is a parametric method. A recurrent unit is added to express participant order not only within event but also across different events. Moreover, a binary indicator $b$ is used to detect the event boundaries. $b$ equals to $1$ if the target word belongs to current event, otherwise $0$. So the event embedding vector is: 
+\begin{equation} \label{eq:incremental}
+\begin{aligned}
+    \mathbf{e} 
+        &= \mathbf{p} + \mathbf{h_{t-1}}\mathbf{W}_h + b\mathbf{v}, 
+\end{aligned}
+\end{equation}
+where $\mathbf{v}$ is the parameter vector of event boundary. $\mathbf{h_{t-1}}$ is the hidden vector of last time step in the recurrent unit. $\mathbf{W}_h$ is the parameter matrix of recurrent unit. 
+
+
 \section{Future Works}
 This model can be employed in incremental semantic parsing \citep{konstas2014incremental, konstas2015semantic} or inferences of logical forms (TODO: add ref). 
 
