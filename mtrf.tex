@@ -393,7 +393,64 @@ which is a representation of a participant in an event. "$\circ$" is Hadamard pr
 
 
 \newpage
-\section{Multi-task Role Filler Model} \label{sec:mtrf}
+\section{Corpus and Prepossessing} \label{sec:corpus}
+In order to learn event-participant embedding from language resources, we use Rollenwechsel-English (\textbf{RW-eng}) corpus, a large-scale labelled semantic corpus with a head word of each argument using PropBank style role labels \citep{SayeedEtAl2015}. With head words of arguments, we have a direct access to the event participants without modifiers. This helps us to learn embeddings of generalised event knowledge. 
+
+The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. The sentences are labelled using SENNA, a syntactic agnostic semantic role labeller with competitive performance, where sentences with multiple predicates are separated into several events. The head words are extracted with one of four heuristics: \texttt{MALT}, \texttt{MALT-SPAN}, \texttt{LINEAR} or \texttt{FAILED}. One sample event in the corpus is listed here: 
+\definecolor{bg}{rgb}{0.95, 0.95, 0.95}
+\begin{minted}
+[frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+bgcolor=bg,
+fontsize=\footnotesize,
+linenos]{xml}
+<text id="ukwac:http://www.exeterviews.co.uk/exeter-shopping2.php" />
+<s>
+<predicate>
+  <governor>release/vbg/13</governor>
+  <dependencies>
+    <dep algorithm="MALT" source="the/DT/3 large/JJ/4
+    stone/NNS/5" text="the large stone"
+    type="A0">stone/nns/5</dep>
+    <dep algorithm="FAILED" source="which/WDT/6" text="which"
+    type="R-A0">which/wdt/6</dep>
+    <dep source="release/VBG/13"
+    text="release" type="V">release/vbg/13</dep>
+    <dep algorithm="MALT_SPAN" source="their/PRP$/14 heat/NN/15"
+    text="their heat" type="A1">heat/nn/15</dep>
+    <dep algorithm="LINEAR" source="at/IN/16 night/NN/17"
+    text="at night" type="AM-TMP">night/nn/17</dep>
+    <dep algorithm="MALT" source="to/TO/18 ensure/VB/19 the/DT/20
+    grape/NNS/21 achieve/VBP/22 maximum/JJ/23 ripeness/NN/24"
+    text="to ensure the grape achieve maximum ripeness"
+    type="AM-PNC">achieve/vbp/22</dep>
+  </dependencies>
+</predicate>
+\end{minted}
+where event is arranged in XML format. Line $1$ contains the URL to the text containing this event. The predicate is tagged as $governor$ and the arguments are tagged as $dep$. The head word is in the value field of $dep$ and the heuristic used to extract it is in the attribute $algorithm$. 
+
+We choose the first 3472 segments as training corpus, the next 14 segments as test corpus and the last 14 segments as validation corpus. The word list for event predicates and participants is constructed with following steps: 
+\begin{enumerate}
+  \item  go through the training corpus, for each event, find out the entries denoting the event predicate and all event participants. 
+  \item  filter out every entry that has \texttt{FAILED} in $algorithm$; only accept entry with POS tag starting with $n$, $v$, $j$, $r$; only accept entry with English characters and the dash line $-$; 
+  \item  extract the lower case form of the head word from each entry.
+  \item  lemmatized each word using WordNet lemmatizer in NLTK. 
+  \item  compute the frequency of each unique lemma. 
+  \item  generate the vocabulary from the top $50000$ most frequent words. 
+\end{enumerate}
+Using this word list, each word $a_i$ is assigned with a identifier $i$ in the integer set of $[1, 50000]$. The identifier of out-of-vocabulary word \texttt{<OOV>} is $50001$. So the length of the word vocabulary $V$ is 50001. The role vocabulary is constructed upon the list of semantic role labels defined in Table \ref{tab:semantic} with an additional role label \texttt{<OTHER>} for those role labels in the corpus but not in our list. Since we have $8$ role labels in the role vocabulary $R$, each role $b_j$ has a identifier $j$ in the range of $[0, 7]$ where the identifier $7$ is for the \texttt{<OTHER>} role. 
+
+Using these identifiers, we go through all three corpora to construct training data, test data and validation data. Similar to vocabulary construction, we filter out all event with \texttt{FAILED} in $algorithm$. In each event, the maximum number of roles is $8$. If there are more than one \texttt{<OTHER>} role in the event, we accept the last one. For each role represented by its identifier, it is coupled with a word identifier for the corresponding head word. For any role without a head word, an identifier $0$ for empty word \texttt{<NULL>} is assigned. The line of the sample event in the data is listed here: 
+\begin{equation} \label{eq:eg-data}
+\begin{aligned}
+    \{ 0:9527,\ 1:20,\ 2:50,\ 3:0,\ 4:0,\ 5:4311,\ 6:50001,\ 7:0\}
+\end{aligned}
+\end{equation}
+
+
+\newpage
+\section{Multi-task Event Predicate-Participants Model} \label{sec:mtrf}
 
 
 \begin{figure}[t]
@@ -539,8 +596,84 @@ where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its di
 \end{equation}
 
 
-\subsection{Model Comparison} \label{sec:comp_mtrf}
-In order to show whether the event similarity problem is solved, we perform a model comparison between NNRF and MTRF. Two models are implemented with the same number of hyper-parameters, except MTRF has additional parameters in the target role classifier. We trained and validated both models on the RW-eng corpus (see Section \ref{sec:corpus}). 
+
+
+
+
+\subsection{Model Training} \label{sec:training}
+For each event in the training data, we define the objective function for three tasks in Section \ref{sec:tasks}:
+\begin{itemize}
+  \item  \textbf{Participant prediction}: We choose the $l$-th head word which is not empty word. We use the head word as target word $a_l$ and its semantic role as target role $b_l$. Then we consider all other word-role pairs as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-w} as  $O^{(pa)}(l) = p(a_l | e, b_l)$. 
+  \item  \textbf{Predicate prediction}: We choose the head word $a_{pr}$ of event predicate as target word and the role \texttt{PRD} as target role. Then we consider all other word-role pairs of event participants as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-w} as  $O^{(pr)}(pr) = p(a_{pr} | e, \texttt{PRD})$. 
+  \item  \textbf{Semantic role prediction}: We choose the $l$-th  head word which is not empty word. We use its semantic role as target role $b_l$ and the head word as target word $a_l$. Then we consider all other word-role pairs as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-r} as  $O^{(sr)}(l) = p(b_l | e, a_l)$. 
+\end{itemize}
+Combining all three objective functions in a multi-task style, we define the likelihood function as:
+\begin{equation} \label{eq:likelihood}
+\begin{aligned}
+    \mathcal{L}(\theta, e)
+        &= \mathcal{L}^{(pr)}(\theta, e) \mathcal{L}^{(pa)}(\theta, e) + \alpha \mathcal{L}^{(sr)}(\theta, e)
+\end{aligned}
+\end{equation}
+where $\theta$ representing all parameters in the model and $\alpha$ is the hyper-parameter for the weight of semantic role prediction task. Combining with objectives we define above, the likelihood function can be written as: 
+\begin{equation} \label{eq:likelihood-obj}
+\begin{aligned}
+    \mathcal{L}(\theta, e)
+        &= O^{(pr)}(pr) \prod_{i \in L-1} O^{(pa)}(i) + \alpha \prod_{j \in L} O^{(sr)}(j) 
+\end{aligned}
+\end{equation}
+where $L$ is the number of all non-empty head words in the event. So $L-1$ is the number of event participants (where the predicate is not included). The model is trained over all events in the training data to obtain parameters $\theta$ that maximize the likelihood function as:
+\begin{equation} \label{eq:mle}
+\begin{aligned}
+    \theta
+        &= \mathop{argmax} \limits_{\theta} \mathcal{L}(\theta, e),\ e \in D_{train}
+\end{aligned}
+\end{equation}
+
+To perform maximum likelihood estimation, we process a fixed number of input entries, a batch, each time and use AdaGrad algorithm \citep{duchi2011adaptive} as optimizer to update parameters. The batch size $bs$ and the learning rate $lr$ are hyper-parameters. When half of the event predicates and participants in training data are processed one time, the period is considered as an epoch. After each training epoch, the model is validated on the validation data. The validation loss is defined as: 
+\begin{equation} \label{eq:validation}
+\begin{aligned}
+    \mathcal{L}_{validate}
+        &= \frac{1}{|D_{validate}|} \sum_{e \in D_{validate}} \mathcal{L}(\theta, e) 
+\end{aligned}
+\end{equation}
+When the validation loss stop decreasing for $dp$ epochs, we decrease the learning rate by multiplying $lr$ with a factor of $dr$. If the validation loss stop decreasing for $es$ epochs, we consider the model has converged. We perform early stopping and start model testing. The model is tested on the test data. The overall perplexity is computed on test data as:
+\begin{equation} \label{eq:perplexity}
+\begin{aligned}
+    \mathcal{L}_{test}
+        &= \frac{1}{|D_{test}|} \sum_{e \in D_{test}} \mathcal{L}(\theta, e) \\
+    \mathcal{PP}
+        &= \frac{1}{\mathcal{L}_{test}}
+\end{aligned}
+\end{equation}
+
+
+\subsection{Model Implementation} \label{sec:implementation}
+We implement all models with Keras 2.0.5 \citep{chollet2015keras}. And then we deploy each model on high performance computer with one 48 cores Intel Xeon E7 CPU and 256 GB main memory. We use one Nvidia Geforce Titan X GPU with 12 GB video memory as neural network accelerator. Each model is trained until converged for about 8 days.
+
+The hyper-parameters for model training we use are listed in Table \ref{tab:hyper}. We firstly use same hyper-parameter setting as \citet{tilk2016event} to make a fair comparison. We choose $1.0$ as the weight of semantic role prediction for simplicity. Because the data scale is enormous, in order to speed-up the training process, we make use of all 12 GB video memory and set the $bs$ to $4000$. Using this batch size, we perform feature selection on learning rate. We train MTEP on the first $10\%$ of training set for $5$ epochs and observe the perplexity on test data. We compare the values in the set of $\{0.05, 0.1, 0.15\}$. The setting of $0.05$ has worst performance and the setting of $0.15$ causes gradient explosion from time to time. The experiments show that $0.1$ is the optimised setting. We adopt the setting of $es$ from \citet{tilk2016event}, set $dp$ as $1$ epoch smaller than $es$ and pick $dr$ according to the suggestion of \citet{he2016deep}. 
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{l|l|l}
+\textbf{Hyper-parameter} &  \textbf{Description}    &   \textbf{Value}  \\ \hline
+$k$         &   Embeddings cardinality      &   256     \\
+$d$         &   Hidden layer cardinality    &   512     \\
+$k^{(w)}$   &   Word output cardinality &   512     \\
+$k^{(w)}$   &   Role output cardinality &   512     \\
+$\alpha$    &   Role prediction weight  &   1.0     \\  \hline
+$bs$        &   Batch size              &   4000    \\
+$lr$        &   Learning rate           &   0.1     \\
+$dp$        &   Decrease $lr$ after     &   4       \\
+$dr$        &   Decrease factor         &   0.1     \\
+$es$        &   Early stopping after    &   5       \\
+\end{tabular}
+\caption{\label{tab:hyper} Hyper-parameters for model training.}
+\end{table}
+
+
+\subsection{Evaluation} \label{sec:comp_mtrf}
+In order to show whether the event embedding similarity problem is solved, we perform a model comparison between NNRF and MTEP. Two models are implemented with the same number of hyper-parameters, except MTEP has additional parameters in the target role classifier. We trained and validated both models on the RW-eng corpus. 
 
 The data set is provided by \citet{grefenstette2015concrete} (see Section \ref{sec:eventsim}). Each row in the data set contains a participant ID, two events, a human evaluation score of their similarity from $1$ to $7$ and a HIGH/LOW tag indicating the similarity group of the entry. An example entry is:
 \begin{equation} \label{eg:event-sim}
@@ -708,116 +841,8 @@ Then the model perform the mean composition as  equation \eqref{eq:mean-comp-bop
 
 \newpage
 \section{Experiments}  \label{sec:exp}
-\subsection{Corpus and Prepossessing} \label{sec:corpus}
-We use Rollenwechsel-English (RW-eng) corpus, a large-scale labelled semantic corpus with a head word of each argument using PropBank style role labels \citep{SayeedEtAl2015}. With head words of arguments, we have a direct access to the event participants without modifiers. This helps us to learn embeddings of generalised event knowledge. 
-
-The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. The sentences are labelled using SENNA, a syntactic agnostic semantic role labeller with competitive performance, where sentences with multiple predicates are separated into several events. The head words are extracted with one of four heuristics: \texttt{MALT}, \texttt{MALT-SPAN}, \texttt{LINEAR} or \texttt{FAILED}. One sample event in the corpus is here: 
-\definecolor{bg}{rgb}{0.95, 0.95, 0.95}
-\begin{minted}
-[frame=lines,
-framesep=2mm,
-baselinestretch=1.2,
-bgcolor=bg,
-fontsize=\footnotesize,
-linenos]{xml}
-<text id="ukwac:http://www.exeterviews.co.uk/exeter-shopping2.php" />
-<s>
-<predicate>
-  <governor>release/vbg/13</governor>
-  <dependencies>
-    <dep algorithm="MALT" source="the/DT/3 large/JJ/4
-    stone/NNS/5" text="the large stone"
-    type="A0">stone/nns/5</dep>
-    <dep algorithm="FAILED" source="which/WDT/6" text="which"
-    type="R-A0">which/wdt/6</dep>
-    <dep source="release/VBG/13"
-    text="release" type="V">release/vbg/13</dep>
-    <dep algorithm="MALT_SPAN" source="their/PRP$/14 heat/NN/15"
-    text="their heat" type="A1">heat/nn/15</dep>
-    <dep algorithm="LINEAR" source="at/IN/16 night/NN/17"
-    text="at night" type="AM-TMP">night/nn/17</dep>
-    <dep algorithm="MALT" source="to/TO/18 ensure/VB/19 the/DT/20
-    grape/NNS/21 achieve/VBP/22 maximum/JJ/23 ripeness/NN/24"
-    text="to ensure the grape achieve maximum ripeness"
-    type="AM-PNC">achieve/vbp/22</dep>
-  </dependencies>
-</predicate>
-\end{minted}
-where event is arranged in XML format. Line $1$ contains the URL to the text containing this event. The predicate is tagged as $governor$ and the arguments are tagged as $dep$. The head word is in the value field of $dep$ and the heuristic used to extract it is in the attribute $algorithm$. 
-
-We choose the first 3472 segments as training corpus, the next 14 segments as test corpus and the last 14 segments as validation corpus. The word list for event predicates and participants is constructed with following steps: 
-\begin{enumerate}
-  \item  go through the training corpus, for each event, find out the entries denoting the event predicate and all event participants. 
-  \item  filter out every entry that has \texttt{FAILED} in $algorithm$; only accept entry with POS tag starting with $n$, $v$, $j$, $r$; only accept entry with English characters and punctuation like $'$, $-$; 
-  \item  extract the lower case form of the head word from each entry.
-  \item  lemmatized each word using WordNet lemmatizer in NLTK. 
-  \item  compute the frequency of each unique lemma. 
-  \item  generate the vocabulary from the top $50000$ most frequent words. 
-\end{enumerate}
-Using this word list, each word $a_i$ is assigned with a identifier $i$ in the integer set of $[1, 50000]$. The identifier of out-of-vocabulary word \texttt{<OOV>} is $50001$. So the length of the word vocabulary $V$ is 50001. The role vocabulary is constructed upon the list of semantic role labels defined in Table \ref{tab:semantic} with an additional role label \texttt{OTHER} for those role labels in the corpus but not in our list. Since we have $8$ role labels in the role vocabulary $R$, each role $b_j$ has a identifier $j$ in the range of $[0, 7]$ where the identifier $7$ is for the \texttt{OTHER} role. 
-
-Using these identifiers, we go through all three corpora to construct training data, test data and validation data. Similar to vocabulary construction, we filter out all event with \texttt{FAILED} in $algorithm$. In each event, the maximum number of roles is $29$ which is the number of all possible roles in the corpora. For each role represented by its identifier, it is coupled with a word identifier for the corresponding head word. For any role without a head word, an identifier $0$ for empty word \texttt{<NULL>} is assigned. 
 
 
-\subsection{Model Training} \label{sec:training}
-For each event in the training data, we define the objective function for three tasks in Section \ref{sec:tasks}:
-\begin{itemize}
-  \item  \textbf{Participant prediction}: We choose the $l$-th event participant whose head word is not empty word. We use its head word as target word $a_l$ and its semantic role as target role $b_l$. Then we consider all other word-role pairs as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-w} as  $O^{(pa)}(l) = p(a_l | e, b_l)$. 
-  \item  \textbf{Predicate prediction}: We choose the head word $a_{pr}$ of event predicate as target word and the role \texttt{PRD} as target role. Then we consider all other word-role pairs of event participants as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-w} as  $O^{(pr)}(pr) = p(a_{pr} | e, \texttt{PRD})$. 
-  \item  \textbf{Semantic role prediction}: We choose the $l$-th event participant whose head word is not empty word. We use its semantic role as target role $b_l$ and its head word as target word $a_l$. Then we consider all other word-role pairs as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-r} as  $O^{(sr)}(l) = p(b_l | e, a_l)$. 
-\end{itemize}
-Combining all three objective functions in a multi-task style, we define the likelihood function as:
-\begin{equation} \label{eq:likelihood}
-\begin{aligned}
-    \mathcal{L}(\theta, e)
-        &= O^{(pr)}(pr) \prod_{i \in L} O^{(pa)}(i) + \alpha \prod_{j \in L} O^{(sr)}(j) 
-\end{aligned}
-\end{equation}
-where $\theta$ representing all parameters in the model, $E$ is the set of all event participants in the event and $\alpha$ is the hyper-parameter for the weight of semantic role prediction task. The model is trained over all events in the training data to obtain parameters $\theta$ that maximize the likelihood function as:
-\begin{equation} \label{eq:mle}
-\begin{aligned}
-    \theta
-        &= \mathop{argmax} \limits_{\theta} \mathcal{L}(\theta, e),\ e \in D_{train}
-\end{aligned}
-\end{equation}
-
-To perform maximum likelihood estimation, we process a fixed number of events, a batch, each time and use AdaGrad algorithm \citep{duchi2011adaptive} as optimizer to update parameters. The batch size $bs$ and the learning rate $lr$ are hyper-parameters. When all events in training data are processed one time, the period is considered as an epoch. After each training epoch, the model is validated on the validation data. The validation loss is defined as: 
-\begin{equation} \label{eq:validation}
-\begin{aligned}
-    \mathcal{L}_{validate}
-        &= \frac{1}{|D_{validate}|} \sum_{e \in D_{validate}} \mathcal{L}(\theta, e) 
-\end{aligned}
-\end{equation}
-When the validation loss stop decreasing for $dp$ epochs, we decrease the learning rate by multiplying $lr$ with a factor of $dr$. If the validation loss stop decreasing for $es$ epochs, we consider the model has converged. We perform early stopping and start model testing. The model is tested on the test data. The overall perplexity is computed on test data as:
-\begin{equation} \label{eq:perplexity}
-\begin{aligned}
-    \mathcal{L}_{test}
-        &= \frac{1}{|D_{test}|} \sum_{e \in D_{test}} \mathcal{L}(\theta, e) \\
-    \mathcal{PP}
-        &= \frac{1}{\mathcal{L}_{test}}
-\end{aligned}
-\end{equation}
-
-
-\subsection{Model Implementation} \label{sec:implementation}
-We implement all models with Keras 2.0.5 \citep{chollet2015keras}. And then we deploy each model on high performance computer with one 48 cores Intel Xeon E7 CPU and 256 GB main memory. We use one Nvidia Geforce Titan X GPU with 12 GB video memory as neural network accelerator. Each model is trained until converged for about 8 days.
-
-\subsection{Model Selection} \label{sec:model-select}
-The hyper-parameters for model training we use are listed in Table \ref{tab:hyper}. Because the data scale is enormous, in order to speed-up the training process, we make use of all 12 GB video memory and set the $bs$ to $4000$. Using this batch size, we perform feature selection on learning rate. We train MTRF on the first $10\%$ of training set for $5$ epochs and observe the perplexity on test data. We compare the values in the set of $\{0.05, 0.1, 0.15\}$. The setting of $0.05$ has worst performance and the setting of $0.15$ causes gradient explosion from time to time. The experiments show that $0.1$ is the optimised setting. We adopt the setting of $es$ from \citet{tilk2016event}, set $dp$ as $1$ epoch smaller than $es$ and pick $dr$ according to \citet{he2016deep}. 
-
-
-\begin{table}[t]
-\centering
-\begin{tabular}{l|l|l}
-\textbf{Hyper-parameter} &  \textbf{Description}    &   \textbf{Value}  \\ \hline
-$bs$    &   Batch size              &   4000    \\
-$lr$    &   Learning rate           &   0.1     \\
-$dp$    &   Decrease $lr$ after     &   4       \\
-$dr$    &   Decrease factor         &   0.1     \\
-$es$    &   Early stopping after    &   5       \\
-\end{tabular}
-\caption{\label{tab:hyper} Hyper-parameters for model training.}
-\end{table}
 
 
 
