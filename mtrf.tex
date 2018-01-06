@@ -311,13 +311,13 @@ We intend to learn meaningful representation of event structure in semantic spac
 \begin{tabular}{l|l|l} 
 \hline
 \textbf{ID} &   \textbf{Semantic Role Label}    &   \textbf{Definition} \\  \hline
-0           & PRD       &   the predicate denoting the event \\ \hline
-1           & ARG0      &   proto-agent, the event participant that most likely to be the agent, \\     &&   volitional causer or experiencer \\ \hline
-2           & ARG1      &   proto-patient, the event participant that most likely to be the patient, \\ &&   the event participant which is being affected by the action \\ \hline
-3           & ARG2      &   the event participant which is secondly likely to be the patient,  \\       &&   the benefactive or attribute \\ \hline
-4           & ARGM-MNR  &   the event participant that specifies how the action is performed \\ \hline
-5           & ARGM-LOC  &   the event participant that indicates where the action takes place \\ \hline
-6           & ARGM-TMP  &   the event participant that shows when an action took place \\ \hline
+0           & \texttt{PRD}       &   the predicate denoting the event \\ \hline
+1           & \texttt{ARG0}      &   \textbf{proto-agent}, the event participant that most likely to be the agent, \\     &&   volitional causer or experiencer \\ \hline
+2           & \texttt{ARG1}      &   \textbf{proto-patient}, the event participant that most likely to be the patient, \\ &&   the event participant which is being affected by the action \\ \hline
+3           & \texttt{ARG2}      &   the event participant which is secondly likely to be the patient,  \\       &&   the benefactive or attribute \\ \hline
+4           & \texttt{ARGM-MNR}  &   the event participant that specifies how the action is performed \\ \hline
+5           & \texttt{ARGM-LOC}  &   the event participant that indicates where the action takes place \\ \hline
+6           & \texttt{ARGM-TMP}  &   the event participant that shows when an action took place \\ \hline
 \end{tabular}
 \caption{\label{tab:semantic} Definitions of semantic role labels in this paper.}
 \end{table}
@@ -391,11 +391,11 @@ which is a representation of a participant in an event. "$\circ$" is Hadamard pr
 
 
 
-\newpage
+ 
 \section{Corpus and Prepossessing} \label{sec:corpus}
 In order to learn event-participant embedding from language resources, we use Rollenwechsel-English (\textbf{RW-eng}) corpus, a large-scale labelled semantic corpus with a head word of each argument using PropBank style role labels \citep{SayeedEtAl2015}. With head words of arguments, we have a direct access to the event participants without modifiers. This helps us to learn embeddings of generalised event knowledge. 
 
-The corpus, extracted from the ukWaC corpus \citep{ferraresi2008introducing} and BNC \citep{british2007british}, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. The sentences are labelled using SENNA, a syntactic agnostic semantic role labeller with competitive performance, where sentences with multiple predicates are separated into several events. The head words are extracted with one of four heuristics: \texttt{MALT}, \texttt{MALT-SPAN}, \texttt{LINEAR} or \texttt{FAILED}. One sample event in the corpus is listed here: 
+The corpus, extracted from the ukWaC corpus and BNC, contains about 78 million sentences over 2.3 million documents. Among those sentences, there are approximately 210 million event predicates and 710 million event participants. They divided the corpus into 3500 segments with approximately same number of documents. The sentences are labelled using SENNA, a syntactic agnostic semantic role labeller with competitive performance, where sentences with multiple predicates are separated into several events. The head words are extracted with one of four heuristics: \texttt{MALT}, \texttt{MALT-SPAN}, \texttt{LINEAR} or \texttt{FAILED}. One sample event in the corpus is listed here: 
 \definecolor{bg}{rgb}{0.95, 0.95, 0.95}
 \begin{minted}
 [frame=lines,
@@ -429,12 +429,12 @@ linenos]{xml}
 \end{minted}
 where event is arranged in XML format. Line $1$ contains the URL to the text containing this event. The predicate is tagged as $governor$ and the arguments are tagged as $dep$. The head word is in the value field of $dep$ and the heuristic used to extract it is in the attribute $algorithm$. 
 
-We choose the first 3472 segments as training corpus, the next 14 segments as test corpus and the last 14 segments as validation corpus. The word list for event predicates and participants is constructed with following steps: 
+We choose the first 3472 segments as training corpus, the next 4 segments as test corpus, the next 4 segments as validation corpus, and keep the remaining segments for further experiments. The word list for event predicates and participants is constructed with following steps: 
 \begin{enumerate}
   \item  go through the training corpus, for each event, find out the entries denoting the event predicate and all event participants. 
   \item  filter out every entry that has \texttt{FAILED} in $algorithm$; only accept entry with POS tag starting with $n$, $v$, $j$, $r$; only accept entry with English characters and the dash line $-$; 
   \item  extract the lower case form of the head word from each entry.
-  \item  lemmatized each word using WordNet lemmatizer in NLTK. 
+  \item  lemmatise each word using WordNet \citep{miller1995wordnet} lemmatiser in NLTK \citep{bird2006nltk}. 
   \item  compute the frequency of each unique lemma. 
   \item  generate the vocabulary from the top $50000$ most frequent words. 
 \end{enumerate}
@@ -443,7 +443,7 @@ Using this word list, each word $a_i$ is assigned with a identifier $i$ in the i
 Using these identifiers, we go through all three corpora to construct training data, test data and validation data. Similar to vocabulary construction, we filter out all event with \texttt{FAILED} in $algorithm$. In each event, the maximum number of roles is $8$. If there are more than one \texttt{<OTHER>} role in the event, we accept the last one. For each role represented by its identifier, it is coupled with a word identifier for the corresponding head word. For any role without a head word, an identifier $0$ for empty word \texttt{<NULL>} is assigned. The line of the sample event in the data is listed here: 
 \begin{equation} \label{eq:eg-data}
 \begin{aligned}
-    \{ 0:9527,\ 1:20,\ 2:50,\ 3:0,\ 4:0,\ 5:4311,\ 6:50001,\ 7:0\}
+    \{ 0:9527,\ 1:20,\ 2:50,\ 3:0,\ 4:0,\ 5:0,\ 6:3123,\ 7:4311\}
 \end{aligned}
 \end{equation}
 
