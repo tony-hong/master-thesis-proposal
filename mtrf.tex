@@ -448,8 +448,8 @@ Using these identifiers, we go through all three corpora to construct training d
 \end{equation}
 
 
-\newpage
-\section{Multi-task Event Predicate-Participants Model} \label{sec:mtrf}
+ 
+\section{Multi-task Event-Participant Model} \label{sec:mtep}
 
 
 \begin{figure}[t]
@@ -522,6 +522,7 @@ Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embed
         &= \mathbf{C}_c \ diag(\mathbf{r}_y \mathbf{B}_c) \ \mathbf{A}_c \\
 \end{aligned}
 \end{equation}
+Using the semantic roles we define in Table \ref{tab:semantic}, the NNRF model can perform both predicate prediction and participant prediction. 
 
 
 \begin{figure}[t]
@@ -531,8 +532,10 @@ Since there is a vector $\mathbf{b}_y$ representing target role $b_y$, the embed
 \end{figure}
 
 
-\subsection{Multi-task Learning} \label{sec:mtl}
-In addition to role-filler prediction, we also want to perform semantic role prediction. This task can be considered as a regularisation of the objective function of the role-filler prediction task. We add one more classifier for this task to NNRF in the last layer. The model, named \textbf{multi-task event (MTEP)}, is described in Figure \ref{fig:MTEP} where the extra classifier is in the red border rectangle. 
+\subsection{Multi-task Learning Model} \label{sec:mtl}
+We also want to perform semantic role prediction together with predicate prediction and participant prediction. Multi-task learning can improve generalisation of the model \citep{caruana1998multitask}. In natural language processing, \citet{collobert2011natural} proposed a model which shares the word embedding across tasks of language modelling, part-of-speech tagging, chunking, named entity recognition, semantic role labelling. They reported improvement on each task. 
+
+The semantic role prediction task can be considered as a regularisation of the objective functions of the other tasks. We add one more classifier for this task to NNRF in the last layer. The model, named \textbf{multi-task event-participant (MTEP)} model, is described in Figure \ref{fig:MTEP} where the extra classifier is in the red border rectangle. 
 
 Since we want to obtain the probability distribution of target word or target role, in the last layer a softmax regression classifier is used for each task. The output vectors of these classifiers are computed as:
 \begin{equation} \label{eq:output-mt}
@@ -595,32 +598,42 @@ where $diag(\mathbf{v})$ is a diagonal matrix with vector $\mathbf{v}$ on its di
 \end{equation}
 
 
-
-
-
-
 \subsection{Model Training} \label{sec:training}
-For each event in the training data, we define the objective function for three tasks in Section \ref{sec:tasks}:
+The MTEP model is trained to optimise three objective functions in a multi-task style. For each event in the training data, we define the likelihood functions for the three tasks defined in Section \ref{sec:tasks}:
 \begin{itemize}
-  \item  \textbf{Participant prediction}: We choose the $l$-th head word which is not empty word. We use the head word as target word $a_l$ and its semantic role as target role $b_l$. Then we consider all other word-role pairs as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-w} as  $O^{(pa)}(l) = p(a_l | e, b_l)$. 
-  \item  \textbf{Predicate prediction}: We choose the head word $a_{pr}$ of event predicate as target word and the role \texttt{PRD} as target role. Then we consider all other word-role pairs of event participants as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-w} as  $O^{(pr)}(pr) = p(a_{pr} | e, \texttt{PRD})$. 
-  \item  \textbf{Semantic role prediction}: We choose the $l$-th  head word which is not empty word. We use its semantic role as target role $b_l$ and the head word as target word $a_l$. Then we consider all other word-role pairs as event context $e$. The objective function is computed using output from Equation \eqref{eq:softmax-r} as  $O^{(sr)}(l) = p(b_l | e, a_l)$. 
+  \item  \textbf{Participant prediction}: We choose the $l$-th head word which is not empty word. We use the head word as target word $a_l$ and its semantic role as target role $b_l$. Then we consider all other word-role pairs as event context $e$. The likelihood function is computed using output from Equation \eqref{eq:softmax-w} as:
+  \begin{equation} \label{eq:likelihood-pa}
+  \begin{aligned}
+  \mathcal{L}^{(pa)}(\theta, e) = \prod_{i = 1}^{L-1} p(a_l | e, b_l)
+  \end{aligned}
+  \end{equation}
+where $L-1$ is the number of event participants in the event (where the predicate is not included). 
+
+  \item  \textbf{Predicate prediction}: We choose the head word $a_{pr}$ of event predicate as target word and the role \texttt{PRD} as target role. Then we consider all other word-role pairs of event participants as event context $e$. The likelihood function is computed using output from Equation \eqref{eq:softmax-w} as:
+  \begin{equation} \label{eq:likelihood-pr}
+  \begin{aligned}
+  \mathcal{L}^{(pr)}(\theta, e) = p(a_{pr} | e, \texttt{PRD}). 
+  \end{aligned}
+  \end{equation}
+
+  \item  \textbf{Semantic role prediction}: We choose the $l$-th  head word which is not empty word. We use its semantic role as target role $b_l$ and the head word as target word $a_l$. Then we consider all other word-role pairs as event context $e$. The likelihood function is computed using output from Equation \eqref{eq:softmax-r} as:
+  \begin{equation} \label{eq:likelihood-r}
+  \begin{aligned}
+  \mathcal{L}^{(r)}(\theta, e) = \prod_{i = 1}^{L} p(b_l | e, a_l)
+  \end{aligned}
+  \end{equation}
+where $L$ is the number of all non-empty head words in the event. 
 \end{itemize}
-Combining all three objective functions in a multi-task style, we define the likelihood function as:
+Considering all three likelihood functions in a multi-task style, we define the likelihood function as:
 \begin{equation} \label{eq:likelihood}
 \begin{aligned}
     \mathcal{L}(\theta, e)
-        &= \mathcal{L}^{(pr)}(\theta, e) \mathcal{L}^{(pa)}(\theta, e) + \alpha \mathcal{L}^{(sr)}(\theta, e)
+        &= \mathcal{L}^{(pr)}(\theta, e) \mathcal{L}^{(pa)}(\theta, e) + \alpha \mathcal{L}^{(r)}(\theta, e)    \\
+        &= \mathcal{L}^{(w)}(\theta, e) + \alpha \mathcal{L}^{(r)}(\theta, e)
 \end{aligned}
 \end{equation}
-where $\theta$ representing all parameters in the model and $\alpha$ is the hyper-parameter for the weight of semantic role prediction task. Combining with objectives we define above, the likelihood function can be written as: 
-\begin{equation} \label{eq:likelihood-obj}
-\begin{aligned}
-    \mathcal{L}(\theta, e)
-        &= O^{(pr)}(pr) \prod_{i \in L-1} O^{(pa)}(i) + \alpha \prod_{j \in L} O^{(sr)}(j) 
-\end{aligned}
-\end{equation}
-where $L$ is the number of all non-empty head words in the event. So $L-1$ is the number of event participants (where the predicate is not included). The model is trained over all events in the training data to obtain parameters $\theta$ that maximize the likelihood function as:
+where $\theta$ representing all parameters in the model and $\alpha$ is the hyper-parameter for the weight of semantic role prediction task. $\mathcal{L}^{(w)}(\theta, e)$ is the head word likelihood and $\mathcal{L}^{(r)}(\theta, e)$ is the semantic role likelihood. 
+The model is trained over all events in the training data to obtain parameters $\theta$ that maximize the likelihood function as:
 \begin{equation} \label{eq:mle}
 \begin{aligned}
     \theta
@@ -628,99 +641,96 @@ where $L$ is the number of all non-empty head words in the event. So $L-1$ is th
 \end{aligned}
 \end{equation}
 
-To perform maximum likelihood estimation, we process a fixed number of input entries, a batch, each time and use AdaGrad algorithm \citep{duchi2011adaptive} as optimizer to update parameters. The batch size $bs$ and the learning rate $lr$ are hyper-parameters. When half of the event predicates and participants in training data are processed one time, the period is considered as an epoch. After each training epoch, the model is validated on the validation data. The validation loss is defined as: 
+To perform maximum likelihood estimation, we process a fixed number of input entries, a batch, each time and use AdaGrad algorithm \citep{duchi2011adaptive} as optimiser to update parameters. The batch size $bs$ and the learning rate $lr$ are hyper-parameters. When a specific number of the event predicates and participants in training data are processed one time, the period is considered as an iteration. This number is the iteration size $is$. After each training iteration, the model is validated on the validation data. The validation loss is defined as: 
 \begin{equation} \label{eq:validation}
 \begin{aligned}
     \mathcal{L}_{validate}
-        &= \frac{1}{|D_{validate}|} \sum_{e \in D_{validate}} \mathcal{L}(\theta, e) 
+        &= \frac{1}{|D_{validate}|} \sum_{e \in D_{validate}} (-\log \mathcal{L}(\theta, e))
 \end{aligned}
 \end{equation}
-When the validation loss stop decreasing for $dp$ epochs, we decrease the learning rate by multiplying $lr$ with a factor of $dr$. If the validation loss stop decreasing for $es$ epochs, we consider the model has converged. We perform early stopping and start model testing. The model is tested on the test data. The overall perplexity is computed on test data as:
-\begin{equation} \label{eq:perplexity}
+When the validation loss stop decreasing for $dl$ iterations, we decrease the learning rate by multiplying $lr$ with a factor of $dr$. If the validation loss stop decreasing for $es$ iterations, we consider the model has converged. We perform early stopping and start model testing. The model is tested on the test data. The test loss is computed on test data as:
+\begin{equation} \label{eq:test-likelihood}
 \begin{aligned}
     \mathcal{L}_{test}
-        &= \frac{1}{|D_{test}|} \sum_{e \in D_{test}} \mathcal{L}(\theta, e) \\
-    \mathcal{PP}
-        &= \frac{1}{\mathcal{L}_{test}}
+        &= \frac{1}{|D_{test}|} \sum_{e \in D_{test}} (-\log \mathcal{L}(\theta, e))
 \end{aligned}
 \end{equation}
 
 
-\subsection{Model Implementation} \label{sec:implementation}
-We implement all models with Keras 2.0.5 \citep{chollet2015keras}. And then we deploy each model on high performance computer with one 48 cores Intel Xeon E7 CPU and 256 GB main memory. We use one Nvidia Geforce Titan X GPU with 12 GB video memory as neural network accelerator. Each model is trained until converged for about 8 days.
 
-The hyper-parameters for model training we use are listed in Table \ref{tab:hyper}. We firstly use same hyper-parameter setting as \citet{tilk2016event} to make a fair comparison. We choose $1.0$ as the weight of semantic role prediction for simplicity. Because the data scale is enormous, in order to speed-up the training process, we make use of all 12 GB video memory and set the $bs$ to $4000$. Using this batch size, we perform feature selection on learning rate. We train MTEP on the first $10\%$ of training set for $5$ epochs and observe the perplexity on test data. We compare the values in the set of $\{0.05, 0.1, 0.15\}$. The setting of $0.05$ has worst performance and the setting of $0.15$ causes gradient explosion from time to time. The experiments show that $0.1$ is the optimised setting. We adopt the setting of $es$ from \citet{tilk2016event}, set $dp$ as $1$ epoch smaller than $es$ and pick $dr$ according to the suggestion of \citet{he2016deep}. 
+\subsection{Model Comparison} 
+We perform a model comparison between NNRF and MTEP. Our hypothesis is that with the additional semantic role prediction task, MTEP can learn a better event embedding. We train the models with the same setting and then perform two evaluations.
+
+\subsubsection{Model Implementation} \label{sec:mtep-implementation}
+We trained and validated both models on the RW-eng corpus. The hyper-parameters for model training we use are listed in Table \ref{tab:hyper}. We firstly use same model hyper-parameter setting, shown in the first section, as \citet{tilk2016event} to make a fair comparison. We choose $1.0$ as the weight of semantic role prediction $\alpha$ for simplicity. Because the data scale is enormous, in order to speed-up the training process, we make use of all 12 GB video memory and set the batch size $bs$ to $4000$. Using this batch size, we perform feature selection on learning rate. We train MTEP on the first $10\%$ of training set for $5$ iterations and observe the perplexity on test data. We compare the values in the set of $\{0.05, 0.1, 0.15\}$. The setting of $0.05$ has the worst performance and the setting of $0.15$ causes gradient explosion from time to time. The results show that $0.1$ is the optimised setting. We set the iteration size $is$ to $1 \times 10^8$. Because it is approximately $\frac{1}{5}$ of the training data size. With this setting, we can now consider $5$ iterations as one epoch. We set the early stopping iterations $es$ to $5$, set the decrease learning rate iterations $dl$ to $3$ that is about half of $es$ and set decreasing factor $dr$ to $0.1$ according to the suggestion of \citet{he2016deep}. We define the minimum difference between two values $\epsilon$ as $1.0*10^{-3}$. So if the difference between the loss of current iteration and the loss of best iteration is no more than $1.0*10^{-3}$, we consider the loss is not decreasing. 
+
+We implement all models using Keras 2.0.5 \citep{chollet2015keras} with Tensorflow 1.2 \citep{abadi2016tensorflow} as backend. And then we deploy each model as a Docker container on a high performance computer with one 48 cores Intel Xeon E7 CPU and 256 GB main memory. We use one Nvidia Geforce Titan X GPU with 12 GB video memory as neural network accelerator. 
 
 
 \begin{table}[t]
 \centering
 \begin{tabular}{l|l|l}
 \textbf{Hyper-parameter} &  \textbf{Description}    &   \textbf{Value}  \\ \hline
-$k$         &   Embeddings cardinality      &   256     \\
-$d$         &   Hidden layer cardinality    &   512     \\
-$k^{(w)}$   &   Word output cardinality &   512     \\
-$k^{(w)}$   &   Role output cardinality &   512     \\
-$\alpha$    &   Role prediction weight  &   1.0     \\  \hline
-$bs$        &   Batch size              &   4000    \\
-$lr$        &   Learning rate           &   0.1     \\
-$dp$        &   Decrease $lr$ after     &   4       \\
-$dr$        &   Decrease factor         &   0.1     \\
-$es$        &   Early stopping after    &   5       \\
+$k$         &   Embeddings dimensions   &   $256$       \\
+$d$         &   Hidden layer dimensions &   $512$       \\
+$k^{(w)}$   &   Word output dimensions  &   $512$       \\
+$k^{(w)}$   &   Role output dimensions  &   $512$       \\  \hline
+$\alpha$    &   Role prediction weight  &   $1.0$       \\
+$bs$        &   Batch size              &   $4000$      \\
+$lr$        &   Learning rate           &   $0.1$       \\
+$is$        &   Iteration size          &   $1 \times 10^8$ \\
+$dl$        &   Decrease $lr$ iterations    &   $3$     \\
+$dr$        &   Decreasing factor       &   $0.1$       \\
+$es$        &   Early stopping iterations   &   $5$     \\
 \end{tabular}
-\caption{\label{tab:hyper} Hyper-parameters for model training.}
+\caption{\label{tab:hyper} Hyper-parameters for model training. Model hyper-parameters are in the first section. Training hyper-parameters are in the second section.}
 \end{table}
 
 
-\subsection{Evaluation} \label{sec:comp_mtrf}
-In order to show whether the event embedding similarity problem is solved, we perform a model comparison between NNRF and MTEP. Two models are implemented with the same number of hyper-parameters, except MTEP has additional parameters in the target role classifier. We trained and validated both models on the RW-eng corpus. 
-
-The data set is provided by \citet{grefenstette2015concrete} (see Section \ref{sec:eventsim}). Each row in the data set contains a participant ID, two events, a human evaluation score of their similarity from $1$ to $7$ and a HIGH/LOW tag indicating the similarity group of the entry. An example entry is:
-\begin{equation} \label{eg:event-sim}
-    participant1, (table, draw, eye), (table, attract, eye), 7, \text{HIGH}
-\end{equation}
-Naturally we can consider the subject $table$ has a ARG0 semantic role and the object $eye$ has a ARG1 semantic role in the event.
-
-The models are evaluated in two experiments. In the first experiment, we want to evaluate the difference between highly similar event pair and event pair containing foil event. For each entry which has a HIGH tag and the highest score (i.e. $7$) in the data set, we extract two events and construct a foil event for the second event. For example entry \eqref{eg:event-sim}, we have:
+\subsubsection{Evaluation: Semantic Role Sensitiveness} \label{sec:comp-srs}
+In the first evaluation, we want to test whether the model is sensitive to semantic roles of event participants. A better model can distinguish between two event with same head words but different semantic roles. For each entry which has non-empty \texttt{ARG0} role and \texttt{ARG1} role in the test dataset from the test data of the RW-eng corpus, we extract a target event and construct a foil event for the second event. For example entry \eqref{eg:event-sim}, we have:
 \begin{equation}
-    (table, draw, eye), (table, attract, eye), (eye, attract, table)
+    (table, draw, eye), (eye, draw, table)
 \end{equation}
-This subset is named as \textbf{foil event similarity (FES)} data set  which has $2057$ entries. We do not deleted entries with same event pair but different experiment participants, because the event pair is more similar to each other if more experiment participants grade it with highest score. We obtain the event embedding vector defined in equation  \eqref{eq:sum-comp} from two models. We then compute two similarities: similarity of the first event and the second event; similarity of the first event and the foil event. Generally the larger of the difference between these two similarities we obtain, the better model we have. The similarity score of two events is computed as cosine similarity of two event embedding vectors. For each model, the means of these two similarities are computed across FSM. The results are in Table \ref{tab:foil-mtrf}. MTRF has a lower mean similarity between original event and foil event. Moreover, it has a higher difference between two similarities. 
+This subset is named as \textbf{target-foil event (TFE)} dataset which has $500$ entries. We use the head words with \texttt{ARG0} role and \texttt{ARG1} role as input. Then we obtain the event embedding vector defined in equation  \eqref{eq:sum-comp} from two models. We compute the similarity of the target event and the foil event using cosine similarity of two event embedding vectors. Generally the bigger of the similarity between these two events we obtain, the more role sensitive model we have. For each model, the means of these two similarities are computed across TFE dataset. The results are in Table \ref{tab:foil-mtep}. The MTEP has a lower mean similarity between target event and foil event. We use two-tailed paired $t$-test on these two lists of similarity scores, $t=-31.844$, $p=2.760 \times 10^{-122}$. The result,  highly significant, indicates that MTEP can better differentiate these two kinds of events. 
 
-The second experiment is event similarity task \citep{grefenstette2015concrete}. We extract the event embedding vector for the first and second event. The similarity score of two events is computed as cosine similarity as well. Then we compute Spearman's rho correlation coefficient between model scores and human judgement scores. The result in every epoch is reported as a line chart in Figure \ref{fig:GS-NNRF-MTRF}. The correlation score keeps stable after $20$ epochs. MTRF has a higher score than NNRF at almost every epoch. Thus MTRF is better correlated with human performance. This indicates that with the additional semantic role prediction task, MTRF learns a better embedding of events. 
+
+\subsubsection{Evaluation: Event Similarity} \label{sec:comp-eventsim}
+The second experiment is event similarity correlation task which tests the compositional process of predicate and participants in each event. This task determine how well it forms an event with clear meaning for ambiguous predicates. We use the sentence similarity comparison task proposed by \citet{grefenstette2015concrete} (second experiment in their paper). The dataset, named \textbf{Grefenstette13} here, is originated from \citet{grefenstette2011experimental} and reannotated by Tuckers in 2013. Each row in the dataset contains a participant ID, two sentences with semantically related predicates, a human evaluation score of their similarity from $1$ to $7$ and a \texttt{HIGH}/\texttt{LOW} tag indicating how similar are two sentences. An example entry is here:
+\begin{equation} \label{eg:event-sim}
+    participant1, (table, draw, eye), (table, attract, eye), 7, \texttt{HIGH}
+\end{equation}
+We treat two sentences as two events. Naturally we can consider the subject $table$ has a \texttt{ARG0} semantic role and the object $eye$ has a \texttt{ARG1} semantic role in the event. We extract the event embedding vector for the first and second event. The similarity score of two events is computed as cosine similarity. Then we compute Spearman's $\rho$ correlation coefficient between model scores and human judgement scores. The result in every iteration is reported as a line chart in Figure \ref{fig:NNRF-MTEP-GS13}. The correlation scores keep stable after $20$ iterations. MTEP has a higher score than NNRF at almost every iteration. Thus MTEP is better correlated with human judgements. This indicates that with the additional semantic role prediction task, MTEP learns a better embedding of events. 
 
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l|ll|l}
-    \textbf{Model}  &   (Event 1, Event 2)   &    (Event 1, Foil Event)    &  Difference of mean  \\ \hline
-    \textbf{NNRF}   &   78 $\pm 10$ &   64 $\pm 12$ &   14  \\
-    \textbf{MTEP}   &   68 $\pm 13$ &   52 $\pm 14$ &   \textbf{16}  \\
+\begin{tabular}{l||l|l}
+    \textbf{Model}  &  sample size  &   $mean \pm std$\\ \hline
+    \textbf{NNRF}   &  $500$    &   $0.74\pm 0.13$  \\
+    \textbf{MTEP}   &  $500$    &   $0.64\pm 0.12$  \\
 \end{tabular}
-\caption{\label{tab:foil-mtrf} Similar event similarity versus foil event similarity. Each score is cosine similarity multiplied by 100 and the standard deviation multiplied by 100 follows.}
+\caption{\label{tab:foil-mtep} Cosine similarity between target event and foil event. Sample sizes are listed in the second column. In the third column, each score is the mean cosine similarity and the standard deviation. }
 \end{table}
 % * <asayeed@mbl.ca> 2017-11-13T22:52:35.875Z:
 % 
-% Did I miss how many items there were in this data set? Can we get an idea of the significance of this difference? (I realize that this is not always easy to calculate, but at least the data set size and some sort of variances may be useful here.)
+% Did I miss how many items there were in this dataset? Can we get an idea of the significance of this difference? (I realize that this is not always easy to calculate, but at least the dataset size and some sort of variances may be useful here.)
 % 
 % ^ <xhong@coli.uni-saarland.de> 2017-11-20T00:30:06.655Z:
 % 
-% I added the number of entries in the data set, standard deviations and explanation of motivation.
+% I added the number of entries in the dataset, standard deviations and explanation of motivation.
 %
 % ^.
 
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.9\textwidth]{GS-NNRF-MTRF.png}
-\caption{\label{fig:GS-NNRF-MTEP} Event similarity evaluation by training epoch of NNRF and MTEP. $x$-axis is the number of training epochs. $y$-axis is the Spearman's rho between model scores andhuman judgements. }
+\includegraphics[width=0.9\textwidth]{NNRF-MTEP-GS13.png}
+\caption{\label{fig:NNRF-MTEP-GS13} Event similarity evaluation by training iteration of NNRF and MTEP. $x$-axis is the number of training iterations. $y$-axis is the Spearman's rho between model scores and human judgements. }
 \end{figure}
 
 
 
-
-
-
-\newpage
 \section{Bag-of-Event-Participant Model} \label{sec:bop}
 
 
