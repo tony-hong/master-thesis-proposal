@@ -742,15 +742,14 @@ We treat two sentences as two events. Naturally we can consider the subject $tab
 
 
 \subsection{Composition Method for Event Embedding} \label{sec:composition}
-When it comes to the construction of event representation, there are two cases: participant order is known or unknown. In order to build a model which is compatible with first-order logic representation where conjunction connective does not imply order, we focus on the case that participant order is not given. 
+When it comes to the construction of event representation, there are two cases: participant order is known or unknown. In order to build a model which is compatible with first-order logic representation where conjunction connective does not imply order, 
+We focus on methods in the condition that participant order is not provided and leave the other case for future exploration.
 
 In the NNRF model, embedding vectors of event participants are sum up together to represent the whole event. Nonetheless, this is only a simple method to composite event participants. Each participant has the same weight in the event. Additionally, means of parameters can shift in a large range the after the sum operation. How can we improve this? We need an exploration of composition methods. 
 
 We separate all possible methods into two groups. The first group is \textbf{non-parametric methods} which have no extra parameters like addition, multiplication and concatenation of event participant vectors. Another group is \textbf{parametric methods} which need more parameters like recursive unit \citep{socher2013recursive}, recurrent unit \citet{mikolov2010recurrent}, or long-short-term-memory recurrent unit \citep{hochreiter1997LSTM}. So the NNRF is classified as non-parametric composition method. 
 
-
-\subsection{Mean Composition Method} \label{sec:mean-composition}
-In this work, we focus on non-parametric methods in the condition that participant order is not provided and leave the other for future exploration. Multiplication is an effective composition method for distributional memory models. Unfortunately, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But the concatenated feature cannot be used directly. An extra feature extractor on top of the concatenation is needed, which turns it into a parametric method. 
+Multiplication is an effective composition method for distributional semantic models. Unfortunately, during optimisation of neural network models, multiplication often results in extreme values which will lead to overflow or underflow. Concatenation is widely used in language modelling. But the concatenated feature cannot be used directly. An extra feature extractor on top of the concatenation is needed, which turns it into a heavyweight parametric method. 
 % * <asayeed@mbl.ca> 2017-11-13T22:54:15.219Z:
 % 
 % "distributed semantic models" you mean...you're not referring to SDDM here right?
@@ -766,13 +765,18 @@ In this work, we focus on non-parametric methods in the condition that participa
 % ^ <xhong@coli.uni-saarland.de> 2017-11-20T08:55:12.079Z:
 % 
 % This claim is actually from two references of Tilk paper. 
-% In Lenci 2011, they used 'PRODUCT' method for composition and obtained their best model on Bicknell data set.
+% In Lenci 2011, they used 'PRODUCT' method for composition and obtained their best model on Bicknell dataset.
 % In Grefenstette 2015 paper we used for the baseline of event similarity, they obtained competitive performance on multiplicative method. 
 % Maybe I can use the general term 'multiplicative method' instead? 
 %
-% ^.
+% ^ <xhong@coli.uni-saarland.de> 2017-11-29T11:32:14.107Z:
+% 
+% modified to a more general term :  'distributional semantic model'
+%
+% ^ <xhong@coli.uni-saarland.de> 2017-11-29T11:32:15.613Z.
 
 
+\subsection{Mean Composition Method} \label{sec:mean-composition}
 We propose the \textbf{mean} composition function which computes the mean of all the vectors of event participants to represent the event as one vector. Computing the mean can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of weights of the hidden vector. 
 
 Since it is a non-parametric method, we also want to add a weight before the mean composition. Instead of using a fully-connected layer, we apply the PReLU to each embedding vector of participants to obtain the hidden vector: 
@@ -799,7 +803,6 @@ Based on the MTEP model, we replace the composition function with mean compositi
 \includegraphics[width=0.8\textwidth]{BOPRes.png}
 \caption{\label{fig:BOPRes} Model architecture of bag-of-predicates/participants with residual learning.}
 \end{figure}
-
 % * <asayeed@mbl.ca> 2017-11-13T22:55:19.201Z:
 % 
 % Would be worth it to maybe highlight somehow visually the differences between these models? As in the most salient feature that distinguishes them from each other/NNRF?
@@ -813,6 +816,7 @@ Based on the MTEP model, we replace the composition function with mean compositi
 % Might be worth pointing out what your highlights mean.  Clarity never hurt.
 %
 % ^.
+
 
 \subsection{Residual Learning} \label{sec:residual}
 All models presented above contain two factored tensors. It has been shown that training model with factored tensors is difficult \citep{sutskever2011generating, kiros2014multimodal}. Due to the fact that each tensor element is represented as a product of three parameters, gradient explosion or vanishing problem happens more likely during the training. To tackle the gradient explosion or vanishing problem in deep neural networks, \citet{he2016deep} proposed the \textit{deep residual learning} framework. They have the observation that in a way of constructing a deep model from a shallow model, one needs to add additional layers which are identity mapping over other layers copied from the shallow model. As a result, we can force the layers to fit a residual mapping. Formally, a residual block containing two hidden layers using $PReLU$ activation function can be written as: 
@@ -976,9 +980,9 @@ This is a representation of the event in first order logic.
 
 
 
+ 
+
 \newpage
-
-
 \bibliographystyle{acl_natbib}
 \bibliography{mtrf}
 
