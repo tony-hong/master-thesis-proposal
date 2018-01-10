@@ -340,7 +340,7 @@ We perform tensor rank decomposition \citep{hitchcock1927expression} on the embe
         &= \sum_{m=1}^{k} \lambda_m \mathbf{a}_m \otimes \mathbf{b}_m \otimes \mathbf{d}_m, \\
 \end{aligned}
 \end{equation}
-where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$ and $\lambda_m$ is the weight of rank $m$. Each rank-1 tensor can be written as outer product of 3 row vectors $\mathbf{a}_m$, $\mathbf{b}_m$ and $\mathbf{d}_m$. Since all parameters are learnt during training, we let $\mathbf{c}_m$ equal to $\lambda_m \mathbf{d}_m$. So the equation becomes:
+where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$ and $\lambda_m$ is the weight of rank $m$. Each rank-1 tensor can be written as outer product of 3 row vectors $\mathbf{a}_m$, $\mathbf{b}_m$ and $\mathbf{d}_m$. Since all parameters are learnt during training, we let $\mathbf{c}_m = \lambda_m \mathbf{d}_m$. So the equation becomes:
 \begin{equation} \label{eq:trd}
 \begin{aligned}
     \mathbf{T}   
@@ -350,7 +350,7 @@ where tensor $\mathbf{T}$ is decomposed into $k$ rank-1 tensor $\mathbf{T}'$ and
 where the smallest $k$ makes the equation true is the tensor rank of $\mathbf{T}$. Now the number of parameters is reduced to $(|V| + |R| + d) \times k$ which is comparable smaller. 
 
 \subsection{Interpretation of Factored Tensor} \label{sec:tf-expl}
-To get a better matrix representation of the factored tensor in equation \eqref{eq:trd}, we group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrices $\mathbf{C} \in \mathbb{R}^{k \times d}$. As a result, word $i$ can be represented by a matrix: 
+To get a better matrix representation of the factored tensor in equation \eqref{eq:trd}, we group $k$ vectors $\mathbf{a}_m$, $\mathbf{b}_m$ by column into matrices $\mathbf{A} \in \mathbb{R}^{|V| \times k}$, $\mathbf{B} \in \mathbb{R}^{|R| \times k}$ and $\mathbf{c}_m$ by row into matrix $\mathbf{C} \in \mathbb{R}^{k \times d}$. As a result, word $i$ can be represented by a matrix: 
 \begin{equation} \label{eq:we-tensor}
 \begin{aligned}
     \mathbf{T}_{(i)}
@@ -441,7 +441,7 @@ Using this word list, each word $a_i$ is assigned with a identifier $i$ in the i
 Using these identifiers, we go through all three corpora to construct training data, test data and validation data. Similar to vocabulary construction, we filter out all event with \texttt{FAILED} in $algorithm$. In each event, the maximum number of roles is $8$. If there are more than one \texttt{<OTHER>} role in the event, we accept the last one. For each role represented by its identifier, it is coupled with a word identifier for the corresponding head word. For any role without a head word, an identifier $0$ for empty word \texttt{<NULL>} is assigned. The line of the sample event in the data is listed here: 
 \begin{equation} \label{eq:eg-data}
 \begin{aligned}
-    \{ 0:9527,\ 1:20,\ 2:50,\ 3:0,\ 4:0,\ 5:0,\ 6:3123,\ 7:4311\}
+  \{ 0:9527,\ 1:20,\ 2:50,\ 3:0,\ 4:0,\ 5:0,\ 6:3123,\ 7:4311\}
 \end{aligned}
 \end{equation}
 
@@ -465,14 +465,14 @@ To perform the role-filler prediction, \citet{tilk2016event} proposed the \texti
         &= (\mathbf{w}_i \mathbf{A}_e \circ \mathbf{r}_j \mathbf{B}_e) \mathbf{C}_e \\
 \end{aligned}
 \end{equation}
-The embedding vectors are composed using sum method into an representation of words except the target word as:
+Except the vector of the target word, the embedding vectors are composed using sum method into an representation of the event as:
 \begin{equation} \label{eq:sum-comp}
 \begin{aligned}
     \mathbf{e}
-        &= \sum_{l=1}^{L} \mathbf{p}_{l} \\
+        &= \sum_{l=1}^{L-1} \mathbf{p}_{l} \\
 \end{aligned}
 \end{equation}
-where $l$ is the index of the word and $L$ is the number of words in current event $e$. Then it passes through one non-linearity layer with parametric rectified linear unit \citep{he2015delving} as follow:
+where $l$ is the index of the word and $L-1$ is the number of input words in current event $e$. Then it passes through one non-linearity layer with parametric rectified linear unit \citep{he2015delving} as follow:
 \begin{equation} \label{eq:nonlinearity-nnrf}
 \begin{aligned}
     \mathbf{h}
@@ -531,7 +531,7 @@ Using the semantic roles we define in Table \ref{tab:semantic}, the NNRF model c
 
 
 \subsection{Multi-task Learning Model} \label{sec:mtl}
-We also want to perform semantic role prediction together with predicate prediction and participant prediction. Multi-task learning can improve generalisation of the model \citep{caruana1998multitask}. In natural language processing, \citet{collobert2011natural} proposed a model which shares the word embedding across tasks of language modelling, part-of-speech tagging, chunking, named entity recognition, semantic role labelling. They reported improvement on each task. 
+We also want to perform semantic role prediction together with predicate prediction and participant prediction. Multi-task learning can improve generalisation of the model \citep{caruana1998multitask}. In natural language processing, \citet{collobert2011natural} proposed a model which shares the word embedding across tasks of language modelling, part-of-speech tagging, chunking, named entity recognition, semantic role labelling. 
 
 The semantic role prediction task can be considered as a regularisation of the objective functions of the other tasks. We add one more classifier for this task to NNRF in the last layer. The model, named \textbf{multi-task event-participant (MTEP)} model, is described in Figure \ref{fig:MTEP} where the extra classifier is in the red border rectangle. 
 
@@ -576,7 +576,7 @@ For each target role or target word, we apply tensor factorisation again to obta
         &= \sum_{m=1}^{k^{(r)}} \mathbf{c}_{m}^{(r)} \otimes  \mathbf{a}_{m_{(y)}}^{(r)} \otimes \mathbf{b}_m^{(r)} \\
 \end{aligned}
 \end{equation}
-Similarly, we group vectors $\mathbf{c}_{m}^{(w)}$, $\mathbf{c}_{m}^{(r)}$ by row into matrices $\mathbf{C}_w \in \mathbb{R}^{d \times k^{(w)}}$, $\mathbf{C}_r \in \mathbb{R}^{d \times k^{(r)}}$ and group $\mathbf{a}_m^{(w)}$, $\mathbf{b}_m^{(r)}$ by column into matrices $\mathbf{A}_w \in \mathbb{R}^{k^{(w)} \times |V|}$, $\mathbf{B}_r \in \mathbb{R}^{k^{(r)} \times |R|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, two weight matrices in equation \eqref{eq:output-nnrf}  can be written as: 
+Similarly, we group vectors $\mathbf{c}_{m}^{(w)}$, $\mathbf{c}_{m}^{(r)}$ by row into matrices $\mathbf{C}_w \in \mathbb{R}^{d \times k^{(w)}}$, $\mathbf{C}_r \in \mathbb{R}^{d \times k^{(r)}}$ and group $\mathbf{a}_m^{(w)}$, $\mathbf{b}_m^{(r)}$ by column into matrices $\mathbf{A}_w \in \mathbb{R}^{k^{(w)} \times |V|}$, $\mathbf{B}_r \in \mathbb{R}^{k^{(r)} \times |R|}$. After getting rid of outer product using same transformation as equation \eqref{eq:rbwe}, two weight matrices in equation \eqref{eq:output-mt}  can be written as: 
 \begin{equation} \label{eq:cls-mt}
 \begin{aligned}
     \mathbf{W}_w
@@ -626,15 +626,15 @@ Considering all three likelihood functions in a multi-task style, we define the 
 \begin{equation} \label{eq:likelihood}
 \begin{aligned}
     \mathcal{L}(\theta, e)
-        &= \mathcal{L}^{(pr)}(\theta, e) \mathcal{L}^{(pa)}(\theta, e) + \alpha \mathcal{L}^{(r)}(\theta, e)    \\
-        &= \mathcal{L}^{(w)}(\theta, e) + \alpha \mathcal{L}^{(r)}(\theta, e)
+    &= \mathcal{L}^{(pr)}(\theta, e) \mathcal{L}^{(pa)}(\theta, e) + \alpha \mathcal{L}^{(r)}(\theta, e)  \\
+    &= \mathcal{L}^{(w)}(\theta, e) + \alpha \mathcal{L}^{(r)}(\theta, e)
 \end{aligned}
 \end{equation}
 where $\theta$ representing all parameters in the model and $\alpha$ is the hyper-parameter for the weight of semantic role prediction task. $\mathcal{L}^{(w)}(\theta, e)$ is the head word likelihood and $\mathcal{L}^{(r)}(\theta, e)$ is the semantic role likelihood. 
-The model is trained over all events in the training data to obtain parameters $\theta$ that maximize the likelihood function as:
+The model is trained over all events in the training data to obtain parameters $\theta^*$ that maximize the likelihood function as:
 \begin{equation} \label{eq:mle}
 \begin{aligned}
-    \theta
+    \theta^*
         &= \mathop{argmax} \limits_{\theta} \mathcal{L}(\theta, e),\ e \in D_{train}
 \end{aligned}
 \end{equation}
@@ -667,19 +667,19 @@ We implement all models using Keras 2.0.5 \citep{chollet2015keras} with Tensorfl
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l|l|l}
-\textbf{Hyper-parameter} &  \textbf{Description}    &   \textbf{Value}  \\ \hline
-$k$         &   Embeddings dimensions   &   $256$       \\
-$d$         &   Hidden layer dimensions &   $512$       \\
-$k^{(w)}$   &   Word output dimensions  &   $512$       \\
-$k^{(w)}$   &   Role output dimensions  &   $512$       \\  \hline
-$\alpha$    &   Role prediction weight  &   $1.0$       \\
-$bs$        &   Batch size              &   $4000$      \\
-$lr$        &   Learning rate           &   $0.1$       \\
-$is$        &   Iteration size          &   $1 \times 10^8$ \\
-$dl$        &   Decrease $lr$ iterations    &   $3$     \\
-$dr$        &   Decreasing factor       &   $0.1$       \\
-$es$        &   Early stopping iterations   &   $5$     \\
+\begin{tabular}{lll}
+\textbf{Hyper-parameter} &  \textbf{Description}  &   \textbf{Value}  \\ \hline
+$k$     & Embeddings dimensions   & $256$   \\
+$d$     & Hidden layer dimensions & $512$   \\
+$k^{(w)}$ & Word output dimensions  & $512$   \\
+$k^{(r)}$ & Role output dimensions  & $512$   \\  \hline
+$\alpha$  & Role prediction weight  & $1.0$   \\
+$bs$    & Batch size        & $4000$    \\
+$lr$    & Learning rate       & $0.1$   \\
+$is$    & Iteration size      & $1 \times 10^8$ \\
+$dl$    &   Decrease $lr$ iterations  & $3$   \\
+$dr$    &   Decreasing factor     & $0.1$   \\
+$es$    &   Early stopping iterations   & $5$   \\
 \end{tabular}
 \caption{\label{tab:hyper} Hyper-parameters for model training. Model hyper-parameters are in the first section. Training hyper-parameters are in the second section.}
 \end{table}
@@ -688,7 +688,7 @@ $es$        &   Early stopping iterations   &   $5$     \\
 \subsubsection{Evaluation: Semantic Role Sensitiveness} \label{sec:comp-srs}
 In the first evaluation, we want to test whether the model is sensitive to semantic roles of event participants. A better model can distinguish between two event with same head words but different semantic roles. For each entry which has non-empty \texttt{ARG0} role and \texttt{ARG1} role in the test dataset from the test data of the RW-eng corpus, we extract a target event and construct a foil event for the second event. For example entry \eqref{eg:event-sim}, we have:
 \begin{equation}
-    (table, draw, eye), (eye, draw, table)
+  (table, draw, eye), (eye, draw, table)
 \end{equation}
 This subset is named as \textbf{target-foil event (TFE)} dataset which has $500$ entries. We use the head words with \texttt{ARG0} role and \texttt{ARG1} role as input. Then we obtain the event embedding vector defined in equation  \eqref{eq:sum-comp} from two models. We compute the similarity of the target event and the foil event using cosine similarity of two event embedding vectors. Generally the bigger of the similarity between these two events we obtain, the more role sensitive model we have. For each model, the means of these two similarities are computed across TFE dataset. The results are in Table \ref{tab:foil-mtep}. The MTEP has a lower mean similarity between target event and foil event. We use two-tailed paired $t$-test on these two lists of similarity scores, $t=-31.844$, $p=2.760 \times 10^{-122}$. The result,  highly significant, indicates that MTEP can better differentiate these two kinds of events. 
 
@@ -703,12 +703,13 @@ We treat two sentences as two events. Naturally we can consider the subject $tab
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||l|l}
-    \textbf{Model}  &  sample size  &   $mean \pm std$\\ \hline
-    \textbf{NNRF}   &  $500$    &   $0.74\pm 0.13$  \\
-    \textbf{MTEP}   &  $500$    &   $0.64\pm 0.12$  \\
+\begin{tabular}{lll}
+    \textbf{Model}  &  Sample size  & $mean \pm std$\\ \hline
+    NNRF16        &  $500$  & $0.74\pm 0.13$  \\
+    NNRF        &  $500$  & $0.66\pm 0.12$  \\
+    NNRF-MT       &  $500$  & $0.63\pm 0.13$  \\
 \end{tabular}
-\caption{\label{tab:foil-mtep} Cosine similarity between target event and foil event. Sample sizes are listed in the second column. In the third column, each score is the mean cosine similarity and the standard deviation. }
+\caption{\label{tab:foil-mtep} Cosine similarity between target event and foil event. Sample sizes are listed in the second column. In the third column, each score is the mean and standard deviation of cosine similarity. }
 \end{table}
 % * <asayeed@mbl.ca> 2017-11-13T22:52:35.875Z:
 % 
@@ -777,7 +778,7 @@ Multiplication is an effective composition method for distributional semantic mo
 \subsection{Mean Composition Method} \label{sec:mean-composition}
 We propose the \textbf{mean} composition function which computes the mean of all the vectors of event participants to represent the event as one vector. Computing the mean can be considered as normalisation of participant representations within the event boundary, which can prevent possible overflow/underflow of weights of the hidden vector. 
 
-Since it is a non-parametric method, we also want to add a weight before the mean composition. Instead of using a fully-connected layer, we apply the PReLU to each embedding vector of participants to obtain the hidden vector: 
+Since it is a non-parametric function, we also want to add a weight before the mean composition. Instead of using a fully-connected layer, we apply the PReLU to each embedding vector of participants to obtain the hidden vector: 
 \begin{equation} \label{eq:nonlinearity-bop}
 \begin{aligned}
     \mathbf{h}_l
@@ -798,7 +799,7 @@ Based on the MTEP model, we replace the composition function with mean compositi
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.8\textwidth]{BOPRes.png}
+\includegraphics[width=0.8\textwidth]{ResBOP.png}
 \caption{\label{fig:BOPRes} Model architecture of bag-of-predicates/participants with residual learning.}
 \end{figure}
 % * <asayeed@mbl.ca> 2017-11-13T22:55:19.201Z:
