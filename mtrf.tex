@@ -37,7 +37,7 @@ Supervisors: Asad Sayeed, Vera Demberg}
 
 \begin{abstract}
 \noindent
-We introduce several neural network models to learn embeddings containing both lexical and semantic features of events and event participants. Possible methods to compose word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk2016event}, we represent the order-3 tensor with three matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multi-task style to perform both semantic role-filler prediction and semantic role prediction. Comparing to previous work, the model has improved on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. The high-level features of the model can be used in incremental semantic role labelling.  
+We introduce several neural network models to learn embeddings containing both lexical and semantic features of events and event participants. Possible methods to compose word and semantic role representations are discussed. Making use of tensor factorisation on role-specific word embedding \citep{tilk2016event}, we represent the order-3 tensor with three matrices. Then we add non-linearity and construct the model as a neural network. The model is trained in multi-task style to perform both semantic role-filler prediction and semantic role prediction. Comparing to previous work, the model has improved on both semantic role/role-filler modelling and human thematic fit judgement correlations task. Moreover, the trained model has high accuracy on semantic role prediction. The high-level features of the model can be used in incremental semantic role labelling. 
 \end{abstract}
 
 
@@ -48,16 +48,16 @@ In natural language understanding, the representation of events and their partic
     & &\text{The cook cut the cake with knife in the kitchen.}        \label{eg:sent1} \\   
     & &\text{In the kitchen, the cake is cut with knife by the cook.} \label{eg:sent2}
 \end{eqnarray}
-the event-level information is actually the same. The event is described by the predicate $cut$ and the participants of this event are $cook$, $cake$, $knife$ and $kitchen$. Although the syntactic roles of participant $cook$ in two sentences are different (subject in sentence \eqref{eg:sent1} and object in sentence \eqref{eg:sent2}), they are both the $cutter$ of the $cake$. This shared information can be capture by a level of shallow semantic representation: \textit{semantic roles} \citep{jurafsky2014speech}. 
+the event-level information is actually the same. The event is described by the predicate $cut$ and the participants of this event are $cook$, $cake$, $knife$ and $kitchen$. Although the participant $cook$ has different syntactic roles (subject in sentence \eqref{eg:sent1} and object in sentence \eqref{eg:sent2}), it is the $cutter$ of the $cake$ in this event. This shared information can be capture by a level of shallow semantic representation: \textit{semantic roles} \citep{jurafsky2014speech}. 
 
-Semantic roles express the abstract roles of a participant can take in an event. In this level of representation, event participants can be mapped to arguments where they located. Using \textit{thematic role}, an inventory of conceptual argument roles (see Section \ref{sec:semanticrole}), the two sentences in earlier example can be annotated as: 
+Semantic roles express the abstract roles of a participant can take in an event. Event participants can be mapped to arguments where they belong. Using \textit{thematic role}, an inventory of conceptual argument roles (see Section \ref{sec:semanticrole}), two sentence can be annotated as: 
 \begin{eqnarray} \label{eg:thematic}
     \nonumber & &[_{\texttt{AGENT}} \text{The }\textbf{cook}]\ cut\ [_{\texttt{PATIENT}}\text{the }\textbf{cake}]\ [_{\texttt{INSTRUMENT}}\text{with }\textbf{knife}]\\  
     &   &[_{\texttt{LOCATION}}\text{in the }\textbf{kitchen}]. \\
     \nonumber & &[_{\texttt{LOCATION }}\text{In the }\textbf{kitchen}],\ [_{\texttt{PATIENT }}\text{the }\textbf{cake }]\ \text{is} \ cut\ \\
     &   &[_{\texttt{INSTRUMENT }}\text{with }\textbf{knife}]\ [_{\texttt{AGENT }}\text{by the }\textbf{cook}]. 
 \end{eqnarray} 
-where the event participants are actually head nouns or noun-noun compounds inside arguments of the predicate $cut$. $The\ cook$, volitional causer of the event, has a \texttt{AGENT} role. And $the\ cake$, the participant mostly affected by the event, has a \texttt{PATIENT} role. But it is hard to define thematic role formally. As a result, the PropBank \citep{palmer2005proposition} style semantic role model is introduced where each semantic role is associated with a specific verb sense. So the representation of two sentences can be unified as: 
+where the event participants are actually head nouns or noun-noun compounds inside arguments of the predicate $cut$. $The\ cook$, volitional causer of the event, has a \texttt{AGENT} role. And $the\ cake$, the participant mostly affected by the event, has a \texttt{PATIENT} role. But it is hard to define thematic role formally. As a result, the PropBank \citep{palmer2005proposition} style semantic role model is introduced where each semantic role is associated with a specific verb sense. So the representation of the event in two sentences can be unified as: 
 \begin{equation*} \label{eg:probank}
 \begin{aligned}
     & \text{Predicate: }&&cut.\textbf{01} \\
@@ -67,8 +67,7 @@ where the event participants are actually head nouns or noun-noun compounds insi
 \end{equation*} 
 where each argument is assigned with a semantic role label. $cut.01$ is the verbal predicate $cut$ with sense $01$ which is \textit{"make an incision or separation"}. Now the \texttt{ARG0} role can be defined exactly as \textit{"the subject which makes incision"}. To obtain this representation from raw text, one needs to solve semantic role labelling task (see Section \ref{sec:srl}). 
 
-Since both raw words and semantic role labels are symbols, it has limited representing power. If someone wants to compare events quantitatively, it is not possible to use the \textit{symbolic representation} where each symbol represents a single state of the entry. There are some previous works construct numerical representation of linguistic units e.g. \textit{Distributional semantic model} (DSM) (see Section \ref{sec:dsm}). Among them, \textit{Distributed representation} of words, also named as \textit{word embedding}, is a well-established technique based on continuous feature space. Each word is represented by a low-dimensional dense vector with real number parameters which are learnt during training of a prediction task given the context. There are many efforts on learning word embeddings from large-scale corpora (see Section \ref{sec:repr}). 
-
+Both raw words and semantic role labels are symbols which have limited representing power. If someone wants to compare events quantitatively, it is not possible to use the \textit{symbolic representation} where each symbol represents a single state of the entry. There are some previous works construct numerical representation of linguistic units e.g. \textit{distributional semantic model} (DSM) (see Section \ref{sec:dsm}). Among them, \textit{distributed representation} of words, also named as \textit{word embedding}, is a well-established technique based on continuous feature space. Each word is represented by a low-dimensional dense vector with real number parameters which are learnt during training of a prediction task given the context. There are many efforts on learning word embeddings from large-scale corpora (see Section \ref{sec:repr}). 
 
 \begin{table}[t]
 \centering
@@ -78,13 +77,14 @@ Since both raw words and semantic role labels are symbols, it has limited repres
 (mother, supply, baby)   &   (baby, supply, mother)  &   0.95    \\
 (firm, buy, politician)    &   (politician, buy, firm)   &   0.91    \\
 \end{tabular}
-\caption{\label{tab:eventsim} Some examples of similarity scores between two events using event embedding vectors in NNRF model. The metric is cosine similarity. }
+\caption{\label{tab:eventsim} Some examples of similarity between two events. The scores are cosine similarity computed with event embedding vectors in the model of \citet{tilk2016event}. }
 \end{table}
 
-\subsection{Main Problem and Previous Work} \label{sec:previous}
-The main problem is that only a few works learn embeddings at the level of events. \citet{tilk2016event} proposed a model to learn a representation of events and their participants. To obtain a probability distribution over \textit{role-fillers} given event information, the models aim to perform \textit{role-filler prediction}: in each event, given the role label of one target word, and also given all other words and their role labels, the task is to predict the target word to fill the target role. The verbal predicate is considered as a special role $verb$ which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. To reduce the number of parameters, they factored the tensor into three matrices. 
+Some previous works in learning representation of events and participants can be found. \citet{tilk2016event} proposed a model to learn a representation of events and their participants. To obtain a probability distribution over \textit{role-fillers} given event information, the models aim to perform \textit{role-filler prediction}: in each event, given the role label of one target word, and also given all other words and their role labels, the task is to predict the target word to fill the target role. The verbal predicate is considered as a special role $verb$ which is not in PropBank style semantic roles. The representation, named as \textit{role-specific word embedding}, learnt by those models is organised into an order-3 tensor. This means that for each word and each role, there is an embedding vector. To reduce the number of parameters, they factored the tensor into three matrices. 
 
-However, there are some limitations in their work. Firstly, there is a problem of \textbf{event embeddings similarity}: the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a target event $([_{\texttt{ARG0}} \text{investor}], buy, [_{\texttt{ARG1}}\text{share}])$ and the foil event $([_{\texttt{ARG0}}\text{share}], buy, [_{\texttt{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human has a low similarity judgement score between it and the target event. But the model has a high similarity judgement score. So in this condition, their model is incompatible with human cognition. This is due to the smoothing effect of distributed representation. Their event embeddings are simply constructed as the sum of role-filler embeddings in each event. For events with a same set of words but different roles, features that characterize the event can be cancelled out during the composition of role-fillers. More examples are shown in Table \ref{tab:eventsim}. 
+
+\subsection{Main Problem} 
+However, there are some limitations in \citet{tilk2016event}. Firstly, there is a problem of \textbf{event embeddings similarity}: the event embeddings with same argument words but different roles can be very similar to each other. For example, considering a target event $([_{\texttt{ARG0}} \text{investor}], buy, [_{\texttt{ARG1}}\text{share}])$ and the foil event $([_{\texttt{ARG0}}\text{share}], buy, [_{\texttt{ARG1}}\text{investor}])$, the model shows high similarity score between them. The foil event is unlikely to happen in real world, so human has a low similarity judgement score between it and the target event. But the model has a high similarity judgement score. So in this condition, their model is incompatible with human cognition. This is due to the smoothing effect of distributed representation. Their event embeddings are simply constructed as the sum of role-filler embeddings in each event. For events with a same set of words but different roles, features that characterize the event can be cancelled out during the composition of role-fillers. More examples are shown in Table \ref{tab:eventsim}. 
 % * <asayeed@mbl.ca> 2017-11-13T22:30:35.273Z:
 % 
 % "based" event? ("foil" is pretty clear)
@@ -118,13 +118,13 @@ Furthermore, the factored order-3 tensor structure is not fully explained. Along
 
 
 \subsection{Main Goals} \label{sec:tasks}
-In this paper, we aim to to tackle the event embeddings similarity problem and obtain an explainable representation of inner event structure with higher quality. In order to tackle the event embeddings similarity problem stated above, we need to train a model to discriminate different roles given same set of words. Besides we want to remain the smoothness of distributed representation of event. For these purposes, we design a training task which is: 
+In this paper, we aim to to tackle the event embeddings similarity problem and obtain an explainable representation of inner event structure with higher quality. In order to tackle the event embeddings similarity problem stated above, we need to train a model to discriminate different roles given same set of words. Besides we want to remain the smoothness of distributed representation. For these purposes, we design a training task which is: 
 \begin{itemize}
   \item  \textbf{Semantic role prediction}: in each event, given one target word, and all other words and their semantic role labels, the task is to predict the target semantic role label. 
 \end{itemize}
 where we define \textbf{semantic roles} as a set which contains semantic roles in PropBank style for event participants and a special semantic role for predicates to get rid of ambiguity. We believe that by forcing the models to solve semantic role prediction during training, the event embeddings with same words but different roles will be distinguished. 
 
-It has been shown that priming effect can be found in the directions of both predicate-to-participant and participant-to-predicate (see Section \ref{sec:event}). Since lexical features of participant and predicate are homogeneous, we can consider each of them as a word. With a view to the explainability of the task, we separate \textit{role-filler prediction} into two sub-tasks: 
+It has been shown that priming effect can be found in the directions of both predicate-to-participant and participant-to-predicate (see Section \ref{sec:event}). Since lexical features of participant and predicate are homogeneous, we can consider each of them as a word. With a view to the explainability of the task, we consider \textit{role-filler prediction} as two sub-tasks: 
 \begin{itemize}
   \item  \textbf{Participant prediction}: in each event, given the predicate, the semantic role label of one target participant, the other participants and their semantic role labels, the task is to predict the target participant to fill the semantic role. 
   \item  \textbf{Predicate prediction}: in each event, given all participants and their semantic role labels, the task is to predict the predicate. 
@@ -140,7 +140,7 @@ To extract event level information from text and to compare with previous baseli
 
 
 \subsection{Experiments and Evaluations} \label{sec:eval-steps}
-We tune hyper-parameters to optimise for different objectives (see Section \ref{sec:exp}). On both three tasks, we compute the perplexity for each model(see Section \ref{sec:roleprediction}, \ref{sec:wordprediction}). The models are evaluated on human thematic fit judgement correlation task (see Section \ref{sec:thematicfit}). The event embeddings are evaluated on an event similarity correlation task (see Section \ref{sec:eventsim}). Last but not least, the word embeddings are evaluated on several word similarity tasks (see Section \ref{sec:wordsim}). The results show that our models have significant improvement over the current best system on specific evaluations while has competitive performance on the other evaluations. The event embedding extracted from the event-participant embedding we learnt also has state-of-the-art performance on event similarity correlation task. 
+We tune hyper-parameters to optimise for different objectives (see Section \ref{sec:exp}). On both three tasks, we compute the perplexity for each model(see Section \ref{sec:roleprediction}, \ref{sec:wordprediction}). The models are evaluated on human thematic fit judgement correlation task (see Section \ref{sec:thematicfit}). The event embeddings are evaluated on an event similarity correlation task (see Section \ref{sec:result-eventsim}). Last but not least, the word embeddings are evaluated on several word similarity tasks (see Section \ref{sec:wordsim}). The results show that our models have significant improvement over the current best system on specific evaluations while has competitive performance on the other evaluations. The event embedding extracted from the event-participant embedding we learnt also has state-of-the-art performance on event similarity correlation task. 
 % * <asayeed@mbl.ca> 2017-11-13T22:34:00.165Z:
 % 
 % This is a very thorough high-level overview, but it's easy to get lost.  Maybe put in some subsections or bullet points?
@@ -168,7 +168,7 @@ When it comes to the application perspective, our best model is a state-of-the-a
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l|l}
+\begin{tabular}{ll}
 \textbf{Thematic Role}  &   \textbf{Definition} \\ \hline
 \texttt{AGENT}                      &   The volitional causer of an event \\
 \texttt{PATIENT} (\texttt{THEME})   &   The participant most directly affected by an event \\
@@ -219,20 +219,19 @@ The Proposition Bank (PropBank) is an annotated corpus of semantic roles based o
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l|l} 
-\hline
+\begin{tabular}{ll} 
 \textbf{PropBank Semantic Role}  &   \textbf{Definition} \\ \hline
 \texttt{Arg0}                    &   proto-agent, the argument that most likely to be the agent, \\ 
-                                 &   volitional causer or experiencer \\ \hline
-\texttt{Arg1}                    &   proto-patient, the argument that most likely to be the patient \\ \hline
-\texttt{Arg2}                    &   the instrument, benefactive or attribute \\ \hline
-\texttt{Arg3}                    &   the starting point, benefactive or attribute \\ \hline
-\texttt{Arg4}                    &   the ending point \\ \hline
-\texttt{ArgM-LOC}                &   the argument that indicates where the action takes place \\ \hline
-\texttt{ArgM-MNR}                &   the argument that specifies how the action is performed \\ \hline
-\texttt{ArgM-TMP}                &   the argument that shows when an action took place \\ \hline
-\texttt{ArgM-PNC}                &   the argument that shows motivation for some action \\ \hline
-\texttt{ArgM-CAU}                &   the argument that indicates the reason for an action \\ \hline
+                                 &   volitional causer or experiencer \\ 
+\texttt{Arg1}                    &   proto-patient, the argument that most likely to be the patient \\ 
+\texttt{Arg2}                    &   the instrument, benefactive or attribute \\ 
+\texttt{Arg3}                    &   the starting point, benefactive or attribute \\ 
+\texttt{Arg4}                    &   the ending point \\ 
+\texttt{ArgM-LOC}                &   the argument that indicates where the action takes place \\ 
+\texttt{ArgM-MNR}                &   the argument that specifies how the action is performed \\ 
+\texttt{ArgM-TMP}                &   the argument that shows when an action took place \\ 
+\texttt{ArgM-PNC}                &   the argument that shows motivation for some action \\ 
+\texttt{ArgM-CAU}                &   the argument that indicates the reason for an action \\ 
 \end{tabular}
 \caption{\label{tab:propbank} Examples of semantic roles in PropBank style.}
 \end{table}
@@ -276,7 +275,7 @@ Distributional semantic model (DSM) is a corpus-based method to construct numeri
 
 \citet{baroni2010distributional} claimed that it is possible to construct a general model for semantic memory, a stable long-term knowledge of human, to tackle different semantic tasks. They proposed \textit{Distributional Memory} (DM) framework which is an order-3 tensor which contains word-relation-word tuple. Tensor space is constructed on a count space of those tuples from large-scale corpus. The weights in the tensor space is smoothed by local mutual information (LMI). Performing matricisation on the tensor onto a matrix, vectors from different semantic spaces can be obtained. The model is constructed on a mixed corpus, named \textbf{UBW} in this paper, containing ukWac  \citep{ferraresi2008introducing}, BNC \citep{british2007british} and Wikipedia. On tasks of a broad range, their best model, named as TypeDM, obtained competitive performance. This can be interpreted as the advantage of the distributional representation on multiple semantic tasks. Furthermore, the tensor like structure is both flexible and expressive for semantic information modelling. 
 
-In addition to syntactic information, \citet{sayeed2014combining} extracts shallow semantic representation using semantic role labeller SENNA and constructs DM upon them. Combining syntactic and semantic features, they build a fully unsupervised distributional memory model, named as SDDM, especially for thematic fit judgement task. SDDM outperforms syntax-based thematic fit model by a large margin, which indicates that semantic information is essential in the thematic fit task. To improve the performance of DM on thematic fit task, \citet{greenberg2015improving} employed clustering on candidate role-fillers to construct a better representation for prototypical role-filler. \citet{santus2017measuring} proposed a feature selection method which extract the most significant \textit{second order contexts} for each role of each verb and compute thematic fit score as a weighted overlap between the top features of role-fillers and prototype role-filler. 
+In addition to syntactic information, \citet{sayeed2014combining} extracts shallow semantic representation using semantic role labeller SENNA and constructs DM upon them. They build a distributional memory model accessing only semantic information, named as SDDM, especially for thematic fit judgement task. SDDM outperforms syntax-based thematic fit model by a large margin, which indicates that semantic information is essential in the thematic fit task. To improve the performance of DM on thematic fit task, \citet{greenberg2015improving} employed clustering on candidate role-fillers to construct a better representation for prototypical role-filler. \citet{santus2017measuring} proposed a feature selection method which extract the most significant \textit{second order contexts} for each role of each verb and compute thematic fit score as a weighted overlap between the top features of role-fillers and prototype role-filler. 
 
 There are three major drawbacks of the distributional semantic model. Firstly when it comes to practice, the semantic space of DSM is high-dimensional and sparse. When someone wants to induce on complex events with a large number of participants, the size of representation becomes enormous. It is time or space consuming to use this kind of representation in practice. In addition, the parameters of the vectors are discrete in count-based vector space. Although many alternative weighting functions and smoothing techniques have been proposed, it is hard to decide which is the most optimised. Last but not least, these models usually suffer the curse of dimensionality. Because the Euclidean distance between two vectors is meaningless in high-dimensional space, when the representation vectors are used as input of distance-based algorithms like nearest-neighbour classifier or clustering, the result can be unexpected. Thus we need a better representation model in this paper. 
 % * <asayeed@mbl.ca> 2017-11-13T22:43:00.518Z:
@@ -308,16 +307,15 @@ We intend to learn meaningful representation of event structure in semantic spac
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l|l|l} 
-\hline
+\begin{tabular}{lll} 
 \textbf{ID} &   \textbf{Semantic Role Label}    &   \textbf{Definition} \\  \hline
-0           & \texttt{PRD}       &   the predicate denoting the event \\ \hline
-1           & \texttt{ARG0}      &   \textbf{proto-agent}, the event participant that most likely to be the agent, \\     &&   volitional causer or experiencer \\ \hline
-2           & \texttt{ARG1}      &   \textbf{proto-patient}, the event participant that most likely to be the patient, \\ &&   the event participant which is being affected by the action \\ \hline
-3           & \texttt{ARG2}      &   the event participant which is secondly likely to be the patient,  \\       &&   the benefactive or attribute \\ \hline
-4           & \texttt{ARGM-MNR}  &   the event participant that specifies how the action is performed \\ \hline
-5           & \texttt{ARGM-LOC}  &   the event participant that indicates where the action takes place \\ \hline
-6           & \texttt{ARGM-TMP}  &   the event participant that shows when an action took place \\ \hline
+0           & \texttt{PRD}       &   the predicate denoting the event \\ 
+1           & \texttt{ARG0}      &   \textbf{proto-agent}, the event participant that most likely to be the agent, \\     &&   volitional causer or experiencer \\ 
+2           & \texttt{ARG1}      &   \textbf{proto-patient}, the event participant that most likely to be the patient, \\ &&   the event participant which is being affected by the action \\ 
+3           & \texttt{ARG2}      &   the event participant which is secondly likely to be the patient,  \\       &&   the benefactive or attribute \\ 
+4           & \texttt{ARGM-MNR}  &   the event participant that specifies how the action is performed \\ 
+5           & \texttt{ARGM-LOC}  &   the event participant that indicates where the action takes place \\ 
+6           & \texttt{ARGM-TMP}  &   the event participant that shows when an action took place \\ 
 \end{tabular}
 \caption{\label{tab:semantic} Definitions of semantic role labels in this paper.}
 \end{table}
