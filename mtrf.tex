@@ -859,13 +859,13 @@ To perform a fair comparison, we train the baseline model NNRF and our three mod
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||l|lll}
-\textbf{Characteristics}    & \textbf{NNRF} & \textbf{MTEP} & \textbf{BOP}  & \textbf{ResBOP} \\ \hline
-Event-participant embedding &   \checkmark  &   \checkmark  &   \checkmark  &   \checkmark  \\
-Multi-task learning         &   \texttimes  &   \checkmark  &   \checkmark  &   \checkmark  \\
-Mean composition method     &   \texttimes  &   \texttimes  &   \checkmark  &   \checkmark  \\
-Residual learning           &   \texttimes  &   \texttimes  &   \texttimes  &   \checkmark  \\  \hline
-Number of parameters        &   38.9m       &   64.7m       &   64.7m       &   64.5m           \\
+\begin{tabular}{lllll}
+\textbf{Characteristics}  & \textbf{NNRF} & \textbf{MTEP} & \textbf{BOP}  & \textbf{ResBOP} \\ \hline
+Event-participant embedding & \checkmark  &   \checkmark  &   \checkmark  &   \checkmark  \\
+Multi-task learning       &   \texttimes  &   \checkmark  &   \checkmark  &   \checkmark  \\
+Mean composition method   &   \texttimes  &   \texttimes  &   \checkmark  &   \checkmark  \\
+Residual learning     &   \texttimes  &   \texttimes  &   \texttimes  &   \checkmark  \\  \hline
+Number of parameters    & 38.9m   & 64.7m   & 64.7m   & 64.5m     \\
 \end{tabular}
 \caption{\label{tab:models} Summary of model characteristics. The first model NNRF is the baseline model from \citet{tilk2016event} and the others are the models proposed in this paper}
 \end{table}
@@ -881,16 +881,16 @@ We want to compare our three models on the semantic role prediction task. Firstl
 \caption{\label{fig:exp-Role-Accuracy} Results of semantic role prediction. Role perplexity of the models. Role accuracy of the models.}
 \end{figure}
 
-Secondly, we compute the precision, recall and F1 score of the models after training on validation set and test set. The results are presented in Table \ref{tab:eval-role}. We notice that the recall of \texttt{AM-LOC} is very low. 
+Secondly, we compute the precision, recall and F1 score of the models after training on validation set and test set. The results are presented in Table \ref{tab:eval-role}. The ResBOP model has an almost 100\% F1 score in \texttt{PRD} role which shows that it has perfect performance of predicate identification as the other more general semantic role labeller. For proto-agent (\texttt{ARG0}) and proto-patient (\texttt{ARG1}), the model obtains higher F1 score in \texttt{ARG1} than \texttt{ARG0}. This is because we filter out all the pronouns in the corpus. Since pronouns usually act as proto-agent in the event, our method of preprocessing will harm the result of \texttt{ARG0} role prediction. We notice that the recall of \texttt{AM-LOC} is very low. This indicates that head words with location role can be easily misclassified to other roles like \texttt{ARG0} or \texttt{ARG1}. 
 To get a better insight on the prediction of different semantic roles, we perform a error analysis. We construct a confusion matrix for each semantic role. The confusion matrix is presented in Figure .
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||llll}
-\textbf{Role}   &   Precision   &   Recall &   F1   \\ \hline
-\texttt{PRD}    &   99.6 &   100       &   99.8 \\
-\texttt{ARG0}   &   89.2 &   83.9      &   83.9 \\
-\texttt{ARG1}   &   92.1 &   96.8      &   92.7 \\
+\begin{tabular}{lllll}
+\textbf{Role} &   Precision   &   Recall &   F1 \\ \hline
+\texttt{PRD}    &   99.6 &   100     &   99.8 \\
+\texttt{ARG0}   &   84.1 &   83.9      &   84.0 \\
+\texttt{ARG1}   &   89.0 &   96.8      &   92.7 \\
 \texttt{ARG2}   &   77.2 &   66.7      &   71.5 \\
 \texttt{AM-MNR} &   88.8 &   68.7      &   77.5 \\
 \texttt{AM-LOC} &   77.3 &   46.6      &   56.7 \\
@@ -898,6 +898,37 @@ To get a better insight on the prediction of different semantic roles, we perfor
 \end{tabular}
 \caption{\label{tab:eval-role} Results of ResBOP on semantic role prediction.}
 \end{table}
+
+Finally, we extract the feature vectors of predicate combing with a target word as:
+\begin{equation} \label{eq:rbe-bopres}
+\begin{aligned}
+    \mathbf{v}
+        &= \mathbf{e} \mathbf{C}_r\ diag(\mathbf{r}_y \mathbf{B}_w) \\
+\end{aligned}
+\end{equation}
+according to Equation \eqref{eq:output-mt} and \eqref{eq:cls-mt-temb}. Then we use this feature as input to Mate-tools (\textbf{MTs}, reproduced by \citet{bjorkelund2010high}). We perform evaluations on CoNLL2009 data set \citep{hajivc-EtAl:2009:CoNLL-2009-ST}. The result is in Table \ref{tab:eval-srl}. 
+
+\begin{table*}[t]
+\centering
+\begin{tabular}{llllll}
+\textbf{Data} & \textbf{Model}        &   Precision &   Recall &   F1   \\ \hline
+dev    &   \textbf{MTs}               &   86.23 &   82.24    &   84.14    \\
+       &   \textbf{MTs + wordEmbs}    &   86.35 &   81.72    &   83.97    \\
+       &   \textbf{MTs + NNRF-MT}     &   86.42 &   82.35    &   84.34    \\
+       &   \textbf{MTs + both}        &   86.4  &   81.98    &   84.13    \\ \hline
+test   &   \textbf{MTs}               &   87.65 &   84.44    &   86.02    \\
+       &   \textbf{MTs + wordEmbs}    &   87.76 &   84.47    &   86.1     \\
+       &   \textbf{MTs + NNRF-MT}     &   87.67 &   84.11    &   85.85    \\
+       &   \textbf{MTs + both}        &   87.68 &   84.41    &   86.01    \\ 
+       &   \textbf{SOTA}              &   90.05 &   87.7     &   89.1     \\ \hline
+ood    &   \textbf{MTs}               &   76.58 &   72.49    &   74.48    \\
+       &   \textbf{MTs + wordEmbs}    &   76.59 &   72.44    &   74.45    \\
+       &   \textbf{MTs + NNRF-MT}     &   76.69 &   72.61    &   74.59    \\
+       &   \textbf{MTs + both}        &   76.66 &   72.44    &   74.49    \\
+       &   \textbf{SOTA}              &   80.8  &   77.1     &   78.9     \\        
+\end{tabular}
+\caption{\label{tab:eval-srl} Results of adding features in NNRF-MT to MTs on semantic role labelling task. }
+\end{table*}
 
 
 \subsection{Participant/Predicate Prediction}  \label{sec:wordprediction}
@@ -922,17 +953,17 @@ Next, we compute PPLs after training on the validation data and the test data. I
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||llll}
-\textbf{Role}   &   NNRF   &   MTEP    &   BOP      &   ResBOP         \\ \hline
-all (valid)     &   325&    328   &   344  &   355      \\  \hline
+\begin{tabular}{lllll}
+\textbf{Role} & \textbf{NNRF} & \textbf{MTEP} & \textbf{BOP}  & \textbf{ResBOP} \\ \hline
+all (valid)   &   325&  328   &   344  &   355    \\  \hline
 all (test)      &   60 &   21      &   60  &   ?       \\
-\texttt{PRD}    &   49 &   46      &   52  &   156     \\
-\texttt{ARG0}   &   49 &   46      &   52  &   1520    \\
-\texttt{ARG1}   &   39 &   39      &   12  &   923     \\
-\texttt{ARG2}   &   49 &   46      &   52  &   1187    \\
-\texttt{AM-MNR} &   12 &   12      &   44  &   530     \\
-\texttt{AM-LOC} &   51 &   12      &   49  &   750     \\
-\texttt{AM-TMP} &   60 &   12      &   60  &   225     \\
+\texttt{PRD}    &   49 &   136      &   52  &   156     \\
+\texttt{ARG0}   &   49 &   1277      &   52  &   1520    \\
+\texttt{ARG1}   &   39 &   754      &   12  &   923     \\
+\texttt{ARG2}   &   49 &   956      &   52  &   1187    \\
+\texttt{AM-MNR} &   12 &   409      &   44  &   530     \\
+\texttt{AM-LOC} &   51 &   651      &   49  &   750     \\
+\texttt{AM-TMP} &   60 &   199      &   60  &   225     \\
 \end{tabular}
 \caption{\label{tab:eval-perplexity-role} Perplexity by target roles.}
 \end{table}
