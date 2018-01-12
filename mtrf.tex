@@ -971,7 +971,7 @@ all (test)      &   60 &   21      &   60  &   ?       \\
 
 
 \section{Evaluations} \label{sec:evaluation}
-Although our models show competitive performance on these three tasks we defined, we also want to show that our models are correlated with human behaviours in language understanding. We evaluate our models on several human judgement correlation tasks. We obtain the model file of NNRF which trained in an old version of RW-eng corpus. To distinguish with the reimplementation of NNRF, this model is named \textbf{NNRF16}. 
+Although our models show competitive performance on these three tasks we defined, we also want to show that our models are correlated with human behaviours in language understanding. We evaluate our models on several human judgement correlation tasks. We obtain the model file of NNRF which trained in an old version of RW-eng corpus which uses \texttt{MALT} heuristic algorithm only. To distinguish with the reimplementation of NNRF, this model is named \textbf{NNRF16}. 
 
 
 \subsection{Human Thematic Fit Judgement Correlation}  \label{sec:thematicfit}
@@ -1016,17 +1016,34 @@ Most of the datasets are from cognitive experiments regarding to thematic fit. T
 \end{equation}
 where \textit{accept} is the predicate, \textit{friend} is the role-filler, \texttt{AGENT} is the target thematic role and $6.1$ is the score of human judgement in a scale from $1$ (least common) to $7$ (most common). The score is usually a mean value of several experiment participants. We use the following datasets chosen from \citet{sayeed2016thematic}: 
 \begin{itemize}
-\item \textbf{Pado07}       the dataset proposed by \citet{pado2007integration} with 414 entries with a format of general format. The role is either \texttt{AGENT} or \texttt{PATIENT}. The predicates are selected according to their frequencies in the Penn TreeBank and FrameNet. The role-fillers are chosen to have a bigger variance of scores within each predicate. 
-\item   \textbf{McRae05}    the dataset from \citet{mcrae2005basis} containing 1444 entries in general format. The role is either \texttt{AGENT} or \texttt{PATIENT}. This dataset is a combination of data from 5 previous experiments which have significant overlap in stimuli but slightly different standards on word selection. This is the largest dataset in thematic fit judgement to our knowledge. 
-\item   \textbf{Ferretti01} the dataset proposed by  \citet{ferretti2001integrating} has two subset. One subset (\textbf{F-Inst}) contains 248 entries of ratings for instrument role. Another subset (\textbf{F-Loc}) contains 274 entries of ratings for location role. All the entries are in general format. 
-\item   \textbf{GDS}    the dataset from \citet{greenberg2015verb} with 720 entries on patient ratings in general format. There are two subsets in this data. The first one, named as \textbf{G-Filler}, with 240 entries is adopted from \citet{mcrae1998modeling} but with new human judgements. The second one, named as \textbf{G-Object}, with 480 entries contains half of entries with monosemy verbs and another half with polysemy verbs. They designed a different judgement elicitation question to avoid the frequency effect causing by the term \textit{common/typical} in previous design of question. The dataset is constructed to vary word frequency and verb polysemy systematically. 
+\item \textbf{Pado07}   the dataset proposed by \citet{pado2007integration} with 414 entries with a format of general format. The role is either \texttt{AGENT} or \texttt{PATIENT}. The predicates are selected according to their frequencies in the Penn TreeBank and FrameNet. The role-fillers are chosen to have a bigger variance of scores within each predicate. 
+\item \textbf{McRae05}  the dataset from \citet{mcrae2005basis} containing 1444 entries in general format. The role is either \texttt{AGENT} or \texttt{PATIENT}. This dataset is a combination of data from 5 previous experiments which have significant overlap in stimuli but slightly different standards on word selection. This is the largest dataset in thematic fit judgement to our knowledge. 
+\item \textbf{Ferretti01} the dataset proposed by  \citet{ferretti2001integrating} has two subset. One subset (\textbf{F-Inst}) contains 248 entries of ratings for instrument role. Another subset (\textbf{F-Loc}) contains 274 entries of ratings for location role. All the entries are in general format. 
+\item \textbf{GDS}  the dataset from \citet{greenberg2015verb} with 720 entries on patient ratings in general format. There are two subsets in this data. The first one, named as \textbf{G-Object}, with 480 entries contains half of entries with monosemy verbs and another half with polysemy verbs. They designed a different judgement elicitation question to avoid the frequency effect causing by the term \textit{common/typical} in previous design of question. The dataset is constructed to vary word frequency and verb polysemy systematically. The second one, named as \textbf{G-Filler}, with 240 entries is adopted from \citet{mcrae1998modeling} but with new human judgements. 
 \end{itemize}
 
 
 \subsubsection{Methods and Results}  \label{sec:method-thematic}
-For four PBEL models, since the role labels of event participants are not thematic role but PropBank style semantic roles, we have to map the thematic roles to semantic roles. Under the semantic role model we define in Section \ref{sec:repr}, we can define the mapping as: (\texttt{AGENT}->\texttt{ARG0}), (\texttt{PATIENT}->\texttt{ARG1}), (\texttt{LOCATION}->\texttt{AM-LOC}), (\texttt{INSTRUMENT}->\texttt{AM-MNR}). 
+For four PBEL models, since the role labels of event participants are not thematic role but PropBank style semantic roles, we have to map the thematic roles to semantic roles. Under the semantic role model we define in Section \ref{sec:repr}, we can define the mapping as: (\texttt{AGENT} $\to$ \texttt{ARG0}), (\texttt{PATIENT} $\to$ \texttt{ARG1}), (\texttt{LOCATION} $\to$ \texttt{AM-LOC}), (\texttt{INSTRUMENT} $\to$ \texttt{AM-MNR}). 
 
-For each entry in the dataset, we use the predicate as input word, \texttt{PRD} as input role and the semantic role from mapping as target role. Then we compute the output probability of participant prediction task defined in Equation \eqref{eq:softmax-nnrf} in each model. Because the models are trained using maximum likelihood estimation, this probability is correlated to target word frequency in the training data. However, \citet{greenberg2015verb} has shown that human thematic fit judgement is not sensitive to noun frequency. \citet{tilk2016event} pointed out that the output bias of a PBEL model is strongly correlated with word frequency in training data. As a matter of fact, to reduce the frequency effect, we adopt the probability adjustment from  that sets the bias of output layer in Equation \eqref{eq:output-nnrf} to zero during the evaluation. We record evaluation scores in each dataset and plot the scores versus training iterations. 
+For each entry in the dataset, we use the predicate as input word, \texttt{PRD} as input role and the semantic role from mapping as target role. Then we compute the output probability of participant prediction task defined in Equation \eqref{eq:softmax-nnrf} in each model. Because the models are trained using maximum likelihood estimation, this probability is correlated to target word frequency in the training data. However, \citet{greenberg2015verb} has shown that human thematic fit judgement is not sensitive to noun frequency. \citet{tilk2016event} pointed out that the output bias of a PBEL model is strongly correlated with word frequency in training data. 
+
+% \begin{equation} \label{eq:softmax-nnrf}
+% \begin{aligned}
+%     p(a_x | e, b_y)
+%         &= \frac{
+%         exp(\mathbf{e}\mathbf{W} + \mathbf{b})_{(x)}
+%         }{
+%         \sum_{i=1}^{|V|} exp(\mathbf{e}\mathbf{W} + \mathbf{b})_{(i)} }   \\
+%         &= \frac{
+%         [exp(\mathbf{e}\mathbf{W}) exp(\mathbf{b})]_{(x)}
+%         }{
+%         \sum_{i=1}^{|V|} [exp(\mathbf{e}\mathbf{W}) exp(\mathbf{b})]_{(i)} }   \\
+% \end{aligned}
+% \end{equation}
+
+
+As a matter of fact, to reduce the frequency effect, we adopt the probability adjustment from  that sets the bias of output layer in Equation \eqref{eq:output-nnrf} to zero during the evaluation. We record evaluation scores in each dataset and plot the scores versus training iterations. 
 
 The results are in Figure \ref{fig:exp-Pado07}, \ref{fig:exp-McRae05}, \ref{fig:exp-F-Loc}, \ref{fig:exp-F-Inst}, \ref{fig:exp-GDS}. On Pado07 and McRae05, NNRF and MTEP have similar performance since they have similar architecture on participant prediction. Our new model BOP has higher score than those two models. This indicates that the mean composition method actually helps with high frequency roles like agent and patient. ResBOP have the highest performance during training. Especially on Pado07 dataset, the difference between ResBOP and the model with second highest score is quite big. This is because predicates in Pado07 are only those with highest frequency. So the other other models can easily overfit on these dataset but the residual block in ResBOP reduce the gradient explosion effect on high frequency samples which leads to better results. On F-Inst, ResBOP has the highest score. But there are no significant differences of the models. On F-Loc, NNRF surprising has the highest score then MTEP follows. This possiblely reveals that for the location role, both additional task and mean composition method are burdens. On GDS, NNRF also has the highest score and MTEP follows. Since there are three subset in this dataset, we perform more in-depth analysis in Section \ref{sec:result-thematic-ap}. Overall, we notice that the results of HTFJC task is not correlated with word perplexity. We believe that this is because word perplexity is frequency-correlated but human judgement is not. Although we try to prune out the frequency effect by setting output bias to zero, the models learn better features for cognitive modelling task can still have high perplexities.
 
@@ -1035,63 +1052,63 @@ The results are in Figure \ref{fig:exp-Pado07}, \ref{fig:exp-McRae05}, \ref{fig:
 \subsubsection{Comparison with Baselines} \label{sec:result-thematic}
 In addition to PBEL models, we want to compare with previous count-based distributional semantic models. The most successful method on thematic fit has been prototype filler construction. Given a triple of verb-noun-role as input, the prototype filler vector is constructed by computing the mean of vectors of role-fillers which have top statistic scores from the model. The thematic fit score is generally computed as the cosine similarity between the prototype filler vector and the target word vector. The baseline models are listed here: 
 \begin{itemize}
-  \item \textbf{TypeDM: }   This is best distributional memory model from \citet{baroni2010distributional} described in Section \ref{sec:dsm}.  The dimensionality of the sparse vectors is about 750-million. The prototype is constructed as the mean of 20 role-fillers with top LMI scores from the tensor. The results of this model is from a reimplementation in \citet{greenberg2015improving}. 
+  \item \textbf{TypeDM: } This is best distributional memory model from \citet{baroni2010distributional} described in Section \ref{sec:dsm}.  The dimensionality of the sparse vectors is about 750-million. The prototype is constructed as the mean of 20 role-fillers with top LMI scores from the tensor. The results of this model is from a reimplementation in \citet{greenberg2015improving}. 
   \item \textbf{SDDM: } The idea of this model is originated from \citet{sayeed2014combining} described in Section \ref{sec:dsm}. The dimensionality of the sparse vectors is about 1-million. \citet{sayeed2015exploration} performed a comparison between variants of SDDM on head-finding heuristics. The best model (\textbf{SDDM-mo}) which use only Malt parser for head-finding with balanced vocabulary has overall best performance. An extended variant (\textbf{SDDMX}) is proposed by \citet{greenberg2015improving}. The model has additional links between head nouns belongs to the same event. The links are labelled with verb lemma for the 400 most frequent verbal predicates. 
-  \item \textbf{SDS15-avg: }    This is a simple ensemble model from \citet{sayeed2015exploration}. The thematic fit score is the average of results from SDDM and TypeDM. 
-  \item \textbf{SDS15-swap: }   This is another ensemble model from \citet{sayeed2015exploration}. TypeDM is used to select top ranking role-fillers. Then the corresponding vectors are extracted from SDDM to compute the representation of their prototype filler. The thematic score is computed as cosine similarity in the SDDM vector space. 
-  \item \textbf{GSD15: }    This is the overall best-performing model from \citet{greenberg2015improving} described in Section \ref{sec:dsm}. A different prototype construction method is applied on TypeDM, which use hierarchical clustering algorithm to cluster typical role-fillers regarding to verb senses given the input role. 
-  \item \textbf{SCLB17: }   This is a model from \citet{santus2017measuring} described in Section \ref{sec:dsm}. We report the  best-performing model on F-Inst here because it is the state-of-the-art on instrument role. The number of the fillers is 30, the number of top features $N$ is 2000 and we only report highest results among different types of dependency contexts. 
+  \item \textbf{SDS15-avg: }  This is a simple ensemble model from \citet{sayeed2015exploration}. The thematic fit score is the average of results from SDDM and TypeDM. 
+  \item \textbf{SDS15-swap: } This is another ensemble model from \citet{sayeed2015exploration}. TypeDM is used to select top ranking role-fillers. Then the corresponding vectors are extracted from SDDM to compute the representation of their prototype filler. The thematic score is computed as cosine similarity in the SDDM vector space. 
+  \item \textbf{GSD15: }  This is the overall best-performing model from \citet{greenberg2015improving} described in Section \ref{sec:dsm}. A different prototype construction method is applied on TypeDM, which use hierarchical clustering algorithm to cluster typical role-fillers regarding to verb senses given the input role. 
+  \item \textbf{SCLB17: } This is a model from \citet{santus2017measuring} described in Section \ref{sec:dsm}. We report the  best-performing model on F-Inst here because it is the state-of-the-art on instrument role. The number of the fillers is 30, the number of top features $N$ is 2000 and we only report highest results among different types of dependency contexts. 
 \end{itemize}
 
-The results are in Table \ref{tab:eval-thematic}. For the same model with different implementation, the results could vary. We therefore only report the highest result across all references. If there is no specific annotation, the result is from the original paper which proposed the model. On Pado07, SDDM-mo is still the current state-of-the-art model. SDS15-avg obtains the highest performance among unsupervised systems on Pado07 dataset but it is an ensemble model. On F-Loc, our reimplementation of NNRF outperform other models in a wide range and remains to be the state-of-the-art model. Our three new models obtain competitive performance. Our best model is the state-of-the-art model on McRae05 and F-Inst dataset. 
+The results are in Table \ref{tab:eval-thematic}. For the same model with different implementation, the results could vary. We therefore only report the highest result across all references. If there is no specific annotation, the result is from the original paper which proposed the model. On Pado07, SDDM-mo is still the current state-of-the-art model. SDS15-avg obtains the highest performance among systems which are not trained directly using human judgements on Pado07 dataset. However, it is an ensemble model so that one can not retrieve predicate representations from it. On F-Loc, our reimplementation of NNRF outperform other models in a wide range and remains to be the state-of-the-art model. Our three new models obtain competitive performance. Our best model is the state-of-the-art model on McRae05 and F-Inst dataset. 
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\begin{tabular}{l||lllllll}
-\textbf{Model} & Pado07       & McRae05     & F-Loc     & F-Inst        &   G-Object    &   G-Filler    &   all     \\ \hline 
-TypeDM  &   53      &   33      &   23      &   36          &   53*         &       31*     &   35      \\ 
-SDDM-mo &   56      &   27      &   13      &   28          &   41          &       16      &   31      \\ 
-GSD15   &   50      &   36      &   29      &   42          &   55                  &       30      &   39      \\
-NNRF16  &   52      &   38      &   45      &   45          &   65          & \textbf{47}   &   41      \\  
-SCLB17  &   49      &   28      &   37      &   50          &   -           &       -       &   -       \\  \hline 
-NNRF    &   48      &   39      &\textbf{52}&   50          &   xx          & \textbf{xx}   &   xx      \\
-MTEP    &   49      &   39      &   48      &   50          &   xx          &       xx      &   xx      \\
-BOP     &   52      & \textbf{41} & 45      &   51          &   \textbf{66} &       37      &   xx      \\
-ResBOP  &   55      & \textbf{41} & 45      &   \textbf{52} &   65          &       42      &   xx      \\  \hline  
-SDS15-swap& 48      &   25      &   19      &   45          &   50          &       29      &   33      \\  
-SDS15-avg&\textbf{59}&  34      &   21      &   39          &   51          &       26      &   38      \\
+\begin{tabular}{l|lllll|l}
+\textbf{Model} & Pado07 & McRae05 & F-Loc   & F-Inst        &   GSD       &   avg     \\ \hline  \hline 
+TypeDM  &   53      &   33      &   23      &   36          &   46*       &   38      \\ 
+SDDM-mo &   56      &   27      &   13      &   28          &   -         &   -       \\ 
+GSD15   &   50      &   36      &   29      &   42          &   48        &   41      \\
+NNRF16  &   52      &   38      &   44      &   45          & \textbf{61} &   46      \\  
+SCLB17  &   49      &   28      &   37      &   50          &   -         &   -       \\  \hline 
+SDS15-avg&\textbf{59}&  34      &   21      &   39          &   -         &   -       \\ \hline  \hline 
+NNRF    &   47      &   39      &\textbf{51}&   \textbf{53} &   60        &   47      \\
+NNRF-MT &   49      &   40      &   50      &   \textbf{53} & \textbf{61} &   48      \\
+RoFA     &   53      &  41    & 45        &  \textbf{53} & \textbf{61}  &\textbf{49}\\
+ResRoFA  &   55      & \textbf{42} & 46     &   51         &   60         &\textbf{49}\\
 \end{tabular}
-\caption{\label{tab:eval-thematic} Results on human thematic fit judgement correlation task comparing to previous works. Some results of TypeDM are taken from \citet{greenberg2015verb}(*). $p\text{-value} < 0.05$ for all results. }
-\end{table}
+\caption{\label{tab:eval-thematic} Results on human thematic fit judgement correlation task comparing to previous works. Some results of TypeDM are taken from \citet{greenberg2015verb}(*). \textit{avg} is the weighted average of results of all 5 evaluation data sets. }
+\end{table*}
 
 
 \subsubsection{Analysis on Agent and Patient} \label{sec:result-thematic-ap}
 In previous works, agent and patient are the most well-studied thematic roles. Because it can be clearly defined as proto-agent and proto-patient for most of transitive predicates like we mentioned in Section \ref{sec:semanticrole}. In order to obtain more insights on differences of these models, we focus on three datasets with these two roles. 
 For this purpose, we add several more baseline models from the other works: 
 \begin{itemize}
-  \item \textbf{CW: }       This model, named \textit{Collobert and Weston}, is the 100-dimensional pre-trained embedding vectors from SENNA \citep{collobert2011natural}. The model is trained on the Wikipedia corpus. The result is taken from \citet{baroni2014don}. Comparing with this model, we want to see whether our model can retrieve better features though we use semantic role labels from SENNA. 
+  \item \textbf{CW: }   This model, named \textit{Collobert and Weston}, is the 100-dimensional pre-trained embedding vectors from SENNA \citep{collobert2011natural}. The model is trained on the Wikipedia corpus. The result is taken from \citet{baroni2014don}. Comparing with this model, we want to see whether our model can retrieve better features though we use semantic role labels from SENNA. 
   \item \textbf{BDK-pre: }  This is the best \textit{predict} model from \citet{baroni2014don}. It is a CBOW model, described in \ref{sec:repr}, trained on UBW corpus. The prototype is selected using top role-fillers from a query to TypeDM. 
   \item \textbf{BagPack: }  This is the only supervised model here proposed by \citet{herdagdelen2009bagpack}. This can be considered as an upper bound of all unsupervised methods. 
 \end{itemize}
 Firstly, we separate Pado07 dataset into two subsets. \textbf{P-Agen} is the subset with \texttt{AGENT} role and \textbf{P-Pati} is the subset with \texttt{PATIENT} role. We compute the Spearman's $\rho$ separately for each subset. The results are in Table \ref{tab:eval-thematic-pado07}. 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||llll}
-\textbf{Model}  &   Pado07 &   P-Agen   &   P-Pati \\ \hline
+\begin{tabular}{lllll}
+\textbf{Model}  &   Pado07 &   P-Agen   &   P-Pati \\ \hline  \hline
 TypeDM      &   53      &\textbf{54}&   53          \\
+SDDM        &   51      &   51      &   51          \\
 SDDMX       &   52      &   53      &   51          \\
 BDK-cnt     &   41      &   -       &   -           \\
 GDS15       &   50      &   46      &   56          \\  
-SDS15-avg   &   59      &   -       &   -           \\
-SDS15-swap  &   48      &   -       &   -           \\\hline
+SDS15-swap  &   48      &   -       &   -           \\
+SDS15-avg   &\textbf{59}&   -       &   -           \\  \hline
 CW          &   28      &   -       &   -           \\
 BDK-pre     &   41      &   -       &   -           \\
-NNRF16      &   52      &   49      &   \textbf{59} \\
-NNRF        &   47      &   42      &   53          \\
-MTEP        &   48      &   39      &   57          \\
+NNRF16      &   52      &   49      &   \textbf{59} \\  \hline  \hline
+NNRF        &   48      &   42      &   54          \\
+MTEP        &   49      &   39      &   57          \\
 BOP         &   52      &   46      &   \textbf{59} \\
-ResBOP      &   55      &   51      &   58          \\  \hline
-BagPack     &\textbf{60}&   -       &   -           \\
+ResBOP      &   55      &   51      &   58          \\  \hline  \hline
+BagPack     & 60    &   -       &   -           \\
 \end{tabular}
 \caption{\label{tab:eval-thematic-pado07} Fine-grain evaluation result of models on Pado07 datasets. '-' means the value is not available.  $p\text{-value} < 0.05$ for all results. }
 \end{table}
@@ -1099,17 +1116,36 @@ BagPack     &\textbf{60}&   -       &   -           \\
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||llll}
-\textbf{Model}  &   McRae &   M-Agen   &   M-Pati   \\ \hline
-TypeDM      &   53      &\textbf{54}&   53          \\
-SDDM-mo     &   52      &   53      &   51          \\
-SDDMX       &   52      &   53      &   51          \\
-GDS15       &   50      &   46      &   56          \\  \hline
-NNRF16      &   52      &   49      &\textbf{59}    \\
-NNRF        &   47      &   42      &   53          \\
-MTEP        &   48      &   39      &   57          \\
-BOP         &   52      &   48      &   56          \\
-ResBOP      &   55      &   51      &   58          \\
+\begin{tabular}{lllll}
+\textbf{Model}  &   McRae05 &   M-Agen   &   M-Pati \\ \hline
+TypeDM      &   33      & 36    &   34          \\
+SDDM      &   24      &   37      &   13          \\
+SDDMX       &   25      &   39      &   13          \\
+GDS15       &   36      &\textbf{42}&   35          \\  \hline
+NNRF16      &   38      &   36      & 41        \\
+NNRF        &   39      &   36      &   45          \\
+MTEP        &   39      &   39      &   43          \\
+BOP         &\textbf{41}&   39      &   46          \\
+ResBOP      &\textbf{41}&   39      & \textbf{47}   \\
+\end{tabular}
+\caption{\label{tab:eval-thematic-mcrae05} Fine-grain evaluation result of models on McRae05 datasets. '-' means the value is not available. $p\text{-value} < 0.05$ for all results. }
+\end{table}
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lllll}
+\textbf{Model}  &   GDS &   G-Object   &   G-Filler \\ \hline
+TypeDM      &   46*     & 53*   &   31*         \\
+SDDM-mo     &   -       &   41      &   16          \\
+SDDM      &   -       &   41      &   -           \\
+SDDMX       &   -       &   45      &   -           \\
+GDS15       &   48      & 55    &   30          \\  \hline
+NNRF16      &   61      &   65**    & \textbf{47}** \\
+NNRF        &   60      &   65      &   42      \\
+MTEP        &   61      &   39      &   43          \\
+BOP         &\textbf{61}&   39      &   46          \\
+ResBOP      & 60    &   39      & \textbf{47}   \\
 \end{tabular}
 \caption{\label{tab:eval-thematic-mcrae05} Fine-grain evaluation result of models on McRae05 datasets. '-' means the value is not available. $p\text{-value} < 0.05$ for all results. }
 \end{table}
@@ -1124,12 +1160,20 @@ In the first case, we use a small dataset, named as \textbf{Bicknell10}, from \c
 \begin{equation*} \label{eg:event-sim}
 \begin{aligned}
     &(secretary, address, letter),  \texttt{YES} \\
-    &(secretary, address, group),   \texttt{NO}  
+    &(secretary, address, group), \texttt{NO}  
 \end{aligned}
 \end{equation*}
-The task for the model is to choose the \texttt{YES}/\texttt{NO} tags on each pair. The naive baseline model, named \textbf{Random}, is to choose the tags uniformly random. \citet{LenciECU} proposed a baseline model, named \textbf{Lenci11}, which is a compositional model based on TypeDM. We use the \textit{Accuracy 1} metric proposed in \citet{tilk2016event}. This metric counts a hit if and only if the model assigns the composed agent-predicate a higher score when we test a patient with \texttt{YES} tag in contrast the other patient with \texttt{NO} tag. 
+The task for the model is to choose the \texttt{YES}/\texttt{NO} tags on each pair. The baseline models are listed here:
+\begin{itemize}
+  \item \textbf{Random: } The naive baseline model is to choose the tags uniformly random. 
+  \item \textbf{Lenci11: }  \citet{LenciECU} proposed a baseline model which is a compositional model based on TypeDM. 
+%   \item \textbf{Kronker: }  A model proposed by \citet{grefenstette2015concrete} using Kronecker product as composition method. 
+\end{itemize}
+We use the \textit{Accuracy 1} metric proposed in \citet{tilk2016event}. This metric counts a hit if and only if the model assigns the composed agent-predicate a higher score when we test a patient with \texttt{YES} tag in contrast the other patient with \texttt{NO} tag. 
 
-For PBEL models, we perform this evaluation after each training iteration and record the result. Then we plot the results versus number of iterations. The result is in Figure \ref{fig:exp-Bicknell10}. The results of other models vibrate in a wide range. This is due to the fact that the data size is too small. The ResBOP is the best-performing model of most training iteration. MTEP has lower score than NNRF at almost every iteration, which reveals that with the sum composition method, the role prediction task can harm the effectiveness of agent-predicate compostionality. But this problem is fixed by the residual block in ResBOP. To compare with previous baselines, we list all the results in Table \ref{tab:Bicknell10}. The ResBOP has the highest accuracy comparing to previous works. 
+For PBEL models, we perform this evaluation after each training iteration and record the result. Then we plot the results versus number of iterations. The result is in Figure \ref{fig:exp-Bicknell10}. The results of other models vibrate in a wide range. This is due to the fact that the data size is too small. The ResBOP is the best-performing model of most training iteration. MTEP has lower score than NNRF at almost every iteration, which reveals that with the sum composition method, the role prediction task can harm the effectiveness of agent-predicate compostionality. But this problem is fixed by the residual block in ResBOP. 
+
+To compare with previous baselines, we list all the results in Table \ref{tab:Bicknell10}. The ResBOP has the highest accuracy comparing to previous works. 
 
 \begin{figure}[t]
 \centering
@@ -1140,10 +1184,10 @@ For PBEL models, we perform this evaluation after each training iteration and re
 \begin{table*}
 \centering
 \begin{tabular}{l|lll|llll}
-\textbf{Model}      & Random & Lenci11 & NNRF16 & NNRF & MTEP &   BOP    &   ResBOP         \\ \hline \hline
-\textbf{Accuracy 1} & 0.500  & 0.672   & 0.687  & 0.702& 0.733&   0.733  & \textbf{0.765}   \\
+      & Random & Lenci11 & NNRF16 & NNRF & MTEP &   BOP    &   ResBOP     \\ \hline
+\textbf{Accuracy 1} & 0.500  & 0.672   & 0.687  & 0.702& 0.733&   0.733  & \textbf{0.765} \\
 \end{tabular}
-\caption{\label{tab:Bicknell10} Results on agent-patient compositionality evaluation comparing to previous models. $p\text{-value} < 0.05$ for all results. }
+\caption{\label{tab:Bicknell10} Results on agent-patient compositionality evaluation comparing to previous models.}
 \end{table*}
 
 
@@ -1153,23 +1197,23 @@ To further test the compositional process of event participants, we evaluate our
   \item \textbf{Add: } An additive model proposed by \citet{mitchell2008vector}. The event representation is composed by the sum of vectors of predicate and participants . 
   \item \textbf{Multiply: } An multiplicative model proposed by \citet{mitchell2008vector}. The event representation is composed by the element-wise product of vectors of predicate and participants. 
   \item \textbf{Kronker: }  A model proposed by \citet{grefenstette2015concrete} using Kronecker product as composition method. 
-  \item \textbf{CBOW: }     The CBOW model implemented by \citet{tilk2016event} trained on an old version of RW-eng corpus.
+  \item \textbf{CBOW: }   The CBOW model implemented by \citet{tilk2016event} trained on an old version of RW-eng corpus.
 \end{itemize}
 We choose the result at the $25$-th iteration as the final result and compare these two systems with previous state-of-the-art models. The result is in Table \ref{tab:GS}. The MTEP obtain state-of-the-art performance. 
 
 \begin{table}[t]
 \centering
-\begin{tabular}{l||l}
-\textbf{Model}  &   \textbf{$\rho \times 100$}  \\ \hline
+\begin{tabular}{ll}
+\textbf{Model}  &   \textbf{$\rho \times 100$}  \\ \hline  \hline
 Add         &   10    \\
 Multiply    &   16    \\
 Kronecker   &   26    \\  \hline
 CBOW        &   13    \\
 NNRF16      &   34    \\  \hline
 NNRF        &   32    \\
-MTEP        &   37    \\
+MTEP        &\textbf{37}\\
 BOP         &   34    \\
-ResBOP      &   34    \\  \hline
+ResBOP      &   34    \\  \hline  \hline
 Human       &   60    \\
 \end{tabular}
 \caption{\label{tab:GS} Results on event similarity evaluation comparing to previous models. $p\text{-value} < 0.05$ for all results. }
@@ -1188,12 +1232,12 @@ Human       &   60    \\
 \subsubsection{Baselines} \label{sec:baselines-wordsim}
 The models are listed here: 
 \begin{itemize}
-  \item \textbf{GloVe: }    \citet{pennington2014glove}.
-  \item \textbf{CBOW: }     t
+  \item \textbf{GloVe: }  \citet{pennington2014glove}.
+  \item \textbf{CBOW: }   t
   \item \textbf{skipgram: } t
-  \item \textbf{MTEP: }     t
-  \item \textbf{BOP: }      t
-  \item \textbf{SOA: }      t
+  \item \textbf{MTEP: }   t
+  \item \textbf{BOP: }    t
+  \item \textbf{SOA: }    t
 \end{itemize}
 
 
